@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { HabitDefinition, HabitTone, TONE_PRESETS } from "@/lib/habits";
 
 type HabitFormProps = {
@@ -154,11 +155,11 @@ export function HabitForm({
     <dialog
       ref={dialogRef}
       onClose={onClose}
-      className="modal-dialog m-auto w-full max-w-lg rounded-2xl border border-white/60 bg-white/90 p-0 shadow-[var(--shadow-panel)] backdrop-blur-2xl backdrop:bg-black/30 backdrop:backdrop-blur-sm"
+      className="modal-dialog m-auto w-full max-w-lg rounded-2xl border border-black/[0.1] bg-white p-0 shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_20px_60px_rgba(10,22,40,0.18)] backdrop:bg-black/35 backdrop:backdrop-blur-sm"
     >
       <form onSubmit={handleSubmit} className="flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-black/[0.06] px-5 py-3.5">
+        <div className="flex items-center justify-between border-b border-black/[0.06] bg-white px-5 py-3.5">
           <h2 className="text-[16px] font-semibold text-ink-950">
             {initial ? "Edit Habit" : "New Habit"}
           </h2>
@@ -182,7 +183,7 @@ export function HabitForm({
         </div>
 
         {/* Body */}
-        <div className="max-h-[70vh] space-y-4 overflow-y-auto px-5 py-4">
+        <div className="max-h-[70vh] space-y-4 overflow-y-auto bg-white px-5 py-4">
           {/* Icon picker */}
           <div>
             <label className="mb-1.5 block text-[13px] font-medium text-ink-700">
@@ -208,7 +209,7 @@ export function HabitForm({
                 value={icon}
                 onChange={(e) => setIcon(e.target.value.slice(-2))}
                 aria-label="Custom icon"
-                className="h-11 w-16 rounded-lg border border-black/10 bg-white px-2 text-center text-[20px] placeholder:text-ink-500 focus:border-ink-950/30"
+                className="h-11 w-16 rounded-lg border border-black/[0.16] bg-white px-2 text-center text-[20px] placeholder:text-ink-500 focus:border-ink-950/30"
                 maxLength={2}
               />
             </div>
@@ -229,7 +230,7 @@ export function HabitForm({
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Take vitamins"
               required
-              className="w-full rounded-lg border border-black/10 bg-white px-3 py-2.5 text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
+              className="w-full rounded-lg border border-black/[0.16] bg-white px-3 py-2.5 text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
             />
           </div>
 
@@ -247,7 +248,7 @@ export function HabitForm({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Optional short description"
               rows={2}
-              className="w-full resize-none rounded-lg border border-black/10 bg-white px-3 py-2.5 text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
+              className="w-full resize-none rounded-lg border border-black/[0.16] bg-white px-3 py-2.5 text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
             />
           </div>
 
@@ -267,7 +268,7 @@ export function HabitForm({
                   setCategory(e.target.value);
                   setNewCategory("");
                 }}
-                className="flex-1 rounded-lg border border-black/10 bg-white px-3 py-2.5 text-[14px] text-ink-950 focus:border-ink-950/30"
+                className="flex-1 rounded-lg border border-black/[0.16] bg-white px-3 py-2.5 text-[14px] text-ink-950 focus:border-ink-950/30"
               >
                 <option value="">Select or type new</option>
                 {existingCategories.map((cat) => (
@@ -285,7 +286,7 @@ export function HabitForm({
                   setCategory("");
                 }}
                 placeholder="New category"
-                className="w-36 rounded-lg border border-black/10 bg-white px-3 py-2.5 text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
+                className="w-36 rounded-lg border border-black/[0.16] bg-white px-3 py-2.5 text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
               />
             </div>
           </div>
@@ -331,7 +332,7 @@ export function HabitForm({
                 value={goalLabel}
                 onChange={(e) => setGoalLabel(e.target.value)}
                 placeholder="e.g., Stay healthy"
-                className="w-full rounded-lg border border-black/10 bg-white px-3 py-2.5 text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
+                className="w-full rounded-lg border border-black/[0.16] bg-white px-3 py-2.5 text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
               />
             </div>
             <div>
@@ -347,7 +348,7 @@ export function HabitForm({
                 value={unitLabel}
                 onChange={(e) => setUnitLabel(e.target.value)}
                 placeholder="e.g., sessions"
-                className="w-full rounded-lg border border-black/10 bg-white px-3 py-2.5 text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
+                className="w-full rounded-lg border border-black/[0.16] bg-white px-3 py-2.5 text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
               />
             </div>
           </div>
@@ -404,7 +405,7 @@ export function HabitForm({
                         handleSlotNameChange(index, e.target.value)
                       }
                       placeholder={`Slot ${index + 1}`}
-                      className="flex-1 rounded-lg border border-black/10 bg-white px-3 py-2.5 text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
+                      className="flex-1 rounded-lg border border-black/[0.16] bg-white px-3 py-2.5 text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
                     />
                   </div>
                 ))}
@@ -414,7 +415,7 @@ export function HabitForm({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2 border-t border-black/[0.06] px-5 py-3">
+        <div className="flex items-center justify-end gap-2 border-t border-black/[0.06] bg-white px-5 py-3">
           <button
             type="button"
             onClick={onClose}
@@ -469,7 +470,7 @@ export function ConfirmDialog({
     <dialog
       ref={dialogRef}
       onClose={onCancel}
-      className="modal-dialog m-auto w-full max-w-sm rounded-2xl border border-white/60 bg-white/90 p-5 shadow-[var(--shadow-panel)] backdrop-blur-2xl backdrop:bg-black/30 backdrop:backdrop-blur-sm"
+      className="modal-dialog m-auto w-full max-w-sm rounded-2xl border border-black/[0.1] bg-white p-5 shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_20px_60px_rgba(10,22,40,0.18)] backdrop:bg-black/35 backdrop:backdrop-blur-sm"
     >
       <h3 className="text-[15px] font-semibold text-ink-950">{title}</h3>
       <p className="mt-2 text-[13px] leading-5 text-ink-700">{message}</p>
@@ -507,12 +508,45 @@ export function HabitMenu({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
+
+  function updateMenuPosition() {
+    const button = buttonRef.current;
+    if (!button) return;
+
+    const rect = button.getBoundingClientRect();
+    const menuWidth = 176;
+    const menuHeight = 136;
+    const gap = 8;
+
+    const left = Math.max(
+      8,
+      Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - 8),
+    );
+
+    const openUp = rect.bottom + gap + menuHeight > window.innerHeight - 8;
+    const top = openUp
+      ? Math.max(8, rect.top - menuHeight - gap)
+      : rect.bottom + gap;
+
+    setMenuPos({ top, left });
+  }
 
   useEffect(() => {
     if (!open) return;
 
+    updateMenuPosition();
+
     function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (
+        ref.current &&
+        !ref.current.contains(target) &&
+        menuRef.current &&
+        !menuRef.current.contains(target)
+      ) {
         setOpen(false);
       }
     }
@@ -523,21 +557,31 @@ export function HabitMenu({
       }
     }
 
+    function handleViewportChange() {
+      updateMenuPosition();
+    }
+
     document.addEventListener("mousedown", handleClick);
     document.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("resize", handleViewportChange);
+    window.addEventListener("scroll", handleViewportChange, true);
     return () => {
       document.removeEventListener("mousedown", handleClick);
       document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("resize", handleViewportChange);
+      window.removeEventListener("scroll", handleViewportChange, true);
     };
   }, [open]);
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative z-40">
       <button
+        ref={buttonRef}
         type="button"
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
+          if (!open) updateMenuPosition();
           setOpen(!open);
         }}
         aria-label="Open habit actions"
@@ -550,52 +594,56 @@ export function HabitMenu({
         </svg>
       </button>
 
-      {open && (
-        <div
-          role="menu"
-          className="absolute right-0 top-10 z-50 w-44 rounded-xl border border-black/[0.06] bg-white/90 py-1.5 shadow-[var(--shadow-panel)] backdrop-blur-2xl"
-        >
-          <button
-            type="button"
-            role="menuitem"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setOpen(false);
-              onEdit();
-            }}
-            className="flex min-h-10 w-full items-center gap-2 px-3 py-2 text-[14px] text-ink-700 hover:bg-black/[0.05]"
+      {open &&
+        createPortal(
+          <div
+            ref={menuRef}
+            role="menu"
+            className="fixed z-[250] w-44 rounded-xl border border-black/[0.08] bg-white py-1.5 shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_12px_28px_rgba(10,22,40,0.16)]"
+            style={{ top: menuPos.top, left: menuPos.left }}
           >
-            Edit
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setOpen(false);
-              onArchive();
-            }}
-            className="flex min-h-10 w-full items-center gap-2 px-3 py-2 text-[14px] text-ink-700 hover:bg-black/[0.05]"
-          >
-            Archive
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setOpen(false);
-              onDelete();
-            }}
-            className="flex min-h-10 w-full items-center gap-2 px-3 py-2 text-[14px] text-red-700 hover:bg-red-50/80"
-          >
-            Delete
-          </button>
-        </div>
-      )}
+            <button
+              type="button"
+              role="menuitem"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setOpen(false);
+                onEdit();
+              }}
+              className="flex min-h-10 w-full items-center gap-2 px-3 py-2 text-[14px] text-ink-700 hover:bg-black/[0.05]"
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setOpen(false);
+                onArchive();
+              }}
+              className="flex min-h-10 w-full items-center gap-2 px-3 py-2 text-[14px] text-ink-700 hover:bg-black/[0.05]"
+            >
+              Archive
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setOpen(false);
+                onDelete();
+              }}
+              className="flex min-h-10 w-full items-center gap-2 px-3 py-2 text-[14px] text-red-700 hover:bg-red-50/80"
+            >
+              Delete
+            </button>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

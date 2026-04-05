@@ -280,7 +280,7 @@ export function HabitTrackerApp() {
 
       <div className="page-shell flex flex-col gap-4 py-5">
         {/* Matrix */}
-        <section className="animate-scale-in surface-panel overflow-hidden rounded-2xl">
+        <section className="animate-scale-in surface-panel relative overflow-visible rounded-2xl">
           <div className="flex items-center justify-between border-b border-black/[0.04] px-5 py-3 sm:px-6">
             <h2 className="text-[14px] font-semibold text-ink-950">
               Habit matrix
@@ -343,7 +343,7 @@ export function HabitTrackerApp() {
                     <div key={`${habit.id}-${slotName}`} className="contents">
                       {/* Row label */}
                       <div
-                        className={`sticky left-0 z-10 flex items-center gap-3 bg-white px-4 py-2.5 ${
+                        className={`sticky left-0 z-30 flex items-center gap-3 bg-white px-4 py-2.5 ${
                           isLastRow ? "rounded-bl-[11px]" : ""
                         } ${
                           !isLastSlot && habit.frequencyPerDay > 1
