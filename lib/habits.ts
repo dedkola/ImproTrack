@@ -1,82 +1,217 @@
+export type HabitTone = {
+  surface: string;
+  accent: string;
+  fill: string;
+  softFill: string;
+  badge: string;
+};
+
 export type HabitDefinition = {
   id: string;
   slug: string;
   name: string;
   description: string;
+  icon: string;
+  category: string;
   unitLabel: string;
   goalLabel: string;
-  tone: {
-    surface: string;
-    accent: string;
-    fill: string;
-    softFill: string;
-    badge: string;
-  };
+  frequencyPerDay: number;
+  timeSlots: string[];
+  archived: boolean;
+  createdAt: string;
+  tone: HabitTone;
 };
 
-export const habits: HabitDefinition[] = [
+const DEFAULT_TIME_SLOT_NAMES = ["Morning", "Afternoon", "Evening", "Night"];
+
+export function getNormalizedFrequency(
+  frequencyPerDay: number,
+  timeSlots: string[] = ["default"],
+) {
+  const meaningfulSlotCount = timeSlots.filter(
+    (slot) => slot.trim() && slot !== "default",
+  ).length;
+
+  return Math.max(1, frequencyPerDay, meaningfulSlotCount);
+}
+
+export function normalizeTimeSlots(
+  frequencyPerDay: number,
+  timeSlots: string[] = ["default"],
+) {
+  if (frequencyPerDay <= 1) return ["default"];
+
+  const seen = new Set<string>();
+
+  return Array.from({ length: frequencyPerDay }, (_, index) => {
+    const rawSlot = timeSlots[index]?.trim();
+    const fallback = DEFAULT_TIME_SLOT_NAMES[index] ?? `Slot ${index + 1}`;
+    const baseLabel = rawSlot && rawSlot !== "default" ? rawSlot : fallback;
+    let label = baseLabel;
+    let counter = 2;
+
+    while (seen.has(label.toLowerCase())) {
+      label = `${baseLabel} ${counter}`;
+      counter += 1;
+    }
+
+    seen.add(label.toLowerCase());
+    return label;
+  });
+}
+
+const WHITE_SURFACE = "from-white via-white to-white";
+
+export const TONE_PRESETS: { label: string; tone: HabitTone }[] = [
+  {
+    label: "Sky",
+    tone: {
+      surface: WHITE_SURFACE,
+      accent: "text-sky-800",
+      fill: "bg-sky-600",
+      softFill: "bg-sky-100 text-sky-800",
+      badge: "ring-sky-200",
+    },
+  },
+  {
+    label: "Emerald",
+    tone: {
+      surface: WHITE_SURFACE,
+      accent: "text-emerald-800",
+      fill: "bg-emerald-600",
+      softFill: "bg-emerald-100 text-emerald-800",
+      badge: "ring-emerald-200",
+    },
+  },
+  {
+    label: "Violet",
+    tone: {
+      surface: WHITE_SURFACE,
+      accent: "text-violet-800",
+      fill: "bg-violet-600",
+      softFill: "bg-violet-100 text-violet-800",
+      badge: "ring-violet-200",
+    },
+  },
+  {
+    label: "Amber",
+    tone: {
+      surface: WHITE_SURFACE,
+      accent: "text-amber-800",
+      fill: "bg-amber-600",
+      softFill: "bg-amber-100 text-amber-800",
+      badge: "ring-amber-200",
+    },
+  },
+  {
+    label: "Rose",
+    tone: {
+      surface: WHITE_SURFACE,
+      accent: "text-rose-800",
+      fill: "bg-rose-600",
+      softFill: "bg-rose-100 text-rose-800",
+      badge: "ring-rose-200",
+    },
+  },
+  {
+    label: "Teal",
+    tone: {
+      surface: WHITE_SURFACE,
+      accent: "text-teal-800",
+      fill: "bg-teal-600",
+      softFill: "bg-teal-100 text-teal-800",
+      badge: "ring-teal-200",
+    },
+  },
+  {
+    label: "Indigo",
+    tone: {
+      surface: WHITE_SURFACE,
+      accent: "text-indigo-800",
+      fill: "bg-indigo-600",
+      softFill: "bg-indigo-100 text-indigo-800",
+      badge: "ring-indigo-200",
+    },
+  },
+  {
+    label: "Slate",
+    tone: {
+      surface: WHITE_SURFACE,
+      accent: "text-slate-800",
+      fill: "bg-slate-600",
+      softFill: "bg-slate-100 text-slate-800",
+      badge: "ring-slate-200",
+    },
+  },
+];
+
+export const DEFAULT_HABITS: HabitDefinition[] = [
   {
     id: "steps",
     slug: "ten-thousand-steps",
     name: "10,000 steps",
     description: "Daily movement target with an easy visual pulse.",
+    icon: "🚶",
+    category: "Health",
     unitLabel: "days hit",
     goalLabel: "10,000 steps",
-    tone: {
-      surface: "from-sky-200/65 via-cyan-100/70 to-white",
-      accent: "text-sky-700",
-      fill: "bg-sky-500",
-      softFill: "bg-sky-100 text-sky-700",
-      badge: "ring-sky-200"
-    }
+    frequencyPerDay: 1,
+    timeSlots: ["default"],
+    archived: false,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    tone: TONE_PRESETS[0].tone,
   },
   {
     id: "exercise",
     slug: "exercise",
     name: "Exercise",
     description: "A short workout, walk, or stretching session.",
+    icon: "💪",
+    category: "Health",
     unitLabel: "sessions",
     goalLabel: "Active body",
-    tone: {
-      surface: "from-emerald-200/70 via-lime-100/80 to-white",
-      accent: "text-emerald-700",
-      fill: "bg-emerald-500",
-      softFill: "bg-emerald-100 text-emerald-700",
-      badge: "ring-emerald-200"
-    }
+    frequencyPerDay: 1,
+    timeSlots: ["default"],
+    archived: false,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    tone: TONE_PRESETS[1].tone,
   },
   {
     id: "english",
     slug: "studying-english",
     name: "Studying English",
-    description: "Focused language practice with lessons, reading, or speaking.",
+    description:
+      "Focused language practice with lessons, reading, or speaking.",
+    icon: "📖",
+    category: "Learning",
     unitLabel: "study days",
     goalLabel: "Language practice",
-    tone: {
-      surface: "from-violet-200/70 via-fuchsia-100/70 to-white",
-      accent: "text-violet-700",
-      fill: "bg-violet-500",
-      softFill: "bg-violet-100 text-violet-700",
-      badge: "ring-violet-200"
-    }
+    frequencyPerDay: 1,
+    timeSlots: ["default"],
+    archived: false,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    tone: TONE_PRESETS[2].tone,
   },
   {
     id: "reading",
     slug: "reading",
     name: "Reading",
     description: "Quiet reading time for focus and recovery.",
+    icon: "📚",
+    category: "Learning",
     unitLabel: "reading days",
     goalLabel: "Reading habit",
-    tone: {
-      surface: "from-amber-200/75 via-orange-100/70 to-white",
-      accent: "text-amber-700",
-      fill: "bg-amber-500",
-      softFill: "bg-amber-100 text-amber-700",
-      badge: "ring-amber-200"
-    }
-  }
+    frequencyPerDay: 1,
+    timeSlots: ["default"],
+    archived: false,
+    createdAt: "2025-01-01T00:00:00.000Z",
+    tone: TONE_PRESETS[3].tone,
+  },
 ];
 
-export function getHabitBySlug(slug: string) {
-  return habits.find((habit) => habit.slug === slug);
+export function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
