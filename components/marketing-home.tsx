@@ -1,6 +1,24 @@
 import Link from "next/link";
 import { AuthControls } from "@/components/auth-controls";
 
+const heroBlocks = [
+  {
+    title: "Dashboard",
+
+    body: "Run your day from one clean workspace with active habits, quick actions, and instant progress feedback.",
+  },
+  {
+    title: "Archive",
+
+    body: "Pause or retire routines without deleting history, then restore them whenever your priorities change.",
+  },
+  {
+    title: "Statistics",
+
+    body: "See hit rate, streak pressure, and weekly rhythm so your next adjustment is based on real signal.",
+  },
+];
+
 const featureCards = [
   {
     title: "Dashboard built for habit pressure",
@@ -141,30 +159,22 @@ export function MarketingHome() {
               </div>
 
               <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                <div className="feature-panel rounded-[24px] px-4 py-4">
-                  <p className="text-[12px] uppercase tracking-[0.18em] text-ink-600">
-                    Dashboard
-                  </p>
-                  <p className="mt-2 font-display text-[28px] font-semibold text-ink-950">
-                    /dashboard
-                  </p>
-                </div>
-                <div className="feature-panel rounded-[24px] px-4 py-4">
-                  <p className="text-[12px] uppercase tracking-[0.18em] text-ink-600">
-                    Archive
-                  </p>
-                  <p className="mt-2 font-display text-[28px] font-semibold text-ink-950">
-                    /dashboard/archive
-                  </p>
-                </div>
-                <div className="feature-panel rounded-[24px] px-4 py-4">
-                  <p className="text-[12px] uppercase tracking-[0.18em] text-ink-600">
-                    Statistics
-                  </p>
-                  <p className="mt-2 font-display text-[28px] font-semibold text-ink-950">
-                    /dashboard/stats
-                  </p>
-                </div>
+                {heroBlocks.map((block) => (
+                  <div
+                    key={block.title}
+                    className="feature-panel rounded-[24px] px-4 py-4"
+                  >
+                    <p className="text-[12px] uppercase tracking-[0.18em] text-ink-600">
+                      {block.title}
+                    </p>
+                    <p className="mt-2 font-display text-[22px] font-semibold text-ink-950 sm:text-[24px]">
+                      {block.route}
+                    </p>
+                    <p className="mt-2 text-[13px] leading-6 text-ink-700">
+                      {block.body}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
 
