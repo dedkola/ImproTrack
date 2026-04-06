@@ -220,7 +220,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
         )}
         <Link
           href="/dashboard"
-          className="pill-btn inline-flex items-center rounded-lg bg-ink-950 px-4 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+          className="pill-btn inline-flex items-center rounded-lg border border-black/[0.06] bg-white/78 px-4 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm hover:bg-white hover:shadow-[var(--shadow-card-hover)]"
         >
           Dashboard
         </Link>
