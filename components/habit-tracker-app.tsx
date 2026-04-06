@@ -407,23 +407,29 @@ export function HabitTrackerApp() {
                       {/* Day cells */}
                       {days.map((dateKey, colIndex) => {
                         const daySlots = records[habit.id]?.[dateKey];
-                        const checked = Boolean(daySlots?.[slotName]);
+                        const slotChecked = Boolean(daySlots?.[slotName]);
                         const isFuture = dateKey > todayKey;
 
-                        // For multi-slot: show partial indicator on first slot row
+                        // For multi-slot: first row shows aggregate state
+                        let checked = slotChecked;
                         let partial = false;
-                        if (
-                          isFirstSlot &&
-                          habit.frequencyPerDay > 1 &&
-                          !checked
-                        ) {
+                        if (isFirstSlot && habit.frequencyPerDay > 1) {
                           const done = completedSlotsInDay(
                             records,
                             habit.id,
                             dateKey,
                             habit.timeSlots,
                           );
-                          partial = done > 0;
+                          if (done === habit.frequencyPerDay) {
+                            checked = true;
+                            partial = false;
+                          } else if (done > 0) {
+                            checked = false;
+                            partial = true;
+                          } else {
+                            checked = false;
+                            partial = false;
+                          }
                         }
 
                         return (
@@ -436,7 +442,7 @@ export function HabitTrackerApp() {
                               }
                             }}
                             disabled={isFuture}
-                            aria-pressed={checked}
+                            aria-pressed={slotChecked}
                             aria-label={`${habit.name}${displaySlotName ? ` ${displaySlotName}` : ""} on ${formatLongDate(dateKey)}`}
                             className={`matrix-day-btn flex h-10 items-center justify-center ${
                               isLastRow && colIndex === days.length - 1

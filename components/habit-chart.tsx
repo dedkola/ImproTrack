@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState, useCallback } from "react";
 import {
   eachDay,
   getRollingRange,
@@ -11,7 +11,7 @@ import {
   type DateRange,
 } from "@/lib/date";
 import type { HabitRecords } from "@/lib/storage";
-import { isDayFullyCompleted } from "@/lib/stats";
+import { completedSlotsInDay } from "@/lib/stats";
 import type { HabitTone } from "@/lib/habits";
 
 // ---- SVG smooth curve helper -----------------------------------------------
@@ -37,9 +37,9 @@ function smoothPath(pts: { x: number; y: number }[]): string {
 
 // ---- Types -----------------------------------------------------------------
 
-type ChartView = "pie" | "bar" | "histogram" | "line";
+type ChartView = "bar" | "histogram" | "line";
 type TimePreset = "7" | "30" | "custom";
-type DayPoint = { dateKey: string; completed: boolean };
+type DayPoint = { dateKey: string; ratio: number };
 
 // ---- Tone → SVG class lookup -----------------------------------------------
 // Explicit strings required so Tailwind's scanner picks them up at build time.
@@ -74,146 +74,11 @@ function buildPoints(
   timeSlots: string[],
   range: DateRange,
 ): DayPoint[] {
-  return eachDay(range).map((dateKey) => ({
-    dateKey,
-    completed: isDayFullyCompleted(records, habitId, dateKey, timeSlots),
-  }));
-}
-
-// ---- Pie / Donut chart -----------------------------------------------------
-
-function PieChart({
-  points,
-  fillClass,
-}: {
-  points: DayPoint[];
-  fillClass: string;
-}) {
-  if (points.length === 0) return <ChartEmpty />;
-
-  const completed = points.filter((p) => p.completed).length;
-  const missed = points.length - completed;
-  const total = points.length;
-  const pct = Math.round((completed / total) * 100);
-
-  const CX = 120;
-  const CY = 120;
-  const R = 88;
-  const INNER_R = 56;
-  const VW = 340;
-  const VH = 240;
-
-  // Arc path helper
-  function arcPath(
-    startAngle: number,
-    endAngle: number,
-    outerR: number,
-    innerR: number,
-  ) {
-    const toRad = (deg: number) => (deg - 90) * (Math.PI / 180);
-    const sx = CX + outerR * Math.cos(toRad(startAngle));
-    const sy = CY + outerR * Math.sin(toRad(startAngle));
-    const ex = CX + outerR * Math.cos(toRad(endAngle));
-    const ey = CY + outerR * Math.sin(toRad(endAngle));
-    const ix = CX + innerR * Math.cos(toRad(endAngle));
-    const iy = CY + innerR * Math.sin(toRad(endAngle));
-    const jx = CX + innerR * Math.cos(toRad(startAngle));
-    const jy = CY + innerR * Math.sin(toRad(startAngle));
-    const large = endAngle - startAngle > 180 ? 1 : 0;
-    return [
-      `M${sx.toFixed(2)},${sy.toFixed(2)}`,
-      `A${outerR},${outerR} 0 ${large} 1 ${ex.toFixed(2)},${ey.toFixed(2)}`,
-      `L${ix.toFixed(2)},${iy.toFixed(2)}`,
-      `A${innerR},${innerR} 0 ${large} 0 ${jx.toFixed(2)},${jy.toFixed(2)}`,
-      "Z",
-    ].join(" ");
-  }
-
-  const completedAngle = (completed / total) * 360;
-  // Clamp so we never draw a full 360 arc (SVG arc collapses)
-  const clampedAngle = Math.min(completedAngle, 359.99);
-  const missedAngle = 360 - clampedAngle;
-
-  const completedPath =
-    completed > 0 ? arcPath(0, clampedAngle, R, INNER_R) : null;
-  const missedPath =
-    missed > 0
-      ? arcPath(
-          clampedAngle,
-          clampedAngle + Math.min(missedAngle, 359.99),
-          R,
-          INNER_R,
-        )
-      : null;
-
-  // Legend x position
-  const LX = CX * 2 + 16;
-
-  return (
-    <div className="flex justify-center">
-      <svg
-        viewBox={`0 0 ${VW} ${VH}`}
-        width="100%"
-        style={{ maxWidth: 320, display: "block" }}
-        aria-label="Completion pie chart"
-      >
-        {/* Missed slice */}
-        {missedPath && (
-          <path d={missedPath} fill="rgba(0,0,0,0.08)">
-            <title>{missed} days missed</title>
-          </path>
-        )}
-
-        {/* Completed slice */}
-        {completedPath && (
-          <path d={completedPath} className={fillClass} fillOpacity={0.85}>
-            <title>{completed} days completed</title>
-          </path>
-        )}
-
-        {/* Centre label */}
-        <text
-          x={CX}
-          y={CY - 8}
-          fontSize={28}
-          fontWeight="700"
-          fill="#0a1628"
-          textAnchor="middle"
-          dominantBaseline="middle"
-        >
-          {pct}%
-        </text>
-        <text
-          x={CX}
-          y={CY + 18}
-          fontSize={10}
-          fill="#8090a5"
-          textAnchor="middle"
-        >
-          completion
-        </text>
-
-        {/* Legend */}
-        <circle
-          cx={LX + 6}
-          cy={80}
-          r={6}
-          className={fillClass}
-          fillOpacity={0.85}
-        />
-        <text x={LX + 18} y={84} fontSize={11} fill="#0a1628" fontWeight="600">
-          {completed} completed
-        </text>
-        <circle cx={LX + 6} cy={106} r={6} fill="rgba(0,0,0,0.12)" />
-        <text x={LX + 18} y={110} fontSize={11} fill="#4a5568">
-          {missed} missed
-        </text>
-        <text x={LX + 6} y={142} fontSize={10} fill="#8090a5">
-          {total} days total
-        </text>
-      </svg>
-    </div>
-  );
+  const slotCount = timeSlots.length || 1;
+  return eachDay(range).map((dateKey) => {
+    const done = completedSlotsInDay(records, habitId, dateKey, timeSlots);
+    return { dateKey, ratio: done / slotCount };
+  });
 }
 
 // ---- Bar Chart (one bar per day) -------------------------------------------
@@ -228,15 +93,15 @@ function BarChartViz({
   if (points.length === 0) return <ChartEmpty />;
 
   const VW = 800;
-  const VH = 180;
-  const P = { t: 16, r: 12, b: 36, l: 12 };
+  const VH = 200;
+  const P = { t: 16, r: 6, b: 36, l: 6 };
   const PW = VW - P.l - P.r;
   const PH = VH - P.t - P.b;
 
   const n = points.length;
   const step = PW / n;
   const barW = Math.max(5, Math.min(24, step * 0.7));
-  const labelEvery = n <= 7 ? 1 : n <= 15 ? 2 : Math.ceil(n / 7);
+  const labelEvery = n <= 7 ? 1 : n <= 14 ? 2 : 7;
 
   return (
     <svg
@@ -263,9 +128,10 @@ function BarChartViz({
 
       {/* Bars */}
       {points.map((p, i) => {
-        const barH = p.completed ? PH : 4;
+        const barH = p.ratio > 0 ? Math.max(4, PH * p.ratio) : 4;
         const x = P.l + i * step + step / 2 - barW / 2;
         const y = P.t + PH - barH;
+        const pctLabel = Math.round(p.ratio * 100);
         return (
           <rect
             key={p.dateKey}
@@ -275,10 +141,15 @@ function BarChartViz({
             height={barH}
             rx={Math.min(4, barW / 4)}
             className={fillClass}
-            fillOpacity={p.completed ? 0.9 : 0.3}
+            fillOpacity={p.ratio === 1 ? 0.9 : p.ratio > 0 ? 0.55 : 0.15}
           >
             <title>
-              {p.dateKey}: {p.completed ? "Done ✓" : "Missed"}
+              {p.dateKey}:{" "}
+              {p.ratio === 1
+                ? "Done ✓"
+                : p.ratio > 0
+                  ? `${pctLabel}%`
+                  : "Missed"}
             </title>
           </rect>
         );
@@ -329,7 +200,7 @@ function HistogramChart({
     const key = toDateKey(mon);
     const prev = weekMap.get(key) ?? { completed: 0, total: 0 };
     weekMap.set(key, {
-      completed: prev.completed + (p.completed ? 1 : 0),
+      completed: prev.completed + p.ratio,
       total: prev.total + 1,
     });
   });
@@ -340,7 +211,7 @@ function HistogramChart({
 
   const VW = 600;
   const VH = 200;
-  const P = { t: 18, r: 12, b: 36, l: 32 };
+  const P = { t: 18, r: 6, b: 36, l: 28 };
   const PW = VW - P.l - P.r;
   const PH = VH - P.t - P.b;
   const Y_MAX = 7;
@@ -416,7 +287,8 @@ function HistogramChart({
               fillOpacity={completed === 0 ? 0.2 : 0.9}
             >
               <title>
-                Week of {key}: {completed}/{total} days ({pct}%)
+                Week of {key}: {Math.round(completed * 10) / 10}/{total} days (
+                {pct}%)
               </title>
             </rect>
             {/* Day count label inside tall bars */}
@@ -429,7 +301,7 @@ function HistogramChart({
                 textAnchor="middle"
                 fontWeight="600"
               >
-                {completed}
+                {Math.round(completed)}
               </text>
             )}
             <text
@@ -459,34 +331,31 @@ function LineChartViz({
   fillClass: string;
   strokeClass: string;
 }) {
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+
   if (points.length < 2) return <ChartEmpty />;
 
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-
-  const VW = 800;
+  const VW = 600;
   const VH = 200;
-  const P = { t: 20, r: 8, b: 36, l: 8 };
+  const P = { t: 20, r: 6, b: 32, l: 32 };
   const PW = VW - P.l - P.r;
   const PH = VH - P.t - P.b;
 
   // Rolling 7-day completion rate per day
   const rates = points.map((_, i) => {
     const win = points.slice(Math.max(0, i - 6), i + 1);
-    return win.filter((p) => p.completed).length / win.length;
+    return win.reduce((sum, p) => sum + p.ratio, 0) / win.length;
   });
 
   const n = rates.length;
   const stepX = PW / Math.max(n - 1, 1);
 
-  const plotted = rates.map((r, i) => ({
+  const pathPts = rates.map((r, i) => ({
     x: P.l + i * stepX,
     y: P.t + PH * (1 - r),
-    rate: r,
-    ratePercent: Math.round(r * 100),
-    dateKey: points[i].dateKey,
   }));
 
-  const pathPts = plotted.map(({ x, y }) => ({ x, y }));
   const linePath = smoothPath(pathPts);
 
   const areaPath =
@@ -494,57 +363,40 @@ function LineChartViz({
     linePath.slice(linePath.indexOf(" ") + 1) +
     ` L${pathPts[n - 1].x.toFixed(1)},${(P.t + PH).toFixed(1)}Z`;
 
-  const targetLabelCount = 8;
-  const labelEvery =
-    n <= 7 ? 1 : n <= 14 ? 2 : Math.max(3, Math.ceil(n / targetLabelCount));
-  const last = pathPts[n - 1];
+  const labelEvery = n <= 7 ? 1 : n <= 14 ? 2 : 7;
 
-  const active = activeIndex !== null ? plotted[activeIndex] : null;
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<SVGSVGElement>) => {
+      const svg = svgRef.current;
+      if (!svg) return;
+      const rect = svg.getBoundingClientRect();
+      const mouseX = ((e.clientX - rect.left) / rect.width) * VW;
+      const idx = Math.round((mouseX - P.l) / stepX);
+      if (idx >= 0 && idx < n) {
+        setHoverIndex(idx);
+      } else {
+        setHoverIndex(null);
+      }
+    },
+    [n, stepX],
+  );
 
-  const setActiveFromClientX = (clientX: number, rect: DOMRect) => {
-    const scaleX = VW / rect.width;
-    const localX = (clientX - rect.left) * scaleX;
-    const clampedX = Math.max(P.l, Math.min(P.l + PW, localX));
-    const nearest = Math.round((clampedX - P.l) / Math.max(stepX, 1));
-    const idx = Math.max(0, Math.min(n - 1, nearest));
-    setActiveIndex(idx);
-  };
+  const handleMouseLeave = useCallback(() => setHoverIndex(null), []);
 
-  const handlePointerMove = (e: React.PointerEvent<SVGRectElement>) => {
-    setActiveFromClientX(e.clientX, e.currentTarget.getBoundingClientRect());
-  };
-
-  const handlePointerEnter = (e: React.PointerEvent<SVGRectElement>) => {
-    setActiveFromClientX(e.clientX, e.currentTarget.getBoundingClientRect());
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<SVGRectElement>) => {
-    if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      setActiveIndex((prev) => Math.max(0, (prev ?? n - 1) - 1));
-      return;
-    }
-    if (e.key === "ArrowRight") {
-      e.preventDefault();
-      setActiveIndex((prev) => Math.min(n - 1, (prev ?? -1) + 1));
-      return;
-    }
-    if (e.key === "Home") {
-      e.preventDefault();
-      setActiveIndex(0);
-      return;
-    }
-    if (e.key === "End") {
-      e.preventDefault();
-      setActiveIndex(n - 1);
-    }
-  };
+  const hp = hoverIndex !== null ? pathPts[hoverIndex] : null;
+  const hRate = hoverIndex !== null ? rates[hoverIndex] : 0;
+  const hPoint = hoverIndex !== null ? points[hoverIndex] : null;
+  const hDate = hPoint ? parseDateKey(hPoint.dateKey) : null;
 
   return (
     <svg
+      ref={svgRef}
       viewBox={`0 0 ${VW} ${VH}`}
       width="100%"
+      className="cursor-crosshair"
       aria-label="7-day rolling completion rate line chart"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
     >
       {/* Y-axis gridlines */}
       {[0, 0.25, 0.5, 0.75, 1].map((pct) => {
@@ -594,135 +446,111 @@ function LineChartViz({
         strokeLinejoin="round"
       />
 
-      {/* Interactive cursor/tooltip */}
-      {active && (
+      {/* Hover guide */}
+      {hp && hPoint && hDate && (
         <g>
+          {/* Vertical line */}
           <line
-            x1={active.x}
+            x1={hp.x}
             y1={P.t}
-            x2={active.x}
+            x2={hp.x}
             y2={P.t + PH}
-            stroke="rgba(10,22,40,0.22)"
+            stroke="rgba(0,0,0,0.15)"
             strokeWidth={1}
-            strokeDasharray="4 3"
+            strokeDasharray="3 3"
           />
-
+          {/* Dot */}
           <circle
-            cx={active.x}
-            cy={active.y}
-            r={7}
-            fill="white"
-            stroke="rgba(10,22,40,0.16)"
-            strokeWidth={1.5}
-          />
-          <circle
-            cx={active.x}
-            cy={active.y}
-            r={4}
+            cx={hp.x}
+            cy={hp.y}
+            r={5}
             className={fillClass}
             stroke="white"
-            strokeWidth={1.8}
+            strokeWidth={2.5}
           />
-
+          {/* Tooltip background */}
           {(() => {
-            const tooltipW = 88;
-            const tooltipH = 31;
-            const xPad = 8;
-            const preferRight = active.x + xPad + tooltipW <= P.l + PW;
-            const tx = preferRight
-              ? active.x + xPad
-              : Math.max(P.l, active.x - tooltipW - xPad);
-            const ty = Math.max(
-              P.t + 4,
-              Math.min(P.t + PH - tooltipH - 4, active.y - tooltipH - 10),
-            );
-            const d = parseDateKey(active.dateKey);
-            const dateLabel = d.toLocaleString("en", {
-              month: "short",
-              day: "numeric",
-            });
-
+            const tw = 110;
+            const th = 38;
+            let tx = hp.x - tw / 2;
+            if (tx < 2) tx = 2;
+            if (tx + tw > VW - 2) tx = VW - 2 - tw;
+            const ty = hp.y - th - 10;
+            const finalTy = ty < 2 ? hp.y + 12 : ty;
             return (
-              <g>
+              <>
                 <rect
                   x={tx}
-                  y={ty}
-                  width={tooltipW}
-                  height={tooltipH}
-                  rx={5}
+                  y={finalTy}
+                  width={tw}
+                  height={th}
+                  rx={6}
                   fill="white"
-                  stroke="rgba(10,22,40,0.12)"
+                  stroke="rgba(0,0,0,0.08)"
+                  strokeWidth={1}
+                  filter="drop-shadow(0 1px 3px rgba(0,0,0,0.1))"
                 />
                 <text
-                  x={tx + 7}
-                  y={ty + 12}
-                  fontSize={7}
-                  fill="#6b7280"
-                  fontWeight="500"
+                  x={tx + tw / 2}
+                  y={finalTy + 15}
+                  fontSize={10}
+                  fontWeight="600"
+                  fill="#0a1628"
+                  textAnchor="middle"
                 >
-                  {dateLabel}
+                  {Math.round(hRate * 100)}% —{" "}
+                  {hDate.toLocaleString("en", {
+                    month: "short",
+                    day: "numeric",
+                  })}
                 </text>
                 <text
-                  x={tx + 7}
-                  y={ty + 22}
+                  x={tx + tw / 2}
+                  y={finalTy + 29}
                   fontSize={9}
-                  fill="#0a1628"
-                  fontWeight="700"
+                  fill="#8090a5"
+                  textAnchor="middle"
                 >
-                  {active.ratePercent}% rolling rate
+                  {Math.round(hPoint.ratio * 100)}% day · 7d avg
                 </text>
-              </g>
+              </>
             );
           })()}
         </g>
       )}
 
-      {/* End dot */}
-      <circle
-        cx={last.x}
-        cy={last.y}
-        r={4}
-        className={fillClass}
-        stroke="white"
-        strokeWidth={2}
-      />
-
-      <rect
-        x={P.l}
-        y={P.t}
-        width={PW}
-        height={PH}
-        fill="transparent"
-        onPointerMove={handlePointerMove}
-        onPointerEnter={handlePointerEnter}
-        onPointerLeave={() => setActiveIndex(null)}
-        onBlur={() => setActiveIndex(null)}
-        onFocus={() => setActiveIndex(n - 1)}
-        onKeyDown={handleKeyDown}
-        tabIndex={0}
-        aria-label="Hover or use arrow keys to inspect chart points"
-      />
+      {/* Default end dot (when not hovering) */}
+      {hoverIndex === null && (
+        <circle
+          cx={pathPts[n - 1].x}
+          cy={pathPts[n - 1].y}
+          r={4}
+          className={fillClass}
+          stroke="white"
+          strokeWidth={2}
+        />
+      )}
 
       {/* X-axis labels */}
-      {points.map((p, i) => {
-        if (i % labelEvery !== 0) return null;
-        const x = P.l + i * stepX;
-        const d = parseDateKey(p.dateKey);
-        const anchor =
-          i === 0 ? "start" : i === points.length - 1 ? "end" : "middle";
-        return (
-          <text
-            key={p.dateKey}
-            x={x}
-            y={VH - 8}
-            fontSize={9}
-            fill="#8090a5"
-            textAnchor={anchor}
-          >
-            {d.toLocaleString("en", { month: "short", day: "numeric" })}
-          </text>
-        );
-      })}
+      {points
+        .filter((_, i) => i % labelEvery === 0)
+        .map((p) => {
+          const i = points.indexOf(p);
+          const x = P.l + i * stepX;
+          const d = parseDateKey(p.dateKey);
+          return (
+            <text
+              key={p.dateKey}
+              x={x}
+              y={VH - 8}
+              fontSize={9}
+              fill="#8090a5"
+              textAnchor="middle"
+            >
+              {d.toLocaleString("en", { month: "short", day: "numeric" })}
+            </text>
+          );
+        })}
     </svg>
   );
 }
@@ -772,7 +600,7 @@ export function HabitChart({
     stroke: "stroke-slate-600",
   };
 
-  const doneCount = points.filter((p) => p.completed).length;
+  const doneCount = points.filter((p) => p.ratio === 1).length;
   const rate = points.length
     ? Math.round((doneCount / points.length) * 100)
     : 0;
@@ -781,7 +609,6 @@ export function HabitChart({
     { value: "line", label: "Line" },
     { value: "bar", label: "Bar" },
     { value: "histogram", label: "Histogram" },
-    { value: "pie", label: "Pie" },
   ];
 
   const PRESET_OPTIONS: { value: TimePreset; label: string }[] = [
@@ -869,13 +696,8 @@ export function HabitChart({
       )}
 
       {/* Chart area */}
-      <div className="mt-4 min-h-[96px]">
-        <div
-          className={`w-full ${view === "pie" ? "mx-auto max-w-[320px]" : ""}`}
-        >
-          {view === "pie" && (
-            <PieChart points={points} fillClass={svgTone.fill} />
-          )}
+      <div className="mt-4 min-h-[100px]">
+        <div className="w-full">
           {view === "bar" && (
             <BarChartViz points={points} fillClass={svgTone.fill} />
           )}
