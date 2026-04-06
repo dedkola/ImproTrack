@@ -11,7 +11,7 @@ export default function ArchivePage() {
   const target = archivedHabits.find((h) => h.id === confirmId);
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-5 py-5 sm:px-8">
+    <div className="page-shell flex flex-col gap-4 py-5">
       <header className="animate-fade-in-up surface-panel flex items-center justify-between rounded-2xl px-5 py-4 sm:px-6">
         <div>
           <h1 className="text-[24px] font-semibold tracking-tight text-ink-950">

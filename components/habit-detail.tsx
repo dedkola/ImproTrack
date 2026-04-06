@@ -38,7 +38,7 @@ export function HabitDetail({ slug }: { slug: string }) {
 
   if (!habit) {
     return (
-      <div className="mx-auto flex min-h-[60vh] max-w-4xl items-center justify-center px-4">
+      <div className="page-shell flex min-h-[60vh] items-center justify-center py-5">
         <div className="animate-scale-in surface-panel rounded-2xl p-6 text-center">
           <p className="text-[14px] text-ink-700">Habit not found</p>
           <h1 className="mt-2 text-[20px] font-semibold text-ink-950">
@@ -96,7 +96,7 @@ export function HabitDetail({ slug }: { slug: string }) {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-5 py-5 sm:px-8">
+    <div className="page-shell flex flex-col gap-4 py-5">
       {/* Header */}
       <header className="animate-fade-in-up surface-panel overflow-hidden rounded-2xl px-5 py-4 sm:px-6">
         <div className="flex flex-col gap-4">
