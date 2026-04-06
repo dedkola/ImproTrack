@@ -128,7 +128,7 @@ export function MarketingHome() {
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/dashboard"
-                  className="pill-btn inline-flex items-center justify-center rounded-xl bg-ink-950 px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_24px_rgba(10,22,40,0.16)]"
+                  className="pill-btn inline-flex items-center justify-center rounded-xl px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_24px_rgba(10,22,40,0.16)]"
                 >
                   Open dashboard
                 </Link>
@@ -563,7 +563,7 @@ export function MarketingHome() {
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/dashboard"
-                  className="pill-btn inline-flex items-center justify-center rounded-xl bg-ink-950 px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_24px_rgba(10,22,40,0.16)]"
+                  className="pill-btn inline-flex items-center justify-center rounded-xl px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_24px_rgba(10,22,40,0.16)]"
                 >
                   Go to dashboard
                 </Link>
