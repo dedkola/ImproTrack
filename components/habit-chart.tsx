@@ -801,7 +801,7 @@ export function HabitChart({
 
         <div className="flex flex-wrap items-center gap-1.5">
           {/* Chart type */}
-          <div className="flex flex-wrap gap-1 rounded-lg bg-ink-950/[0.03] p-1">
+          <div className="flex flex-wrap gap-1">
             {VIEW_OPTIONS.map(({ value, label }) => (
               <button
                 key={value}
@@ -820,7 +820,7 @@ export function HabitChart({
           </div>
 
           {/* Time preset */}
-          <div className="flex gap-1 rounded-lg bg-ink-950/[0.03] p-1">
+          <div className="flex gap-1">
             {PRESET_OPTIONS.map(({ value, label }) => (
               <button
                 key={value}

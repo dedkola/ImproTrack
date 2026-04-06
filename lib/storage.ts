@@ -186,9 +186,10 @@ function normalizeHabits(habits: HabitDefinition[]): HabitDefinition[] {
 // ---- Hooks ------------------------------------------------------------
 
 export function useHabits() {
-  const [habits, setHabits] = useState<HabitDefinition[]>(() => readHabits());
+  const [habits, setHabits] = useState<HabitDefinition[]>(DEFAULT_HABITS);
 
   useEffect(() => {
+    setHabits(readHabits());
     const syncState = (event: StorageEvent) => {
       if (event.key === HABITS_KEY && event.newValue) {
         const parsed = JSON.parse(event.newValue) as HabitDefinition[];
@@ -328,11 +329,10 @@ export function useHabits() {
 }
 
 export function useHabitRecords(habits: HabitDefinition[]) {
-  const [records, setRecords] = useState<HabitRecords>(() =>
-    readRecords(habits),
-  );
+  const [records, setRecords] = useState<HabitRecords>({});
 
   useEffect(() => {
+    setRecords(readRecords(habits));
     const syncState = (event: StorageEvent) => {
       if (event.key === RECORDS_KEY && event.newValue) {
         setRecords(JSON.parse(event.newValue) as HabitRecords);

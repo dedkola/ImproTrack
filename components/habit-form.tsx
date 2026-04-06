@@ -469,25 +469,27 @@ export function ConfirmDialog({
     <dialog
       ref={dialogRef}
       onClose={onCancel}
-      className="modal-dialog m-auto w-full max-w-sm rounded-2xl border border-black/[0.1] bg-white p-5 shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_20px_60px_rgba(10,22,40,0.18)] backdrop:bg-black/35 backdrop:backdrop-blur-sm"
+      className="modal-dialog m-auto w-full max-w-lg rounded-2xl border border-black/[0.08] bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_24px_80px_rgba(10,22,40,0.22)] backdrop:bg-black/35 backdrop:backdrop-blur-sm"
     >
-      <h3 className="text-[15px] font-semibold text-ink-950">{title}</h3>
-      <p className="mt-2 text-[13px] leading-5 text-ink-700">{message}</p>
-      <div className="mt-4 flex justify-end gap-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="pill-btn tap-target-compact rounded-lg px-4 py-2 text-[14px] font-medium text-ink-700 hover:bg-black/[0.04]"
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
-          onClick={onConfirm}
-          className="pill-btn tap-target-compact rounded-lg bg-red-600 px-4 py-2 text-[14px] font-semibold text-white shadow-sm"
-        >
-          {confirmLabel ?? "Delete"}
-        </button>
+      <div className="px-8 pt-8 pb-10">
+        <h3 className="text-[17px] font-semibold text-ink-950">{title}</h3>
+        <p className="mt-3 text-[15px] leading-[1.6] text-ink-600">{message}</p>
+        <div className="mt-8 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-lg border border-black/[0.12] bg-white px-5 py-2.5 text-[14px] font-medium text-ink-700 transition-colors hover:bg-black/[0.04]"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="rounded-lg bg-red-600 px-5 py-2.5 text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-red-700"
+          >
+            {confirmLabel ?? "Delete"}
+          </button>
+        </div>
       </div>
     </dialog>
   );
