@@ -22,6 +22,44 @@ export type HabitDefinition = {
   tone: HabitTone;
 };
 
+const DEFAULT_TIME_SLOT_NAMES = ["Morning", "Afternoon", "Evening", "Night"];
+
+export function getNormalizedFrequency(
+  frequencyPerDay: number,
+  timeSlots: string[] = ["default"],
+) {
+  const meaningfulSlotCount = timeSlots.filter(
+    (slot) => slot.trim() && slot !== "default",
+  ).length;
+
+  return Math.max(1, frequencyPerDay, meaningfulSlotCount);
+}
+
+export function normalizeTimeSlots(
+  frequencyPerDay: number,
+  timeSlots: string[] = ["default"],
+) {
+  if (frequencyPerDay <= 1) return ["default"];
+
+  const seen = new Set<string>();
+
+  return Array.from({ length: frequencyPerDay }, (_, index) => {
+    const rawSlot = timeSlots[index]?.trim();
+    const fallback = DEFAULT_TIME_SLOT_NAMES[index] ?? `Slot ${index + 1}`;
+    const baseLabel = rawSlot && rawSlot !== "default" ? rawSlot : fallback;
+    let label = baseLabel;
+    let counter = 2;
+
+    while (seen.has(label.toLowerCase())) {
+      label = `${baseLabel} ${counter}`;
+      counter += 1;
+    }
+
+    seen.add(label.toLowerCase());
+    return label;
+  });
+}
+
 const WHITE_SURFACE = "from-white via-white to-white";
 
 export const TONE_PRESETS: { label: string; tone: HabitTone }[] = [

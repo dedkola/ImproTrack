@@ -4,8 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import { addDays, startOfDay, subtractDays, toDateKey } from "@/lib/date";
 import {
   DEFAULT_HABITS,
+  getNormalizedFrequency,
   HabitDefinition,
   HabitTone,
+  normalizeTimeSlots,
   TONE_PRESETS,
   slugify,
 } from "@/lib/habits";
@@ -169,6 +171,14 @@ function normalizeTone(tone: HabitTone | undefined): HabitTone {
 function normalizeHabits(habits: HabitDefinition[]): HabitDefinition[] {
   return habits.map((habit) => ({
     ...habit,
+    frequencyPerDay: getNormalizedFrequency(
+      habit.frequencyPerDay,
+      habit.timeSlots,
+    ),
+    timeSlots: normalizeTimeSlots(
+      getNormalizedFrequency(habit.frequencyPerDay, habit.timeSlots),
+      habit.timeSlots,
+    ),
     tone: normalizeTone(habit.tone),
   }));
 }
@@ -194,6 +204,10 @@ export function useHabits() {
       habit: Omit<HabitDefinition, "id" | "slug" | "createdAt" | "archived">,
     ) => {
       setHabits((current) => {
+        const normalizedFrequency = getNormalizedFrequency(
+          habit.frequencyPerDay,
+          habit.timeSlots,
+        );
         const id = slugify(habit.name) + "-" + Date.now().toString(36);
         const slug = slugify(habit.name);
         // Ensure unique slug
@@ -207,6 +221,8 @@ export function useHabits() {
           ...habit,
           id,
           slug: finalSlug,
+          frequencyPerDay: normalizedFrequency,
+          timeSlots: normalizeTimeSlots(normalizedFrequency, habit.timeSlots),
           archived: false,
           createdAt: new Date().toISOString(),
         };
@@ -226,7 +242,19 @@ export function useHabits() {
       setHabits((current) => {
         const next = current.map((h) => {
           if (h.id !== id) return h;
-          const updated = { ...h, ...updates };
+          const merged = { ...h, ...updates };
+          const normalizedFrequency = getNormalizedFrequency(
+            merged.frequencyPerDay,
+            merged.timeSlots,
+          );
+          const updated = {
+            ...merged,
+            frequencyPerDay: normalizedFrequency,
+            timeSlots: normalizeTimeSlots(
+              normalizedFrequency,
+              merged.timeSlots,
+            ),
+          };
           // If name changed, update slug
           if (updates.name && updates.name !== h.name) {
             let newSlug = slugify(updates.name);

@@ -2,7 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { HabitDefinition, HabitTone, TONE_PRESETS } from "@/lib/habits";
+import {
+  getNormalizedFrequency,
+  HabitDefinition,
+  HabitTone,
+  normalizeTimeSlots,
+  TONE_PRESETS,
+} from "@/lib/habits";
 
 type HabitFormProps = {
   open: boolean;
@@ -73,14 +79,18 @@ export function HabitForm({
   // Pre-fill when editing
   useEffect(() => {
     if (initial) {
+      const normalizedFrequency = getNormalizedFrequency(
+        initial.frequencyPerDay,
+        initial.timeSlots,
+      );
       setName(initial.name);
       setDescription(initial.description);
       setIcon(initial.icon);
       setCategory(initial.category);
       setGoalLabel(initial.goalLabel);
       setUnitLabel(initial.unitLabel);
-      setFrequencyPerDay(initial.frequencyPerDay);
-      setTimeSlots([...initial.timeSlots]);
+      setFrequencyPerDay(normalizedFrequency);
+      setTimeSlots(normalizeTimeSlots(normalizedFrequency, initial.timeSlots));
       const toneIdx = TONE_PRESETS.findIndex(
         (p) => p.tone.fill === initial.tone.fill,
       );
@@ -106,18 +116,7 @@ export function HabitForm({
   function handleFrequencyChange(value: number) {
     const freq = Math.max(1, Math.min(10, value));
     setFrequencyPerDay(freq);
-    if (freq === 1) {
-      setTimeSlots(["default"]);
-    } else {
-      const defaults = ["Morning", "Afternoon", "Evening", "Night"];
-      setTimeSlots(
-        Array.from({ length: freq }, (_, i) =>
-          i < timeSlots.length && timeSlots[i] !== "default"
-            ? timeSlots[i]
-            : (defaults[i] ?? `Slot ${i + 1}`),
-        ),
-      );
-    }
+    setTimeSlots((current) => normalizeTimeSlots(freq, current));
   }
 
   function handleSlotNameChange(index: number, value: string) {
@@ -142,7 +141,7 @@ export function HabitForm({
       unitLabel: unitLabel.trim() || "days",
       goalLabel: goalLabel.trim() || name.trim(),
       frequencyPerDay,
-      timeSlots: frequencyPerDay === 1 ? ["default"] : timeSlots,
+      timeSlots: normalizeTimeSlots(frequencyPerDay, timeSlots),
       tone: TONE_PRESETS[selectedToneIndex].tone,
     });
     resetForm();
