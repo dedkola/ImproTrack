@@ -22,6 +22,7 @@ import {
 } from "@/lib/stats";
 import { useHabits, useHabitRecords } from "@/lib/storage";
 import { HabitForm, HabitMenu, ConfirmDialog } from "@/components/habit-form";
+import { DatePicker } from "@/components/date-picker";
 
 type PeriodPreset = "month" | "7" | "30" | "90" | "custom";
 
@@ -251,28 +252,18 @@ export function HabitTrackerApp() {
             </div>
 
             <div className="flex flex-col gap-2 sm:flex-row">
-              <label className="flex min-h-10 items-center gap-2 rounded-lg bg-ink-950/[0.04] px-3 py-2 text-[13px] text-ink-700 transition hover:bg-ink-950/[0.06]">
-                <span className="font-medium">From</span>
-                <input
-                  type="date"
-                  value={range.from}
-                  onChange={(event) =>
-                    updateCustomRange("from", event.target.value)
-                  }
-                  className="bg-transparent text-ink-900"
-                />
-              </label>
-              <label className="flex min-h-10 items-center gap-2 rounded-lg bg-ink-950/[0.04] px-3 py-2 text-[13px] text-ink-700 transition hover:bg-ink-950/[0.06]">
-                <span className="font-medium">To</span>
-                <input
-                  type="date"
-                  value={range.to}
-                  onChange={(event) =>
-                    updateCustomRange("to", event.target.value)
-                  }
-                  className="bg-transparent text-ink-900"
-                />
-              </label>
+              <DatePicker
+                label="From"
+                value={range.from}
+                max={range.to}
+                onChange={(v) => updateCustomRange("from", v)}
+              />
+              <DatePicker
+                label="To"
+                value={range.to}
+                min={range.from}
+                onChange={(v) => updateCustomRange("to", v)}
+              />
             </div>
           </div>
         </div>

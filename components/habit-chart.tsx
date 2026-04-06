@@ -13,6 +13,7 @@ import {
 import type { HabitRecords } from "@/lib/storage";
 import { completedSlotsInDay } from "@/lib/stats";
 import type { HabitTone } from "@/lib/habits";
+import { DatePicker } from "@/components/date-picker";
 
 // ---- SVG smooth curve helper -----------------------------------------------
 // Catmull-Rom → cubic Bézier conversion (tension 0.4) for pretty line charts.
@@ -209,7 +210,7 @@ function HistogramChart({
     ...v,
   }));
 
-  const VW = 600;
+  const VW = 800;
   const VH = 200;
   const P = { t: 18, r: 6, b: 36, l: 28 };
   const PW = VW - P.l - P.r;
@@ -336,8 +337,8 @@ function LineChartViz({
 
   if (points.length < 2) return <ChartEmpty />;
 
-  const VW = 600;
-  const VH = 200;
+  const VW = 1000;
+  const VH = 160;
   const P = { t: 20, r: 6, b: 32, l: 32 };
   const PW = VW - P.l - P.r;
   const PH = VH - P.t - P.b;
@@ -670,28 +671,22 @@ export function HabitChart({
       {/* Custom date range inputs */}
       {preset === "custom" && (
         <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-          <label className="flex h-7 items-center gap-1.5 rounded-md bg-ink-950/[0.04] px-2.5 text-[11px] text-ink-700 transition hover:bg-ink-950/[0.06]">
-            <span className="font-medium">From</span>
-            <input
-              type="date"
-              value={customFrom}
-              max={customTo}
-              onChange={(e) => setCustomFrom(e.target.value)}
-              className="w-[7.5rem] bg-transparent text-[11px] text-ink-950 focus:outline-none"
-            />
-          </label>
+          <DatePicker
+            label="From"
+            value={customFrom}
+            max={customTo}
+            onChange={(v) => setCustomFrom(v)}
+            size="compact"
+          />
           <span className="text-[11px] text-ink-700">–</span>
-          <label className="flex h-7 items-center gap-1.5 rounded-md bg-ink-950/[0.04] px-2.5 text-[11px] text-ink-700 transition hover:bg-ink-950/[0.06]">
-            <span className="font-medium">To</span>
-            <input
-              type="date"
-              value={customTo}
-              min={customFrom}
-              max={todayKey}
-              onChange={(e) => setCustomTo(e.target.value)}
-              className="w-[7.5rem] bg-transparent text-[11px] text-ink-950 focus:outline-none"
-            />
-          </label>
+          <DatePicker
+            label="To"
+            value={customTo}
+            min={customFrom}
+            max={todayKey}
+            onChange={(v) => setCustomTo(v)}
+            size="compact"
+          />
         </div>
       )}
 
