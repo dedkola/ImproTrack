@@ -16,6 +16,7 @@ import {
 } from "@/lib/stats";
 import { useHabits, useHabitRecords } from "@/lib/storage";
 import { HabitForm, HabitMenu, ConfirmDialog } from "@/components/habit-form";
+import { HabitChart } from "@/components/habit-chart";
 
 const today = startOfDay(new Date());
 const todayKey = toDateKey(today);
@@ -209,6 +210,14 @@ export function HabitDetail({ slug }: { slug: string }) {
           </div>
         </section>
       )}
+
+      {/* Chart */}
+      <HabitChart
+        records={records}
+        habitId={habit.id}
+        timeSlots={habit.timeSlots}
+        tone={habit.tone}
+      />
 
       {/* Monthly trend & weekday pattern */}
       <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
