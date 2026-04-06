@@ -167,9 +167,7 @@ export function MarketingHome() {
                     <p className="text-[12px] uppercase tracking-[0.18em] text-ink-600">
                       {block.title}
                     </p>
-                    <p className="mt-2 font-display text-[22px] font-semibold text-ink-950 sm:text-[24px]">
-                      {block.route}
-                    </p>
+                    <p className="mt-2 font-display text-[22px] font-semibold text-ink-950 sm:text-[24px]"></p>
                     <p className="mt-2 text-[13px] leading-6 text-ink-700">
                       {block.body}
                     </p>
