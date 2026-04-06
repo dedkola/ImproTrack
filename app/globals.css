@@ -151,6 +151,77 @@ textarea {
   z-index: 0;
 }
 
+/* --- Landing / Marketing ------------------------------------------------ */
+
+.landing-backdrop {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(14, 165, 233, 0.1),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(16, 185, 129, 0.09),
+      transparent 30%
+    ),
+    linear-gradient(180deg, #f8fbff 0%, #ffffff 32%, #f9fbfd 100%);
+}
+
+.landing-grid {
+  background-image:
+    linear-gradient(rgba(10, 22, 40, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(10, 22, 40, 0.04) 1px, transparent 1px);
+  background-size: 30px 30px;
+  background-position: center;
+}
+
+.landing-orb {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(40px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.feature-panel {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition:
+    box-shadow 0.25s cubic-bezier(0.25, 0.1, 0.25, 1),
+    transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1),
+    border-color 0.25s ease;
+}
+
+.feature-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-panel-hover);
+  border-color: rgba(10, 22, 40, 0.1);
+}
+
+.mockup-frame {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(10, 22, 40, 0.08);
+  box-shadow: var(--shadow-panel);
+}
+
+.comparison-scroll {
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.comparison-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.comparison-scroll::-webkit-scrollbar-thumb {
+  background: rgba(10, 22, 40, 0.16);
+  border-radius: 999px;
+}
+
 /* --- Animations -------------------------------------------------------- */
 
 @keyframes fade-in-up {

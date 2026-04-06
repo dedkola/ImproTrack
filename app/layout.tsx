@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
-import { AppShell } from "@/components/app-shell";
 import "./globals.css";
 
 const sans = Inter({
@@ -16,9 +15,12 @@ const display = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Momentum — Habit Tracker",
+  title: {
+    default: "Momentum",
+    template: "%s | Momentum",
+  },
   description:
-    "A responsive habit tracker with spreadsheet-style calendar grids.",
+    "A focused habit tracker with a calm homepage, dashboard, archive, and statistics.",
 };
 
 export default function RootLayout({
@@ -29,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${sans.variable} ${display.variable} antialiased`}>
-        <AppShell>{children}</AppShell>
+        {children}
       </body>
     </html>
   );

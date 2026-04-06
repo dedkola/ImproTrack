@@ -39,7 +39,7 @@ export function Sidebar({
       >
         {/* Logo area */}
         <div className="flex h-14 items-center justify-between border-b border-black/[0.06] px-4">
-          <Link href="/" className="flex items-center gap-2.5">
+          <Link href="/dashboard" className="flex items-center gap-2.5">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink-950 text-[13px] font-semibold text-white">
               M
             </span>
@@ -70,7 +70,7 @@ export function Sidebar({
         <nav className="flex-1 overflow-y-auto px-3 py-3">
           {/* Dashboard */}
           <NavItem
-            href="/"
+            href="/dashboard"
             label="Dashboard"
             icon={
               <svg
@@ -88,7 +88,7 @@ export function Sidebar({
                 <rect x="9" y="9" width="5" height="5" rx="1" />
               </svg>
             }
-            active={pathname === "/"}
+            active={pathname === "/dashboard"}
           />
 
           {/* Habits section */}
@@ -121,14 +121,14 @@ export function Sidebar({
               {habits.map((habit) => (
                 <NavItem
                   key={habit.id}
-                  href={`/habits/${habit.slug}`}
+                  href={`/dashboard/habits/${habit.slug}`}
                   label={habit.name}
                   icon={
                     <span className="text-[14px] leading-none">
                       {habit.icon}
                     </span>
                   }
-                  active={pathname === `/habits/${habit.slug}`}
+                  active={pathname === `/dashboard/habits/${habit.slug}`}
                   badge={
                     <span
                       className={`h-2 w-2 rounded-full ${habit.tone.fill}`}
@@ -167,7 +167,7 @@ export function Sidebar({
           {/* Archive & Settings */}
           <div className="mt-5 border-t border-black/[0.06] pt-3">
             <NavItem
-              href="/archive"
+              href="/dashboard/archive"
               label="Archive"
               icon={
                 <svg
@@ -184,7 +184,27 @@ export function Sidebar({
                   <path d="M6.5 9h3" />
                 </svg>
               }
-              active={pathname === "/archive"}
+              active={pathname === "/dashboard/archive"}
+            />
+            <NavItem
+              href="/dashboard/stats"
+              label="Statistics"
+              icon={
+                <svg
+                  viewBox="0 0 16 16"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M3 13V8" />
+                  <path d="M8 13V3" />
+                  <path d="M13 13V6" />
+                </svg>
+              }
+              active={pathname === "/dashboard/stats"}
             />
             <NavItem
               href="#"

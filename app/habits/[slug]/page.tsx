@@ -1,11 +1,11 @@
-import { HabitDetail } from "@/components/habit-detail";
+import { redirect } from "next/navigation";
 
-export default async function HabitDetailPage({
-  params
+export default async function LegacyHabitDetailPage({
+  params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
 
-  return <HabitDetail slug={slug} />;
+  redirect(`/dashboard/habits/${slug}`);
 }

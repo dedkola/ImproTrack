@@ -1,5 +1,5 @@
-import { HabitTrackerApp } from "@/components/habit-tracker-app";
+import { MarketingHome } from "@/components/marketing-home";
 
 export default function HomePage() {
-  return <HabitTrackerApp />;
+  return <MarketingHome />;
 }

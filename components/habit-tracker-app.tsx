@@ -199,6 +199,12 @@ export function HabitTrackerApp() {
               <span className="font-display text-[14px] font-medium text-ink-950">
                 {formatMonthLabel(range)}
               </span>
+              <Link
+                href="/dashboard/stats"
+                className="pill-btn tap-target-compact inline-flex items-center gap-1.5 rounded-lg bg-white/80 px-3 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm transition-all hover:bg-white hover:shadow-[var(--shadow-card-hover)]"
+              >
+                Statistics
+              </Link>
               <button
                 type="button"
                 aria-label="Add habit"
@@ -502,7 +508,7 @@ export function HabitTrackerApp() {
           {habitSummaries.map(({ habit, completed, rate }) => (
             <Link
               key={habit.id}
-              href={`/habits/${habit.slug}`}
+              href={`/dashboard/habits/${habit.slug}`}
               className={`group relative overflow-hidden rounded-2xl border border-white/75 bg-linear-to-br ${getAppleCardGradient(habit.tone.fill)} p-4 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)]`}
             >
               <div className="absolute inset-x-6 bottom-0 h-16 rounded-full bg-white/60 blur-3xl transition-transform duration-500 group-hover:scale-125" />
