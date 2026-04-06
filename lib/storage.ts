@@ -1,9 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { addDays, startOfDay, subtractDays, toDateKey } from "@/lib/date";
 import {
-  DEFAULT_HABITS,
+  createContext,
+  createElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { useFirebaseAuth } from "@/components/firebase-auth-provider";
+import {
+  deleteUserHabit,
+  listenToUserHabits,
+  listenToUserRecords,
+  saveUserHabit,
+  saveUserRecordSlots,
+} from "@/lib/firebase/habit-store";
+import {
   getNormalizedFrequency,
   HabitDefinition,
   HabitTone,
@@ -12,128 +26,129 @@ import {
   slugify,
 } from "@/lib/habits";
 
-const RECORDS_KEY = "habit-grid-tracker-state-v2";
-const RECORDS_KEY_V1 = "habit-grid-tracker-state-v1";
-const HABITS_KEY = "habit-grid-tracker-habits-v1";
-const HISTORY_DAYS = 220;
-
-// New nested structure: { habitId: { dateKey: { slotName: boolean } } }
 export type SlotRecords = Record<string, boolean>;
 export type DayRecords = Record<string, SlotRecords>;
 export type HabitRecords = Record<string, DayRecords>;
+type PendingRecordPatches = Record<string, SlotRecords>;
 
-// ---- helpers ----------------------------------------------------------
-
-function seededChance(seed: string) {
-  let hash = 0;
-  for (let index = 0; index < seed.length; index += 1) {
-    hash = (hash * 31 + seed.charCodeAt(index)) % 2147483647;
-  }
-  return (hash % 1000) / 1000;
+function normalizeSlotKey(slotName: string) {
+  return slotName.trim().toLowerCase();
 }
 
-function migrateV1Records(): HabitRecords | null {
-  if (typeof window === "undefined") return null;
-  const raw = window.localStorage.getItem(RECORDS_KEY_V1);
-  if (!raw) return null;
+function resolveSlotValue(
+  daySlots: SlotRecords | undefined,
+  slotName: string,
+  options?: { fallbackToAny?: boolean },
+) {
+  if (!daySlots) return false;
 
-  try {
-    const v1 = JSON.parse(raw) as Record<string, Record<string, boolean>>;
-    const v2: HabitRecords = {};
-    for (const [habitId, days] of Object.entries(v1)) {
-      v2[habitId] = {};
-      for (const [dateKey, completed] of Object.entries(days)) {
-        v2[habitId][dateKey] = { default: completed };
-      }
-    }
-    window.localStorage.setItem(RECORDS_KEY, JSON.stringify(v2));
-    window.localStorage.removeItem(RECORDS_KEY_V1);
-    return v2;
-  } catch {
-    return null;
-  }
-}
-
-function createInitialRecords(habits: HabitDefinition[]): HabitRecords {
-  const today = startOfDay(new Date());
-  const startDate = subtractDays(today, HISTORY_DAYS);
-  const records: HabitRecords = {};
-
-  habits.forEach((habit, habitIndex) => {
-    const entries: DayRecords = {};
-
-    for (let cursor = startDate; cursor <= today; cursor = addDays(cursor, 1)) {
-      const dateKey = toDateKey(cursor);
-      const weekday = cursor.getDay();
-      const weekendBoost = weekday === 0 || weekday === 6 ? 0.07 : 0;
-      const targetRate = 0.62 + habitIndex * 0.05 + weekendBoost;
-      const slots: SlotRecords = {};
-
-      for (const slot of habit.timeSlots) {
-        const chance = seededChance(`${habit.id}-${slot}-${dateKey}`);
-        slots[slot] = chance < targetRate;
-      }
-
-      entries[dateKey] = slots;
-    }
-
-    records[habit.id] = entries;
-  });
-
-  return records;
-}
-
-function readRecords(habits: HabitDefinition[]): HabitRecords {
-  if (typeof window === "undefined") return createInitialRecords(habits);
-
-  const stored = window.localStorage.getItem(RECORDS_KEY);
-  if (stored) {
-    try {
-      return JSON.parse(stored) as HabitRecords;
-    } catch {
-      /* fall through */
-    }
+  if (typeof daySlots[slotName] === "boolean") {
+    return daySlots[slotName];
   }
 
-  // Try migrating from v1
-  const migrated = migrateV1Records();
-  if (migrated) return migrated;
+  const normalizedTarget = normalizeSlotKey(slotName);
+  const normalizedEntry = Object.entries(daySlots).find(
+    ([key]) => normalizeSlotKey(key) === normalizedTarget,
+  );
 
-  const initial = createInitialRecords(habits);
-  window.localStorage.setItem(RECORDS_KEY, JSON.stringify(initial));
-  return initial;
-}
-
-function persistRecords(records: HabitRecords) {
-  window.localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
-}
-
-// ---- Habits persistence -----------------------------------------------
-
-function readHabits(): HabitDefinition[] {
-  if (typeof window === "undefined") return DEFAULT_HABITS;
-
-  const stored = window.localStorage.getItem(HABITS_KEY);
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored) as HabitDefinition[];
-      const normalized = normalizeHabits(parsed);
-      if (JSON.stringify(parsed) !== JSON.stringify(normalized)) {
-        window.localStorage.setItem(HABITS_KEY, JSON.stringify(normalized));
-      }
-      return normalized;
-    } catch {
-      /* fall through */
-    }
+  if (normalizedEntry) {
+    return Boolean(normalizedEntry[1]);
   }
 
-  window.localStorage.setItem(HABITS_KEY, JSON.stringify(DEFAULT_HABITS));
-  return DEFAULT_HABITS;
+  if (options?.fallbackToAny) {
+    return Object.values(daySlots).some(Boolean);
+  }
+
+  return false;
 }
 
-function persistHabits(habits: HabitDefinition[]) {
-  window.localStorage.setItem(HABITS_KEY, JSON.stringify(habits));
+function getPendingPatchKey(habitId: string, dateKey: string) {
+  return `${habitId}::${dateKey}`;
 }
+
+function parsePendingPatchKey(patchKey: string) {
+  const separatorIndex = patchKey.lastIndexOf("::");
+
+  return {
+    habitId: patchKey.slice(0, separatorIndex),
+    dateKey: patchKey.slice(separatorIndex + 2),
+  };
+}
+
+function areSlotRecordsEqual(
+  left: SlotRecords | undefined,
+  right: SlotRecords,
+) {
+  if (!left) {
+    return false;
+  }
+
+  const keys = new Set([...Object.keys(left), ...Object.keys(right)]);
+
+  return Array.from(keys).every(
+    (key) => Boolean(left[key]) === Boolean(right[key]),
+  );
+}
+
+function mergePendingRecordPatches(
+  records: HabitRecords,
+  patches: PendingRecordPatches,
+) {
+  return Object.entries(patches).reduce((nextRecords, [patchKey, slots]) => {
+    const { habitId, dateKey } = parsePendingPatchKey(patchKey);
+    return upsertDaySlots(nextRecords, habitId, dateKey, slots);
+  }, records);
+}
+
+function upsertDaySlots(
+  current: HabitRecords,
+  habitId: string,
+  dateKey: string,
+  slots: SlotRecords,
+): HabitRecords {
+  const nextHabitDays = {
+    ...(current[habitId] ?? {}),
+    [dateKey]: slots,
+  };
+
+  return {
+    ...current,
+    [habitId]: nextHabitDays,
+  };
+}
+
+type HabitMutationInput = Omit<
+  HabitDefinition,
+  "id" | "slug" | "createdAt" | "archived"
+>;
+
+type HabitStorageContextValue = {
+  habits: HabitDefinition[];
+  activeHabits: HabitDefinition[];
+  archivedHabits: HabitDefinition[];
+  categories: string[];
+  records: HabitRecords;
+  isLoading: boolean;
+  error: string | null;
+  addHabit: (habit: HabitMutationInput) => Promise<void>;
+  updateHabit: (
+    id: string,
+    updates: Partial<Omit<HabitDefinition, "id" | "createdAt">>,
+  ) => Promise<void>;
+  deleteHabit: (id: string) => Promise<void>;
+  archiveHabit: (id: string) => Promise<void>;
+  restoreHabit: (id: string) => Promise<void>;
+  toggleHabitDay: (
+    habitId: string,
+    dateKey: string,
+    slotName?: string,
+  ) => Promise<void>;
+  getHabitBySlug: (slug: string) => HabitDefinition | undefined;
+};
+
+const HabitStorageContext = createContext<HabitStorageContextValue | undefined>(
+  undefined,
+);
 
 const LEGACY_FILL_TO_CURRENT: Record<string, string> = {
   "bg-sky-500": "bg-sky-600",
@@ -183,142 +198,391 @@ function normalizeHabits(habits: HabitDefinition[]): HabitDefinition[] {
   }));
 }
 
-// ---- Hooks ------------------------------------------------------------
+function toErrorMessage(error: unknown, fallback: string) {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "permission-denied"
+  ) {
+    return "Firestore rejected the request. Publish your Firestore rules, then sign out and sign back in once to refresh the session.";
+  }
 
-export function useHabits() {
-  const [habits, setHabits] = useState<HabitDefinition[]>(DEFAULT_HABITS);
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return fallback;
+}
+
+function useHabitStorageContext() {
+  const context = useContext(HabitStorageContext);
+
+  if (!context) {
+    throw new Error(
+      "Habit storage hooks must be used within HabitStorageProvider.",
+    );
+  }
+
+  return context;
+}
+
+export function HabitStorageProvider({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const { user, isLoading: isAuthLoading } = useFirebaseAuth();
+  const [habits, setHabits] = useState<HabitDefinition[]>([]);
+  const [serverRecords, setServerRecords] = useState<HabitRecords>({});
+  const [pendingRecordPatches, setPendingRecordPatches] =
+    useState<PendingRecordPatches>({});
+  const [isLoadingHabits, setIsLoadingHabits] = useState(true);
+  const [isLoadingRecords, setIsLoadingRecords] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setHabits(readHabits());
-    const syncState = (event: StorageEvent) => {
-      if (event.key === HABITS_KEY && event.newValue) {
-        const parsed = JSON.parse(event.newValue) as HabitDefinition[];
-        setHabits(normalizeHabits(parsed));
-      }
+    if (isAuthLoading) {
+      setIsLoadingHabits(true);
+      setIsLoadingRecords(true);
+      return;
+    }
+
+    if (!user) {
+      setHabits([]);
+      setServerRecords({});
+      setPendingRecordPatches({});
+      setError(null);
+      setIsLoadingHabits(false);
+      setIsLoadingRecords(false);
+      return;
+    }
+
+    setError(null);
+    setIsLoadingHabits(true);
+    setIsLoadingRecords(true);
+
+    const unsubscribeHabits = listenToUserHabits(
+      user.uid,
+      (nextHabits) => {
+        setHabits(normalizeHabits(nextHabits));
+        setIsLoadingHabits(false);
+      },
+      (nextError) => {
+        setError(toErrorMessage(nextError, "Unable to load habits."));
+        setHabits([]);
+        setIsLoadingHabits(false);
+      },
+    );
+
+    const unsubscribeRecords = listenToUserRecords(
+      user.uid,
+      (nextRecords) => {
+        setServerRecords(nextRecords);
+        setIsLoadingRecords(false);
+      },
+      (nextError) => {
+        setError(toErrorMessage(nextError, "Unable to load records."));
+        setServerRecords({});
+        setPendingRecordPatches({});
+        setIsLoadingRecords(false);
+      },
+    );
+
+    return () => {
+      unsubscribeHabits();
+      unsubscribeRecords();
     };
-    window.addEventListener("storage", syncState);
-    return () => window.removeEventListener("storage", syncState);
-  }, []);
+  }, [isAuthLoading, user]);
+
+  useEffect(() => {
+    setPendingRecordPatches((current) => {
+      let hasChanges = false;
+      const nextPatches = { ...current };
+
+      Object.entries(current).forEach(([patchKey, slots]) => {
+        const { habitId, dateKey } = parsePendingPatchKey(patchKey);
+        const persistedSlots = serverRecords[habitId]?.[dateKey];
+
+        if (areSlotRecordsEqual(persistedSlots, slots)) {
+          delete nextPatches[patchKey];
+          hasChanges = true;
+        }
+      });
+
+      return hasChanges ? nextPatches : current;
+    });
+  }, [serverRecords]);
 
   const addHabit = useCallback(
-    (
-      habit: Omit<HabitDefinition, "id" | "slug" | "createdAt" | "archived">,
-    ) => {
-      setHabits((current) => {
-        const normalizedFrequency = getNormalizedFrequency(
-          habit.frequencyPerDay,
-          habit.timeSlots,
-        );
-        const id = slugify(habit.name) + "-" + Date.now().toString(36);
-        const slug = slugify(habit.name);
-        // Ensure unique slug
-        let finalSlug = slug;
-        let counter = 2;
-        while (current.some((h) => h.slug === finalSlug)) {
-          finalSlug = `${slug}-${counter}`;
-          counter++;
-        }
-        const newHabit: HabitDefinition = {
-          ...habit,
-          id,
-          slug: finalSlug,
-          frequencyPerDay: normalizedFrequency,
-          timeSlots: normalizeTimeSlots(normalizedFrequency, habit.timeSlots),
-          archived: false,
-          createdAt: new Date().toISOString(),
-        };
-        const next = [...current, newHabit];
-        persistHabits(next);
-        return next;
-      });
+    async (habit: HabitMutationInput) => {
+      if (!user) return;
+
+      setError(null);
+
+      const normalizedFrequency = getNormalizedFrequency(
+        habit.frequencyPerDay,
+        habit.timeSlots,
+      );
+      const baseSlug = slugify(habit.name);
+      const id = `${baseSlug}-${Date.now().toString(36)}`;
+      let finalSlug = baseSlug;
+      let counter = 2;
+
+      while (habits.some((entry) => entry.slug === finalSlug)) {
+        finalSlug = `${baseSlug}-${counter}`;
+        counter += 1;
+      }
+
+      const nextHabit: HabitDefinition = {
+        ...habit,
+        id,
+        slug: finalSlug,
+        frequencyPerDay: normalizedFrequency,
+        timeSlots: normalizeTimeSlots(normalizedFrequency, habit.timeSlots),
+        archived: false,
+        createdAt: new Date().toISOString(),
+        tone: normalizeTone(habit.tone),
+      };
+
+      try {
+        await saveUserHabit(user.uid, nextHabit);
+      } catch (nextError) {
+        setError(toErrorMessage(nextError, "Unable to create habit."));
+      }
     },
-    [],
+    [habits, user],
   );
 
   const updateHabit = useCallback(
-    (
+    async (
       id: string,
       updates: Partial<Omit<HabitDefinition, "id" | "createdAt">>,
     ) => {
-      setHabits((current) => {
-        const next = current.map((h) => {
-          if (h.id !== id) return h;
-          const merged = { ...h, ...updates };
-          const normalizedFrequency = getNormalizedFrequency(
-            merged.frequencyPerDay,
-            merged.timeSlots,
-          );
-          const updated = {
-            ...merged,
-            frequencyPerDay: normalizedFrequency,
-            timeSlots: normalizeTimeSlots(
-              normalizedFrequency,
-              merged.timeSlots,
-            ),
-          };
-          // If name changed, update slug
-          if (updates.name && updates.name !== h.name) {
-            let newSlug = slugify(updates.name);
-            let counter = 2;
-            while (
-              current.some((other) => other.id !== id && other.slug === newSlug)
-            ) {
-              newSlug = `${slugify(updates.name)}-${counter}`;
-              counter++;
-            }
-            updated.slug = newSlug;
-          }
-          return updated;
-        });
-        persistHabits(next);
-        return next;
-      });
+      if (!user) return;
+
+      const currentHabit = habits.find((habit) => habit.id === id);
+      if (!currentHabit) return;
+
+      setError(null);
+
+      const merged = { ...currentHabit, ...updates };
+      const normalizedFrequency = getNormalizedFrequency(
+        merged.frequencyPerDay,
+        merged.timeSlots,
+      );
+      let nextSlug = merged.slug;
+
+      if (updates.name && updates.name !== currentHabit.name) {
+        const baseSlug = slugify(updates.name);
+        nextSlug = baseSlug;
+        let counter = 2;
+
+        while (
+          habits.some((habit) => habit.id !== id && habit.slug === nextSlug)
+        ) {
+          nextSlug = `${baseSlug}-${counter}`;
+          counter += 1;
+        }
+      }
+
+      const nextHabit: HabitDefinition = {
+        ...merged,
+        slug: nextSlug,
+        frequencyPerDay: normalizedFrequency,
+        timeSlots: normalizeTimeSlots(normalizedFrequency, merged.timeSlots),
+        tone: normalizeTone(merged.tone),
+      };
+
+      try {
+        await saveUserHabit(user.uid, nextHabit);
+      } catch (nextError) {
+        setError(toErrorMessage(nextError, "Unable to update habit."));
+      }
     },
-    [],
+    [habits, user],
   );
 
-  const deleteHabit = useCallback((id: string) => {
-    setHabits((current) => {
-      const next = current.filter((h) => h.id !== id);
-      persistHabits(next);
-      return next;
-    });
-  }, []);
+  const deleteHabit = useCallback(
+    async (id: string) => {
+      if (!user) return;
 
-  const archiveHabit = useCallback((id: string) => {
-    setHabits((current) => {
-      const next = current.map((h) =>
-        h.id === id ? { ...h, archived: true } : h,
-      );
-      persistHabits(next);
-      return next;
-    });
-  }, []);
+      setError(null);
 
-  const restoreHabit = useCallback((id: string) => {
-    setHabits((current) => {
-      const next = current.map((h) =>
-        h.id === id ? { ...h, archived: false } : h,
-      );
-      persistHabits(next);
-      return next;
-    });
-  }, []);
+      try {
+        await deleteUserHabit(user.uid, id);
+      } catch (nextError) {
+        setError(toErrorMessage(nextError, "Unable to delete habit."));
+      }
+    },
+    [user],
+  );
+
+  const archiveHabit = useCallback(
+    async (id: string) => {
+      const currentHabit = habits.find((habit) => habit.id === id);
+      if (!user || !currentHabit) return;
+
+      setError(null);
+
+      try {
+        await saveUserHabit(user.uid, { ...currentHabit, archived: true });
+      } catch (nextError) {
+        setError(toErrorMessage(nextError, "Unable to archive habit."));
+      }
+    },
+    [habits, user],
+  );
+
+  const restoreHabit = useCallback(
+    async (id: string) => {
+      const currentHabit = habits.find((habit) => habit.id === id);
+      if (!user || !currentHabit) return;
+
+      setError(null);
+
+      try {
+        await saveUserHabit(user.uid, { ...currentHabit, archived: false });
+      } catch (nextError) {
+        setError(toErrorMessage(nextError, "Unable to restore habit."));
+      }
+    },
+    [habits, user],
+  );
+
+  const mergedRecords = useMemo(
+    () => mergePendingRecordPatches(serverRecords, pendingRecordPatches),
+    [serverRecords, pendingRecordPatches],
+  );
+
+  const toggleHabitDay = useCallback(
+    async (habitId: string, dateKey: string, slotName: string = "default") => {
+      if (!user) return;
+
+      const currentHabit = habits.find((habit) => habit.id === habitId);
+      const allowSingleSlotFallback =
+        (currentHabit?.timeSlots.length ?? 0) <= 1;
+      const daySlots = mergedRecords[habitId]?.[dateKey] ?? {};
+      const previousSlots = { ...daySlots };
+      const nextValue = !resolveSlotValue(daySlots, slotName, {
+        fallbackToAny: allowSingleSlotFallback,
+      });
+      const nextSlots = allowSingleSlotFallback
+        ? { [slotName]: nextValue }
+        : {
+            ...daySlots,
+            [slotName]: nextValue,
+          };
+      const patchKey = getPendingPatchKey(habitId, dateKey);
+
+      setPendingRecordPatches((current) => ({
+        ...current,
+        [patchKey]: nextSlots,
+      }));
+
+      setError(null);
+
+      try {
+        await saveUserRecordSlots(user.uid, dateKey, habitId, nextSlots);
+      } catch (nextError) {
+        setPendingRecordPatches((current) => {
+          const nextPatches = { ...current };
+
+          if (Object.keys(previousSlots).length === 0) {
+            delete nextPatches[patchKey];
+          } else {
+            nextPatches[patchKey] = previousSlots;
+          }
+
+          return nextPatches;
+        });
+        setError(toErrorMessage(nextError, "Unable to save record."));
+      }
+    },
+    [habits, mergedRecords, user],
+  );
 
   const getHabitBySlug = useCallback(
-    (slug: string) => habits.find((h) => h.slug === slug),
+    (slug: string) => habits.find((habit) => habit.slug === slug),
     [habits],
   );
 
-  const activeHabits = habits.filter((h) => !h.archived);
-  const archivedHabits = habits.filter((h) => h.archived);
-  const categories = [...new Set(activeHabits.map((h) => h.category))].sort();
+  const activeHabits = useMemo(
+    () => habits.filter((habit) => !habit.archived),
+    [habits],
+  );
+  const archivedHabits = useMemo(
+    () => habits.filter((habit) => habit.archived),
+    [habits],
+  );
+  const categories = useMemo(
+    () => [...new Set(activeHabits.map((habit) => habit.category))].sort(),
+    [activeHabits],
+  );
+  const isLoading =
+    isAuthLoading || (!!user && (isLoadingHabits || isLoadingRecords));
+
+  const value = useMemo(
+    () => ({
+      habits,
+      activeHabits,
+      archivedHabits,
+      categories,
+      records: mergedRecords,
+      isLoading,
+      error,
+      addHabit,
+      updateHabit,
+      deleteHabit,
+      archiveHabit,
+      restoreHabit,
+      toggleHabitDay,
+      getHabitBySlug,
+    }),
+    [
+      habits,
+      activeHabits,
+      archivedHabits,
+      categories,
+      mergedRecords,
+      isLoading,
+      error,
+      addHabit,
+      updateHabit,
+      deleteHabit,
+      archiveHabit,
+      restoreHabit,
+      toggleHabitDay,
+      getHabitBySlug,
+    ],
+  );
+
+  return createElement(HabitStorageContext.Provider, { value }, children);
+}
+
+export function useHabits() {
+  const {
+    habits,
+    activeHabits,
+    archivedHabits,
+    categories,
+    isLoading,
+    error,
+    addHabit,
+    updateHabit,
+    deleteHabit,
+    archiveHabit,
+    restoreHabit,
+    getHabitBySlug,
+  } = useHabitStorageContext();
 
   return {
     habits,
     activeHabits,
     archivedHabits,
     categories,
+    isLoading,
+    error,
     addHabit,
     updateHabit,
     deleteHabit,
@@ -328,41 +592,9 @@ export function useHabits() {
   };
 }
 
-export function useHabitRecords(habits: HabitDefinition[]) {
-  const [records, setRecords] = useState<HabitRecords>({});
+export function useHabitRecords(_habits: HabitDefinition[]) {
+  const { records, toggleHabitDay, isLoading, error } =
+    useHabitStorageContext();
 
-  useEffect(() => {
-    setRecords(readRecords(habits));
-    const syncState = (event: StorageEvent) => {
-      if (event.key === RECORDS_KEY && event.newValue) {
-        setRecords(JSON.parse(event.newValue) as HabitRecords);
-      }
-    };
-    window.addEventListener("storage", syncState);
-    return () => window.removeEventListener("storage", syncState);
-  }, []);
-
-  const toggleHabitDay = useCallback(
-    (habitId: string, dateKey: string, slotName: string = "default") => {
-      setRecords((current) => {
-        const habitDays = current[habitId] ?? {};
-        const daySlots = habitDays[dateKey] ?? {};
-        const next: HabitRecords = {
-          ...current,
-          [habitId]: {
-            ...habitDays,
-            [dateKey]: {
-              ...daySlots,
-              [slotName]: !daySlots[slotName],
-            },
-          },
-        };
-        persistRecords(next);
-        return next;
-      });
-    },
-    [],
-  );
-
-  return { records, toggleHabitDay };
+  return { records, toggleHabitDay, isLoading, error };
 }

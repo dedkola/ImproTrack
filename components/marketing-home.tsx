@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthControls } from "@/components/auth-controls";
 
 const featureCards = [
   {
@@ -104,28 +105,7 @@ export function MarketingHome() {
             </a>
           </nav>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              disabled
-              className="pill-btn hidden rounded-lg px-3 py-2 text-[13px] font-semibold text-ink-500 sm:inline-flex"
-            >
-              Log in
-            </button>
-            <button
-              type="button"
-              disabled
-              className="pill-btn hidden rounded-lg border border-black/[0.06] bg-white/70 px-3 py-2 text-[13px] font-semibold text-ink-500 shadow-[var(--shadow-card)] sm:inline-flex"
-            >
-              Sign up
-            </button>
-            <Link
-              href="/dashboard"
-              className="pill-btn inline-flex items-center rounded-lg bg-ink-950 px-4 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
-            >
-              Dashboard
-            </Link>
-          </div>
+          <AuthControls variant="landing" />
         </div>
       </header>
 

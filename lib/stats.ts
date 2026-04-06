@@ -1,6 +1,37 @@
 import { DateRange, eachDay, parseDateKey, toDateKey } from "@/lib/date";
 import { HabitRecords } from "@/lib/storage";
 
+function normalizeSlotKey(slotName: string) {
+  return slotName.trim().toLowerCase();
+}
+
+export function isSlotCompleted(
+  daySlots: Record<string, boolean> | undefined,
+  slotName: string,
+  options?: { fallbackToAny?: boolean },
+) {
+  if (!daySlots) return false;
+
+  if (typeof daySlots[slotName] === "boolean") {
+    return daySlots[slotName];
+  }
+
+  const normalizedTarget = normalizeSlotKey(slotName);
+  const normalizedEntry = Object.entries(daySlots).find(
+    ([key]) => normalizeSlotKey(key) === normalizedTarget,
+  );
+
+  if (normalizedEntry) {
+    return Boolean(normalizedEntry[1]);
+  }
+
+  if (options?.fallbackToAny) {
+    return Object.values(daySlots).some(Boolean);
+  }
+
+  return false;
+}
+
 /**
  * Check if a day is fully completed (all slots checked).
  * For single-slot habits, this is equivalent to the old boolean check.
@@ -13,7 +44,14 @@ export function isDayFullyCompleted(
 ): boolean {
   const daySlots = records[habitId]?.[dateKey];
   if (!daySlots) return false;
-  return timeSlots.every((slot) => daySlots[slot]);
+
+  if (timeSlots.length <= 1) {
+    return isSlotCompleted(daySlots, timeSlots[0] ?? "default", {
+      fallbackToAny: true,
+    });
+  }
+
+  return timeSlots.every((slot) => isSlotCompleted(daySlots, slot));
 }
 
 /**
@@ -27,7 +65,16 @@ export function completedSlotsInDay(
 ): number {
   const daySlots = records[habitId]?.[dateKey];
   if (!daySlots) return 0;
-  return timeSlots.filter((slot) => daySlots[slot]).length;
+
+  if (timeSlots.length <= 1) {
+    return isSlotCompleted(daySlots, timeSlots[0] ?? "default", {
+      fallbackToAny: true,
+    })
+      ? 1
+      : 0;
+  }
+
+  return timeSlots.filter((slot) => isSlotCompleted(daySlots, slot)).length;
 }
 
 export function countCompleted(

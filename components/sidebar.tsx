@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AuthControls } from "@/components/auth-controls";
 import { HabitDefinition } from "@/lib/habits";
 
 type SidebarProps = {
@@ -228,6 +229,10 @@ export function Sidebar({
             />
           </div>
         </nav>
+
+        <div className="border-t border-black/[0.06] p-3">
+          <AuthControls variant="sidebar" />
+        </div>
       </aside>
     </>
   );

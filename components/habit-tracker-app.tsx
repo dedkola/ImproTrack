@@ -15,11 +15,7 @@ import {
   toDateKey,
 } from "@/lib/date";
 import { HabitDefinition } from "@/lib/habits";
-import {
-  completionRate,
-  countCompleted,
-  completedSlotsInDay,
-} from "@/lib/stats";
+import { completionRate, countCompleted, isSlotCompleted } from "@/lib/stats";
 import { useHabits, useHabitRecords } from "@/lib/storage";
 import { HabitForm, HabitMenu, ConfirmDialog } from "@/components/habit-form";
 import { DatePicker } from "@/components/date-picker";
@@ -62,6 +58,112 @@ function getAppleCardGradient(fillClass: string) {
   };
 
   return gradients[fillClass] ?? "from-sky-200/80 via-cyan-100/80 to-white";
+}
+
+function getMatrixTone(fillClass: string) {
+  const tones: Record<
+    string,
+    { cellTint: string; fill: string; glow: string; partial: string }
+  > = {
+    "bg-sky-500": {
+      cellTint: "rgba(14, 165, 233, 0.12)",
+      fill: "#0284c7",
+      glow: "rgba(2, 132, 199, 0.28)",
+      partial: "rgba(2, 132, 199, 0.16)",
+    },
+    "bg-sky-600": {
+      cellTint: "rgba(14, 165, 233, 0.12)",
+      fill: "#0284c7",
+      glow: "rgba(2, 132, 199, 0.28)",
+      partial: "rgba(2, 132, 199, 0.16)",
+    },
+    "bg-emerald-500": {
+      cellTint: "rgba(16, 185, 129, 0.12)",
+      fill: "#059669",
+      glow: "rgba(5, 150, 105, 0.28)",
+      partial: "rgba(5, 150, 105, 0.16)",
+    },
+    "bg-emerald-600": {
+      cellTint: "rgba(16, 185, 129, 0.12)",
+      fill: "#059669",
+      glow: "rgba(5, 150, 105, 0.28)",
+      partial: "rgba(5, 150, 105, 0.16)",
+    },
+    "bg-violet-500": {
+      cellTint: "rgba(139, 92, 246, 0.12)",
+      fill: "#7c3aed",
+      glow: "rgba(124, 58, 237, 0.28)",
+      partial: "rgba(124, 58, 237, 0.16)",
+    },
+    "bg-violet-600": {
+      cellTint: "rgba(139, 92, 246, 0.12)",
+      fill: "#7c3aed",
+      glow: "rgba(124, 58, 237, 0.28)",
+      partial: "rgba(124, 58, 237, 0.16)",
+    },
+    "bg-amber-500": {
+      cellTint: "rgba(245, 158, 11, 0.14)",
+      fill: "#d97706",
+      glow: "rgba(217, 119, 6, 0.28)",
+      partial: "rgba(217, 119, 6, 0.16)",
+    },
+    "bg-amber-600": {
+      cellTint: "rgba(245, 158, 11, 0.14)",
+      fill: "#d97706",
+      glow: "rgba(217, 119, 6, 0.28)",
+      partial: "rgba(217, 119, 6, 0.16)",
+    },
+    "bg-rose-500": {
+      cellTint: "rgba(244, 63, 94, 0.12)",
+      fill: "#e11d48",
+      glow: "rgba(225, 29, 72, 0.28)",
+      partial: "rgba(225, 29, 72, 0.16)",
+    },
+    "bg-rose-600": {
+      cellTint: "rgba(244, 63, 94, 0.12)",
+      fill: "#e11d48",
+      glow: "rgba(225, 29, 72, 0.28)",
+      partial: "rgba(225, 29, 72, 0.16)",
+    },
+    "bg-teal-500": {
+      cellTint: "rgba(13, 148, 136, 0.12)",
+      fill: "#0f766e",
+      glow: "rgba(15, 118, 110, 0.28)",
+      partial: "rgba(15, 118, 110, 0.16)",
+    },
+    "bg-teal-600": {
+      cellTint: "rgba(13, 148, 136, 0.12)",
+      fill: "#0f766e",
+      glow: "rgba(15, 118, 110, 0.28)",
+      partial: "rgba(15, 118, 110, 0.16)",
+    },
+    "bg-indigo-500": {
+      cellTint: "rgba(99, 102, 241, 0.12)",
+      fill: "#4f46e5",
+      glow: "rgba(79, 70, 229, 0.28)",
+      partial: "rgba(79, 70, 229, 0.16)",
+    },
+    "bg-indigo-600": {
+      cellTint: "rgba(99, 102, 241, 0.12)",
+      fill: "#4f46e5",
+      glow: "rgba(79, 70, 229, 0.28)",
+      partial: "rgba(79, 70, 229, 0.16)",
+    },
+    "bg-slate-500": {
+      cellTint: "rgba(71, 85, 105, 0.12)",
+      fill: "#475569",
+      glow: "rgba(71, 85, 105, 0.28)",
+      partial: "rgba(71, 85, 105, 0.16)",
+    },
+    "bg-slate-600": {
+      cellTint: "rgba(71, 85, 105, 0.12)",
+      fill: "#475569",
+      glow: "rgba(71, 85, 105, 0.28)",
+      partial: "rgba(71, 85, 105, 0.16)",
+    },
+  };
+
+  return tones[fillClass] ?? tones["bg-sky-600"];
 }
 
 export function HabitTrackerApp() {
@@ -335,6 +437,7 @@ export function HabitTrackerApp() {
                   const isLastRow = rowIndex === gridRows.length - 1;
                   const displaySlotName =
                     habit.frequencyPerDay === 1 ? null : slotName;
+                  const matrixTone = getMatrixTone(habit.tone.fill);
 
                   return (
                     <div key={`${habit.id}-${slotName}`} className="contents">
@@ -404,30 +507,34 @@ export function HabitTrackerApp() {
                       {/* Day cells */}
                       {days.map((dateKey, colIndex) => {
                         const daySlots = records[habit.id]?.[dateKey];
-                        const slotChecked = Boolean(daySlots?.[slotName]);
+                        const slotChecked = isSlotCompleted(
+                          daySlots,
+                          slotName,
+                          {
+                            fallbackToAny: habit.timeSlots.length <= 1,
+                          },
+                        );
                         const isFuture = dateKey > todayKey;
-
-                        // For multi-slot: first row shows aggregate state
-                        let checked = slotChecked;
-                        let partial = false;
-                        if (isFirstSlot && habit.frequencyPerDay > 1) {
-                          const done = completedSlotsInDay(
-                            records,
-                            habit.id,
-                            dateKey,
-                            habit.timeSlots,
-                          );
-                          if (done === habit.frequencyPerDay) {
-                            checked = true;
-                            partial = false;
-                          } else if (done > 0) {
-                            checked = false;
-                            partial = true;
-                          } else {
-                            checked = false;
-                            partial = false;
-                          }
-                        }
+                        const checked = slotChecked;
+                        const partial = false;
+                        const buttonStyle = checked
+                          ? {
+                              backgroundColor: matrixTone.cellTint,
+                              boxShadow: `inset 0 0 0 1.5px ${matrixTone.fill}`,
+                            }
+                          : undefined;
+                        const checkStyle = checked
+                          ? {
+                              backgroundColor: matrixTone.fill,
+                              borderColor: matrixTone.fill,
+                              boxShadow: `0 6px 14px ${matrixTone.glow}, 0 1px 2px rgba(10, 22, 40, 0.12)`,
+                            }
+                          : partial
+                            ? {
+                                backgroundColor: matrixTone.partial,
+                                borderColor: matrixTone.fill,
+                              }
+                            : undefined;
 
                         return (
                           <button
@@ -441,16 +548,27 @@ export function HabitTrackerApp() {
                             disabled={isFuture}
                             aria-pressed={slotChecked}
                             aria-label={`${habit.name}${displaySlotName ? ` ${displaySlotName}` : ""} on ${formatLongDate(dateKey)}`}
-                            className={`matrix-day-btn flex h-10 items-center justify-center ${
+                            className={`matrix-day-btn relative flex h-10 items-center justify-center ${
                               isLastRow && colIndex === days.length - 1
                                 ? "rounded-br-[11px]"
                                 : ""
                             }`}
+                            style={buttonStyle}
                           >
+                            {checked ? (
+                              <span
+                                aria-hidden="true"
+                                className="pointer-events-none absolute inset-[6px] rounded-[10px] opacity-100 transition-all duration-200"
+                                style={{
+                                  background: `linear-gradient(180deg, ${matrixTone.cellTint} 0%, rgba(255,255,255,0.88) 100%)`,
+                                }}
+                              />
+                            ) : null}
                             <span
-                              className={`matrix-check flex h-[26px] w-[26px] items-center justify-center rounded-lg text-white transition-all duration-200 ${
+                              style={checkStyle}
+                              className={`matrix-check relative z-10 flex h-[26px] w-[26px] items-center justify-center rounded-lg text-white transition-all duration-200 ${
                                 checked
-                                  ? `${habit.tone.fill} matrix-check-pop matrix-check-checked`
+                                  ? `matrix-check-pop matrix-check-checked`
                                   : partial
                                     ? `matrix-check-partial ${habit.tone.badge} text-transparent`
                                     : "matrix-check-idle text-transparent"

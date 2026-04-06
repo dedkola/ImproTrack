@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
+import { FirebaseAnalytics } from "@/components/firebase-analytics";
+import { FirebaseAuthProvider } from "@/components/firebase-auth-provider";
 import "./globals.css";
 
 const sans = Inter({
@@ -31,7 +33,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${sans.variable} ${display.variable} antialiased`}>
-        {children}
+        <FirebaseAnalytics />
+        <FirebaseAuthProvider>{children}</FirebaseAuthProvider>
       </body>
     </html>
   );
