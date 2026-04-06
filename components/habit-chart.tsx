@@ -37,7 +37,7 @@ function smoothPath(pts: { x: number; y: number }[]): string {
 
 // ---- Types -----------------------------------------------------------------
 
-type ChartView = "timeline" | "bar" | "histogram" | "line";
+type ChartView = "pie" | "bar" | "histogram" | "line";
 type TimePreset = "7" | "30" | "custom";
 type DayPoint = { dateKey: string; completed: boolean };
 
@@ -80,104 +80,137 @@ function buildPoints(
   }));
 }
 
-// ---- Timeline (contribution grid) ------------------------------------------
+// ---- Pie / Donut chart -----------------------------------------------------
 
-function TimelineChart({
+function PieChart({
   points,
   fillClass,
 }: {
   points: DayPoint[];
   fillClass: string;
 }) {
-  const CELL = 18;
-  const GAP = 4;
-  const STEP = CELL + GAP;
-  const LABEL_H = 24;
-  const LABEL_W = 18;
-
   if (points.length === 0) return <ChartEmpty />;
 
-  const first = parseDateKey(points[0].dateKey);
-  const dayOffset = (first.getDay() + 6) % 7; // Mon = 0
-  const cols = Math.ceil((points.length + dayOffset) / 7);
-  const svgW = LABEL_W + cols * STEP;
-  const svgH = LABEL_H + 7 * STEP;
+  const completed = points.filter((p) => p.completed).length;
+  const missed = points.length - completed;
+  const total = points.length;
+  const pct = Math.round((completed / total) * 100);
 
-  // Collect one label per distinct month
-  const monthLabels: { col: number; label: string }[] = [];
-  let lastMonth = -1;
-  points.forEach((p, i) => {
-    const d = parseDateKey(p.dateKey);
-    const col = Math.floor((i + dayOffset) / 7);
-    if (d.getMonth() !== lastMonth) {
-      lastMonth = d.getMonth();
-      monthLabels.push({
-        col,
-        label: d.toLocaleString("en", { month: "short" }),
-      });
-    }
-  });
+  const CX = 120;
+  const CY = 120;
+  const R = 88;
+  const INNER_R = 56;
+  const VW = 340;
+  const VH = 240;
 
-  const weekdayLabels = ["M", "", "W", "", "F", "", "S"];
+  // Arc path helper
+  function arcPath(
+    startAngle: number,
+    endAngle: number,
+    outerR: number,
+    innerR: number,
+  ) {
+    const toRad = (deg: number) => (deg - 90) * (Math.PI / 180);
+    const sx = CX + outerR * Math.cos(toRad(startAngle));
+    const sy = CY + outerR * Math.sin(toRad(startAngle));
+    const ex = CX + outerR * Math.cos(toRad(endAngle));
+    const ey = CY + outerR * Math.sin(toRad(endAngle));
+    const ix = CX + innerR * Math.cos(toRad(endAngle));
+    const iy = CY + innerR * Math.sin(toRad(endAngle));
+    const jx = CX + innerR * Math.cos(toRad(startAngle));
+    const jy = CY + innerR * Math.sin(toRad(startAngle));
+    const large = endAngle - startAngle > 180 ? 1 : 0;
+    return [
+      `M${sx.toFixed(2)},${sy.toFixed(2)}`,
+      `A${outerR},${outerR} 0 ${large} 1 ${ex.toFixed(2)},${ey.toFixed(2)}`,
+      `L${ix.toFixed(2)},${iy.toFixed(2)}`,
+      `A${innerR},${innerR} 0 ${large} 0 ${jx.toFixed(2)},${jy.toFixed(2)}`,
+      "Z",
+    ].join(" ");
+  }
+
+  const completedAngle = (completed / total) * 360;
+  // Clamp so we never draw a full 360 arc (SVG arc collapses)
+  const clampedAngle = Math.min(completedAngle, 359.99);
+  const missedAngle = 360 - clampedAngle;
+
+  const completedPath =
+    completed > 0 ? arcPath(0, clampedAngle, R, INNER_R) : null;
+  const missedPath =
+    missed > 0
+      ? arcPath(
+          clampedAngle,
+          clampedAngle + Math.min(missedAngle, 359.99),
+          R,
+          INNER_R,
+        )
+      : null;
+
+  // Legend x position
+  const LX = CX * 2 + 16;
 
   return (
-    <div className="overflow-x-auto pb-1">
+    <div className="flex justify-center">
       <svg
-        width={svgW}
-        height={svgH}
-        aria-label="Completion timeline"
-        style={{ display: "block" }}
+        viewBox={`0 0 ${VW} ${VH}`}
+        width="100%"
+        style={{ maxWidth: 320, display: "block" }}
+        aria-label="Completion pie chart"
       >
-        {/* Weekday labels */}
-        {weekdayLabels.map((label, row) =>
-          label ? (
-            <text
-              key={row}
-              x={LABEL_W - 3}
-              y={LABEL_H + row * STEP + CELL - 2}
-              fontSize={9}
-              fill="#8090a5"
-              textAnchor="end"
-            >
-              {label}
-            </text>
-          ) : null,
+        {/* Missed slice */}
+        {missedPath && (
+          <path d={missedPath} fill="rgba(0,0,0,0.08)">
+            <title>{missed} days missed</title>
+          </path>
         )}
 
-        {/* Month labels */}
-        {monthLabels.map(({ col, label }) => (
-          <text
-            key={`${col}-${label}`}
-            x={LABEL_W + col * STEP}
-            y={LABEL_H - 6}
-            fontSize={9}
-            fill="#8090a5"
-          >
-            {label}
-          </text>
-        ))}
+        {/* Completed slice */}
+        {completedPath && (
+          <path d={completedPath} className={fillClass} fillOpacity={0.85}>
+            <title>{completed} days completed</title>
+          </path>
+        )}
 
-        {/* Day cells */}
-        {points.map((p, i) => {
-          const col = Math.floor((i + dayOffset) / 7);
-          const row = (i + dayOffset) % 7;
-          return (
-            <rect
-              key={p.dateKey}
-              x={LABEL_W + col * STEP}
-              y={LABEL_H + row * STEP}
-              width={CELL}
-              height={CELL}
-              rx={3}
-              className={p.completed ? fillClass : undefined}
-              fill={p.completed ? undefined : "rgba(0,0,0,0.06)"}
-            >
-              <title>
-                {p.dateKey}: {p.completed ? "Done ✓" : "Missed"}
-              </title>
-            </rect>
-          );
-        })}
+        {/* Centre label */}
+        <text
+          x={CX}
+          y={CY - 8}
+          fontSize={28}
+          fontWeight="700"
+          fill="#0a1628"
+          textAnchor="middle"
+          dominantBaseline="middle"
+        >
+          {pct}%
+        </text>
+        <text
+          x={CX}
+          y={CY + 18}
+          fontSize={10}
+          fill="#8090a5"
+          textAnchor="middle"
+        >
+          completion
+        </text>
+
+        {/* Legend */}
+        <circle
+          cx={LX + 6}
+          cy={80}
+          r={6}
+          className={fillClass}
+          fillOpacity={0.85}
+        />
+        <text x={LX + 18} y={84} fontSize={11} fill="#0a1628" fontWeight="600">
+          {completed} completed
+        </text>
+        <circle cx={LX + 6} cy={106} r={6} fill="rgba(0,0,0,0.12)" />
+        <text x={LX + 18} y={110} fontSize={11} fill="#4a5568">
+          {missed} missed
+        </text>
+        <text x={LX + 6} y={142} fontSize={10} fill="#8090a5">
+          {total} days total
+        </text>
       </svg>
     </div>
   );
@@ -194,8 +227,8 @@ function BarChartViz({
 }) {
   if (points.length === 0) return <ChartEmpty />;
 
-  const VW = 600;
-  const VH = 200;
+  const VW = 800;
+  const VH = 180;
   const P = { t: 16, r: 12, b: 36, l: 12 };
   const PW = VW - P.l - P.r;
   const PH = VH - P.t - P.b;
@@ -203,7 +236,7 @@ function BarChartViz({
   const n = points.length;
   const step = PW / n;
   const barW = Math.max(5, Math.min(24, step * 0.7));
-  const labelEvery = n <= 7 ? 1 : n <= 14 ? 2 : 7;
+  const labelEvery = n <= 7 ? 1 : n <= 15 ? 2 : Math.ceil(n / 7);
 
   return (
     <svg
@@ -428,9 +461,11 @@ function LineChartViz({
 }) {
   if (points.length < 2) return <ChartEmpty />;
 
-  const VW = 600;
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+  const VW = 800;
   const VH = 200;
-  const P = { t: 20, r: 16, b: 32, l: 38 };
+  const P = { t: 20, r: 8, b: 36, l: 8 };
   const PW = VW - P.l - P.r;
   const PH = VH - P.t - P.b;
 
@@ -443,11 +478,15 @@ function LineChartViz({
   const n = rates.length;
   const stepX = PW / Math.max(n - 1, 1);
 
-  const pathPts = rates.map((r, i) => ({
+  const plotted = rates.map((r, i) => ({
     x: P.l + i * stepX,
     y: P.t + PH * (1 - r),
+    rate: r,
+    ratePercent: Math.round(r * 100),
+    dateKey: points[i].dateKey,
   }));
 
+  const pathPts = plotted.map(({ x, y }) => ({ x, y }));
   const linePath = smoothPath(pathPts);
 
   const areaPath =
@@ -455,8 +494,51 @@ function LineChartViz({
     linePath.slice(linePath.indexOf(" ") + 1) +
     ` L${pathPts[n - 1].x.toFixed(1)},${(P.t + PH).toFixed(1)}Z`;
 
-  const labelEvery = n <= 7 ? 1 : n <= 14 ? 2 : 7;
+  const targetLabelCount = 8;
+  const labelEvery =
+    n <= 7 ? 1 : n <= 14 ? 2 : Math.max(3, Math.ceil(n / targetLabelCount));
   const last = pathPts[n - 1];
+
+  const active = activeIndex !== null ? plotted[activeIndex] : null;
+
+  const setActiveFromClientX = (clientX: number, rect: DOMRect) => {
+    const scaleX = VW / rect.width;
+    const localX = (clientX - rect.left) * scaleX;
+    const clampedX = Math.max(P.l, Math.min(P.l + PW, localX));
+    const nearest = Math.round((clampedX - P.l) / Math.max(stepX, 1));
+    const idx = Math.max(0, Math.min(n - 1, nearest));
+    setActiveIndex(idx);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<SVGRectElement>) => {
+    setActiveFromClientX(e.clientX, e.currentTarget.getBoundingClientRect());
+  };
+
+  const handlePointerEnter = (e: React.PointerEvent<SVGRectElement>) => {
+    setActiveFromClientX(e.clientX, e.currentTarget.getBoundingClientRect());
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<SVGRectElement>) => {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      setActiveIndex((prev) => Math.max(0, (prev ?? n - 1) - 1));
+      return;
+    }
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      setActiveIndex((prev) => Math.min(n - 1, (prev ?? -1) + 1));
+      return;
+    }
+    if (e.key === "Home") {
+      e.preventDefault();
+      setActiveIndex(0);
+      return;
+    }
+    if (e.key === "End") {
+      e.preventDefault();
+      setActiveIndex(n - 1);
+    }
+  };
 
   return (
     <svg
@@ -512,6 +594,89 @@ function LineChartViz({
         strokeLinejoin="round"
       />
 
+      {/* Interactive cursor/tooltip */}
+      {active && (
+        <g>
+          <line
+            x1={active.x}
+            y1={P.t}
+            x2={active.x}
+            y2={P.t + PH}
+            stroke="rgba(10,22,40,0.22)"
+            strokeWidth={1}
+            strokeDasharray="4 3"
+          />
+
+          <circle
+            cx={active.x}
+            cy={active.y}
+            r={7}
+            fill="white"
+            stroke="rgba(10,22,40,0.16)"
+            strokeWidth={1.5}
+          />
+          <circle
+            cx={active.x}
+            cy={active.y}
+            r={4}
+            className={fillClass}
+            stroke="white"
+            strokeWidth={1.8}
+          />
+
+          {(() => {
+            const tooltipW = 88;
+            const tooltipH = 31;
+            const xPad = 8;
+            const preferRight = active.x + xPad + tooltipW <= P.l + PW;
+            const tx = preferRight
+              ? active.x + xPad
+              : Math.max(P.l, active.x - tooltipW - xPad);
+            const ty = Math.max(
+              P.t + 4,
+              Math.min(P.t + PH - tooltipH - 4, active.y - tooltipH - 10),
+            );
+            const d = parseDateKey(active.dateKey);
+            const dateLabel = d.toLocaleString("en", {
+              month: "short",
+              day: "numeric",
+            });
+
+            return (
+              <g>
+                <rect
+                  x={tx}
+                  y={ty}
+                  width={tooltipW}
+                  height={tooltipH}
+                  rx={5}
+                  fill="white"
+                  stroke="rgba(10,22,40,0.12)"
+                />
+                <text
+                  x={tx + 7}
+                  y={ty + 12}
+                  fontSize={7}
+                  fill="#6b7280"
+                  fontWeight="500"
+                >
+                  {dateLabel}
+                </text>
+                <text
+                  x={tx + 7}
+                  y={ty + 22}
+                  fontSize={9}
+                  fill="#0a1628"
+                  fontWeight="700"
+                >
+                  {active.ratePercent}% rolling rate
+                </text>
+              </g>
+            );
+          })()}
+        </g>
+      )}
+
       {/* End dot */}
       <circle
         cx={last.x}
@@ -522,26 +687,42 @@ function LineChartViz({
         strokeWidth={2}
       />
 
+      <rect
+        x={P.l}
+        y={P.t}
+        width={PW}
+        height={PH}
+        fill="transparent"
+        onPointerMove={handlePointerMove}
+        onPointerEnter={handlePointerEnter}
+        onPointerLeave={() => setActiveIndex(null)}
+        onBlur={() => setActiveIndex(null)}
+        onFocus={() => setActiveIndex(n - 1)}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        aria-label="Hover or use arrow keys to inspect chart points"
+      />
+
       {/* X-axis labels */}
-      {points
-        .filter((_, i) => i % labelEvery === 0)
-        .map((p) => {
-          const i = points.indexOf(p);
-          const x = P.l + i * stepX;
-          const d = parseDateKey(p.dateKey);
-          return (
-            <text
-              key={p.dateKey}
-              x={x}
-              y={VH - 8}
-              fontSize={9}
-              fill="#8090a5"
-              textAnchor="middle"
-            >
-              {d.toLocaleString("en", { month: "short", day: "numeric" })}
-            </text>
-          );
-        })}
+      {points.map((p, i) => {
+        if (i % labelEvery !== 0) return null;
+        const x = P.l + i * stepX;
+        const d = parseDateKey(p.dateKey);
+        const anchor =
+          i === 0 ? "start" : i === points.length - 1 ? "end" : "middle";
+        return (
+          <text
+            key={p.dateKey}
+            x={x}
+            y={VH - 8}
+            fontSize={9}
+            fill="#8090a5"
+            textAnchor={anchor}
+          >
+            {d.toLocaleString("en", { month: "short", day: "numeric" })}
+          </text>
+        );
+      })}
     </svg>
   );
 }
@@ -600,7 +781,7 @@ export function HabitChart({
     { value: "line", label: "Line" },
     { value: "bar", label: "Bar" },
     { value: "histogram", label: "Histogram" },
-    { value: "timeline", label: "Timeline" },
+    { value: "pie", label: "Pie" },
   ];
 
   const PRESET_OPTIONS: { value: TimePreset; label: string }[] = [
@@ -609,21 +790,25 @@ export function HabitChart({
     { value: "custom", label: "Custom" },
   ];
 
+  const CONTROL_BTN_BASE =
+    "pill-btn h-6 rounded-md px-2 text-[11px] font-medium leading-none transition";
+
   return (
     <section className="animate-fade-in-up surface-panel rounded-2xl p-5 sm:p-6">
       {/* Controls row */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-[13px] font-semibold text-ink-950">Chart</h2>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           {/* Chart type */}
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1 rounded-lg bg-ink-950/[0.03] p-1">
             {VIEW_OPTIONS.map(({ value, label }) => (
               <button
                 key={value}
                 type="button"
                 onClick={() => setView(value)}
-                className={`pill-btn tap-target-compact rounded-lg px-3 py-2 text-[12px] font-medium transition ${
+                aria-pressed={view === value}
+                className={`${CONTROL_BTN_BASE} ${
                   view === value
                     ? "bg-ink-950 text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
                     : "bg-ink-950/[0.04] text-ink-700 hover:bg-ink-950/[0.08]"
@@ -635,13 +820,14 @@ export function HabitChart({
           </div>
 
           {/* Time preset */}
-          <div className="flex gap-1">
+          <div className="flex gap-1 rounded-lg bg-ink-950/[0.03] p-1">
             {PRESET_OPTIONS.map(({ value, label }) => (
               <button
                 key={value}
                 type="button"
                 onClick={() => setPreset(value)}
-                className={`pill-btn tap-target-compact rounded-lg px-3 py-2 text-[12px] font-medium transition ${
+                aria-pressed={preset === value}
+                className={`${CONTROL_BTN_BASE} ${
                   preset === value
                     ? "bg-ink-950 text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
                     : "bg-ink-950/[0.04] text-ink-700 hover:bg-ink-950/[0.08]"
@@ -656,19 +842,19 @@ export function HabitChart({
 
       {/* Custom date range inputs */}
       {preset === "custom" && (
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <label className="flex min-h-10 items-center gap-2 rounded-lg bg-ink-950/[0.04] px-3 py-2 text-[13px] text-ink-700 transition hover:bg-ink-950/[0.06]">
+        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+          <label className="flex h-7 items-center gap-1.5 rounded-md bg-ink-950/[0.04] px-2.5 text-[11px] text-ink-700 transition hover:bg-ink-950/[0.06]">
             <span className="font-medium">From</span>
             <input
               type="date"
               value={customFrom}
               max={customTo}
               onChange={(e) => setCustomFrom(e.target.value)}
-              className="bg-transparent text-ink-950 focus:outline-none"
+              className="w-[7.5rem] bg-transparent text-[11px] text-ink-950 focus:outline-none"
             />
           </label>
-          <span className="text-[13px] text-ink-700">–</span>
-          <label className="flex min-h-10 items-center gap-2 rounded-lg bg-ink-950/[0.04] px-3 py-2 text-[13px] text-ink-700 transition hover:bg-ink-950/[0.06]">
+          <span className="text-[11px] text-ink-700">–</span>
+          <label className="flex h-7 items-center gap-1.5 rounded-md bg-ink-950/[0.04] px-2.5 text-[11px] text-ink-700 transition hover:bg-ink-950/[0.06]">
             <span className="font-medium">To</span>
             <input
               type="date"
@@ -676,30 +862,34 @@ export function HabitChart({
               min={customFrom}
               max={todayKey}
               onChange={(e) => setCustomTo(e.target.value)}
-              className="bg-transparent text-ink-950 focus:outline-none"
+              className="w-[7.5rem] bg-transparent text-[11px] text-ink-950 focus:outline-none"
             />
           </label>
         </div>
       )}
 
       {/* Chart area */}
-      <div className="mt-5 min-h-[100px] max-w-3xl">
-        {view === "timeline" && (
-          <TimelineChart points={points} fillClass={svgTone.fill} />
-        )}
-        {view === "bar" && (
-          <BarChartViz points={points} fillClass={svgTone.fill} />
-        )}
-        {view === "histogram" && (
-          <HistogramChart points={points} fillClass={svgTone.fill} />
-        )}
-        {view === "line" && (
-          <LineChartViz
-            points={points}
-            fillClass={svgTone.fill}
-            strokeClass={svgTone.stroke}
-          />
-        )}
+      <div className="mt-4 min-h-[96px]">
+        <div
+          className={`w-full ${view === "pie" ? "mx-auto max-w-[320px]" : ""}`}
+        >
+          {view === "pie" && (
+            <PieChart points={points} fillClass={svgTone.fill} />
+          )}
+          {view === "bar" && (
+            <BarChartViz points={points} fillClass={svgTone.fill} />
+          )}
+          {view === "histogram" && (
+            <HistogramChart points={points} fillClass={svgTone.fill} />
+          )}
+          {view === "line" && (
+            <LineChartViz
+              points={points}
+              fillClass={svgTone.fill}
+              strokeClass={svgTone.stroke}
+            />
+          )}
+        </div>
       </div>
 
       {/* Summary */}

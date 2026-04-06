@@ -146,30 +146,6 @@ export function HabitDetail({ slug }: { slug: string }) {
             )}
             <span className="text-[12px] text-ink-700">{habit.goalLabel}</span>
           </div>
-
-          {/* Stats cards */}
-          <div className="stagger-children grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard
-              label="This month"
-              value={`${monthRate}%`}
-              detail={`${monthCompleted} completed`}
-            />
-            <StatCard
-              label="All time"
-              value={String(total)}
-              detail={habit.unitLabel}
-            />
-            <StatCard
-              label="Current streak"
-              value={`${currentStreak}`}
-              detail="days"
-            />
-            <StatCard
-              label="Best streak"
-              value={`${bestStreak}`}
-              detail="best run"
-            />
-          </div>
         </div>
       </header>
 
@@ -211,13 +187,39 @@ export function HabitDetail({ slug }: { slug: string }) {
         </section>
       )}
 
-      {/* Chart */}
-      <HabitChart
-        records={records}
-        habitId={habit.id}
-        timeSlots={habit.timeSlots}
-        tone={habit.tone}
-      />
+      {/* Chart + stat cards side by side */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
+        <div className="min-w-0 flex-1">
+          <HabitChart
+            records={records}
+            habitId={habit.id}
+            timeSlots={habit.timeSlots}
+            tone={habit.tone}
+          />
+        </div>
+        <div className="stagger-children grid grid-cols-2 gap-3 sm:grid-cols-4 lg:flex lg:flex-col lg:w-48 lg:shrink-0">
+          <StatCard
+            label="This month"
+            value={`${monthRate}%`}
+            detail={`${monthCompleted} completed`}
+          />
+          <StatCard
+            label="All time"
+            value={String(total)}
+            detail={habit.unitLabel}
+          />
+          <StatCard
+            label="Current streak"
+            value={`${currentStreak}`}
+            detail="days"
+          />
+          <StatCard
+            label="Best streak"
+            value={`${bestStreak}`}
+            detail="best run"
+          />
+        </div>
+      </div>
 
       {/* Monthly trend & weekday pattern */}
       <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
