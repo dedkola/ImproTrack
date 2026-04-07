@@ -299,7 +299,13 @@ export function HabitTrackerApp() {
 
             <div className="flex items-center gap-3">
               <span className="font-display text-[14px] font-medium text-ink-950">
-                {formatMonthLabel(range)}
+                {selectedPreset === "7"
+                  ? "Last 7 days"
+                  : selectedPreset === "30"
+                    ? "Last 30 days"
+                    : selectedPreset === "90"
+                      ? "Last 90 days"
+                      : formatMonthLabel(range)}
               </span>
               <Link
                 href="/dashboard/stats"
@@ -371,6 +377,7 @@ export function HabitTrackerApp() {
                 value={range.to}
                 min={range.from}
                 onChange={(v) => updateCustomRange("to", v)}
+                align="right"
               />
             </div>
           </div>
@@ -378,6 +385,28 @@ export function HabitTrackerApp() {
       </header>
 
       <div className="page-shell flex flex-col gap-4 py-5">
+        {activeHabits.length === 0 ? (
+          <div className="surface-panel flex flex-col items-center justify-center gap-3 rounded-2xl px-8 py-16 text-center">
+            <span className="text-[32px]">🎯</span>
+            <h2 className="text-[18px] font-semibold text-ink-950">
+              No habits yet
+            </h2>
+            <p className="max-w-xs text-[14px] text-ink-700">
+              Create your first habit to start tracking your progress.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setEditingHabit(null);
+                setFormOpen(true);
+              }}
+              className="pill-btn tap-target mt-2 rounded-lg bg-ink-950 px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+            >
+              Create first habit
+            </button>
+          </div>
+        ) : (
+          <>
         {/* Matrix */}
         <section className="animate-scale-in surface-panel relative overflow-visible rounded-2xl">
           <div className="flex items-center justify-between border-b border-black/[0.04] px-5 py-3 sm:px-6">
@@ -676,27 +705,7 @@ export function HabitTrackerApp() {
             </Link>
           ))}
         </section>
-
-        {activeHabits.length === 0 && (
-          <div className="surface-panel flex flex-col items-center justify-center gap-3 rounded-2xl px-8 py-16 text-center">
-            <span className="text-[32px]">🎯</span>
-            <h2 className="text-[18px] font-semibold text-ink-950">
-              No habits yet
-            </h2>
-            <p className="max-w-xs text-[14px] text-ink-700">
-              Create your first habit to start tracking your progress.
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setEditingHabit(null);
-                setFormOpen(true);
-              }}
-              className="pill-btn tap-target mt-2 rounded-lg bg-ink-950 px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
-            >
-              Create first habit
-            </button>
-          </div>
+          </>
         )}
       </div>
 
