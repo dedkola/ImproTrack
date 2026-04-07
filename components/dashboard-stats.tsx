@@ -286,7 +286,7 @@ export function DashboardStats() {
           </p>
           <Link
             href="/dashboard"
-            className="pill-btn tap-target mt-2 inline-flex items-center rounded-lg bg-[#3274C7] px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+            className="pill-btn tap-target mt-2 inline-flex items-center rounded-lg bg-white px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)]"
           >
             Go to dashboard
           </Link>
@@ -493,7 +493,7 @@ export function DashboardStats() {
 
               <Link
                 href={`/dashboard/habits/${summary.topHabit.habit.slug}`}
-                className="pill-btn mt-5 inline-flex items-center rounded-lg bg-[#3274C7] px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+                className="pill-btn mt-5 inline-flex items-center rounded-lg bg-white px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)]"
               >
                 Open habit details
               </Link>
@@ -714,7 +714,7 @@ function StatsHeader({
             </Link>
             <Link
               href="/dashboard"
-              className="pill-btn tap-target-compact inline-flex items-center rounded-lg bg-[#3274C7] px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+              className="pill-btn tap-target-compact inline-flex items-center rounded-lg bg-white px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm transition-all hover:shadow-[var(--shadow-card-hover)]"
             >
               Back to dashboard
             </Link>
