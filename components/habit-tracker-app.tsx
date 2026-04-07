@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { Check, Plus } from "lucide-react";
 import {
   clampDateKey,
   DateRange,
@@ -322,16 +323,7 @@ export function HabitTrackerApp() {
                 }}
                 className="pill-btn tap-target-compact flex items-center gap-1.5 rounded-lg bg-ink-950 px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
               >
-                <svg
-                  viewBox="0 0 16 16"
-                  className="h-3.5 w-3.5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                >
-                  <path d="M8 3v10M3 8h10" />
-                </svg>
+                <Plus className="h-3.5 w-3.5" strokeWidth={2} />
                 Add habit
               </button>
             </div>
@@ -604,39 +596,21 @@ export function HabitTrackerApp() {
                               }`}
                             >
                               {checked ? (
-                                <svg
-                                  viewBox="0 0 16 16"
+                                <Check
                                   aria-hidden="true"
                                   className="h-3 w-3 opacity-100"
-                                >
-                                  <path
-                                    d="M3.5 8.4 6.7 11.6 12.7 4.8"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2.2"
-                                  />
-                                </svg>
+                                  strokeWidth={2.2}
+                                />
                               ) : partial ? (
                                 <span
                                   className={`h-2 w-2 rounded-full ${habit.tone.fill} opacity-40`}
                                 />
                               ) : (
-                                <svg
-                                  viewBox="0 0 16 16"
+                                <Check
                                   aria-hidden="true"
                                   className="h-3 w-3 opacity-0"
-                                >
-                                  <path
-                                    d="M3.5 8.4 6.7 11.6 12.7 4.8"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2.2"
-                                  />
-                                </svg>
+                                  strokeWidth={2.2}
+                                />
                               )}
                             </span>
                           </button>

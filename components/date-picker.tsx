@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   addDays,
   endOfMonth,
@@ -121,16 +122,10 @@ export function DatePicker({
       >
         {label && <span className="font-medium">{label}</span>}
         <span className="text-ink-950 font-medium">{displayLabel}</span>
-        <svg
-          viewBox="0 0 16 16"
+        <ChevronDown
           className={`${compact ? "h-3 w-3" : "h-3.5 w-3.5"} text-ink-500`}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        >
-          <path d="M4 6l4 4 4-4" />
-        </svg>
+          strokeWidth={2}
+        />
       </button>
 
       {open && (
@@ -142,16 +137,7 @@ export function DatePicker({
               onClick={() => navigateMonth(-1)}
               className="flex h-7 w-7 items-center justify-center rounded-lg text-ink-700 transition hover:bg-ink-950/[0.06]"
             >
-              <svg
-                viewBox="0 0 16 16"
-                className="h-3.5 w-3.5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              >
-                <path d="M10 4l-4 4 4 4" />
-              </svg>
+              <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2} />
             </button>
             <span className="text-[13px] font-semibold text-ink-950">
               {monthLabel}
@@ -161,16 +147,7 @@ export function DatePicker({
               onClick={() => navigateMonth(1)}
               className="flex h-7 w-7 items-center justify-center rounded-lg text-ink-700 transition hover:bg-ink-950/[0.06]"
             >
-              <svg
-                viewBox="0 0 16 16"
-                className="h-3.5 w-3.5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              >
-                <path d="M6 4l4 4-4 4" />
-              </svg>
+              <ChevronRight className="h-3.5 w-3.5" strokeWidth={2} />
             </button>
           </div>
 
