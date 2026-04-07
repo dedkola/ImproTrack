@@ -2,6 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  Archive,
+  BarChart2,
+  LayoutGrid,
+  Menu,
+  Plus,
+  Settings,
+  X,
+} from "lucide-react";
 import { AuthControls } from "@/components/auth-controls";
 import { HabitDefinition } from "@/lib/habits";
 
@@ -54,16 +63,7 @@ export function Sidebar({
             aria-label="Close sidebar"
             className="tap-target-compact flex items-center justify-center rounded-md text-ink-700 hover:bg-black/[0.04] lg:hidden"
           >
-            <svg
-              viewBox="0 0 16 16"
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            >
-              <path d="M4 4l8 8M12 4l-8 8" />
-            </svg>
+            <X className="h-4 w-4" strokeWidth={1.5} />
           </button>
         </div>
 
@@ -73,22 +73,7 @@ export function Sidebar({
           <NavItem
             href="/dashboard"
             label="Dashboard"
-            icon={
-              <svg
-                viewBox="0 0 16 16"
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="2" y="2" width="5" height="5" rx="1" />
-                <rect x="9" y="2" width="5" height="5" rx="1" />
-                <rect x="2" y="9" width="5" height="5" rx="1" />
-                <rect x="9" y="9" width="5" height="5" rx="1" />
-              </svg>
-            }
+            icon={<LayoutGrid className="h-4 w-4" strokeWidth={1.5} />}
             active={pathname === "/dashboard"}
           />
 
@@ -105,16 +90,7 @@ export function Sidebar({
                 className="tap-target-compact flex items-center justify-center rounded-md text-ink-700 hover:bg-black/[0.06] hover:text-ink-950"
                 title="Add habit"
               >
-                <svg
-                  viewBox="0 0 16 16"
-                  className="h-3.5 w-3.5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                >
-                  <path d="M8 3v10M3 8h10" />
-                </svg>
+                <Plus className="h-3.5 w-3.5" strokeWidth={2} />
               </button>
             </div>
 
@@ -170,60 +146,19 @@ export function Sidebar({
             <NavItem
               href="/dashboard/archive"
               label="Archive"
-              icon={
-                <svg
-                  viewBox="0 0 16 16"
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect x="2" y="3" width="12" height="3" rx="1" />
-                  <path d="M3 6v6a1 1 0 001 1h8a1 1 0 001-1V6" />
-                  <path d="M6.5 9h3" />
-                </svg>
-              }
+              icon={<Archive className="h-4 w-4" strokeWidth={1.5} />}
               active={pathname === "/dashboard/archive"}
             />
             <NavItem
               href="/dashboard/stats"
               label="Statistics"
-              icon={
-                <svg
-                  viewBox="0 0 16 16"
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M3 13V8" />
-                  <path d="M8 13V3" />
-                  <path d="M13 13V6" />
-                </svg>
-              }
+              icon={<BarChart2 className="h-4 w-4" strokeWidth={1.5} />}
               active={pathname === "/dashboard/stats"}
             />
             <NavItem
               href="#"
               label="Settings"
-              icon={
-                <svg
-                  viewBox="0 0 16 16"
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="8" cy="8" r="2.5" />
-                  <path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.1 3.1l1.4 1.4M11.5 11.5l1.4 1.4M3.1 12.9l1.4-1.4M11.5 4.5l1.4-1.4" />
-                </svg>
-              }
+              icon={<Settings className="h-4 w-4" strokeWidth={1.5} />}
               active={false}
               disabled
             />
@@ -287,16 +222,7 @@ export function SidebarToggle({ onToggle }: { onToggle: () => void }) {
       aria-label="Open sidebar"
       className="tap-target flex items-center justify-center rounded-lg text-ink-700 hover:bg-black/[0.04] lg:hidden"
     >
-      <svg
-        viewBox="0 0 16 16"
-        className="h-4 w-4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      >
-        <path d="M2 4h12M2 8h12M2 12h12" />
-      </svg>
+      <Menu className="h-4 w-4" strokeWidth={1.8} />
     </button>
   );
 }

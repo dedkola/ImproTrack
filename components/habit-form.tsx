@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { MoreVertical, X } from "lucide-react";
 import {
   getNormalizedFrequency,
   HabitDefinition,
@@ -168,16 +169,7 @@ export function HabitForm({
             aria-label="Close habit form"
             className="tap-target-compact flex items-center justify-center rounded-md text-ink-700 hover:bg-black/[0.06]"
           >
-            <svg
-              viewBox="0 0 16 16"
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            >
-              <path d="M4 4l8 8M12 4l-8 8" />
-            </svg>
+            <X className="h-4 w-4" strokeWidth={1.5} />
           </button>
         </div>
 
@@ -588,11 +580,7 @@ export function HabitMenu({
         aria-label="Open habit actions"
         className="tap-target-compact flex items-center justify-center rounded-md text-ink-700 hover:bg-black/[0.08]"
       >
-        <svg viewBox="0 0 16 16" className="h-4 w-4" fill="currentColor">
-          <circle cx="8" cy="3" r="1.2" />
-          <circle cx="8" cy="8" r="1.2" />
-          <circle cx="8" cy="13" r="1.2" />
-        </svg>
+        <MoreVertical className="h-4 w-4" strokeWidth={1.5} />
       </button>
 
       {open &&
