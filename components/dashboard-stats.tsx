@@ -286,7 +286,7 @@ export function DashboardStats() {
           </p>
           <Link
             href="/dashboard"
-            className="pill-btn tap-target mt-2 inline-flex items-center rounded-lg bg-ink-950 px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+            className="pill-btn tap-target mt-2 inline-flex items-center rounded-lg bg-[#3274C7] px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
           >
             Go to dashboard
           </Link>
@@ -410,7 +410,7 @@ export function DashboardStats() {
                 >
                   <div className="relative h-40 w-full overflow-hidden rounded-[16px] bg-black/[0.04]">
                     <div
-                      className="absolute bottom-0 left-0 right-0 rounded-t-[16px] bg-ink-950 transition-all duration-500"
+                      className="absolute bottom-0 left-0 right-0 rounded-t-[16px] bg-[#3274C7] transition-all duration-500"
                       style={{
                         height: `${Math.max(day.rate, day.total === 0 ? 8 : 16)}%`,
                         opacity:
@@ -493,7 +493,7 @@ export function DashboardStats() {
 
               <Link
                 href={`/dashboard/habits/${summary.topHabit.habit.slug}`}
-                className="pill-btn mt-5 inline-flex items-center rounded-lg bg-ink-950 px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+                className="pill-btn mt-5 inline-flex items-center rounded-lg bg-[#3274C7] px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
               >
                 Open habit details
               </Link>
@@ -532,7 +532,7 @@ export function DashboardStats() {
                 </div>
                 <div className="h-[8px] overflow-hidden rounded-full bg-black/[0.05]">
                   <div
-                    className="h-[8px] rounded-full bg-ink-950 transition-all duration-700 ease-out"
+                    className="h-[8px] rounded-full bg-[#3274C7] transition-all duration-700 ease-out"
                     style={{ width: `${category.rate}%` }}
                   />
                 </div>
@@ -567,7 +567,7 @@ export function DashboardStats() {
                 href={`/dashboard/habits/${snapshot.habit.slug}`}
                 className="group flex items-center gap-3 rounded-[22px] border border-black/[0.06] bg-white px-4 py-3 shadow-[var(--shadow-card)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)]"
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-ink-950 text-[12px] font-semibold text-white">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#3274C7] text-[12px] font-semibold text-white">
                   {index + 1}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -633,7 +633,7 @@ export function DashboardStats() {
               </div>
               <div className="mt-3 h-[7px] overflow-hidden rounded-full bg-black/[0.05]">
                 <div
-                  className="h-[7px] rounded-full bg-ink-950 transition-all duration-700 ease-out"
+                  className="h-[7px] rounded-full bg-[#3274C7] transition-all duration-700 ease-out"
                   style={{ width: `${day.rate}%` }}
                 />
               </div>
@@ -714,7 +714,7 @@ function StatsHeader({
             </Link>
             <Link
               href="/dashboard"
-              className="pill-btn tap-target-compact inline-flex items-center rounded-lg bg-ink-950 px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+              className="pill-btn tap-target-compact inline-flex items-center rounded-lg bg-[#3274C7] px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
             >
               Back to dashboard
             </Link>

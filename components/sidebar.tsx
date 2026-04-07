@@ -50,7 +50,7 @@ export function Sidebar({
         {/* Logo area */}
         <div className="flex h-14 items-center justify-between border-b border-black/[0.06] px-4">
           <Link href="/dashboard" className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink-950 text-[13px] font-semibold text-white">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3274C7] text-[13px] font-semibold text-white">
               M
             </span>
             <span className="font-display text-[16px] font-semibold text-ink-950">

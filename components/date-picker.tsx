@@ -129,7 +129,9 @@ export function DatePicker({
       </button>
 
       {open && (
-        <div className={`absolute top-full z-50 mt-1.5 w-[272px] rounded-xl bg-white p-3 shadow-[0_8px_30px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)] ${align === "right" ? "right-0" : "left-0"}`}>
+        <div
+          className={`absolute top-full z-50 mt-1.5 w-[272px] rounded-xl bg-white p-3 shadow-[0_8px_30px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)] ${align === "right" ? "right-0" : "left-0"}`}
+        >
           {/* Month navigation */}
           <div className="flex items-center justify-between pb-2.5">
             <button
@@ -185,7 +187,7 @@ export function DatePicker({
                   }}
                   className={`flex h-8 w-full items-center justify-center rounded-lg text-[12px] font-medium transition ${
                     sel
-                      ? "bg-ink-950 text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+                      ? "bg-[#3274C7] text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
                       : disabled
                         ? "text-ink-400 cursor-not-allowed"
                         : tod

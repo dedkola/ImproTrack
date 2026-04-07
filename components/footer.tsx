@@ -3,7 +3,7 @@ export function Footer() {
     <footer className="border-t border-black/[0.06] bg-white/80 backdrop-blur-2xl">
       <div className="page-shell flex items-center justify-between py-3">
         <div className="flex items-center gap-2">
-          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-ink-950 text-[11px] font-bold text-white">
+          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[#3274C7] text-[11px] font-bold text-white">
             M
           </span>
           <span className="text-[13px] font-medium text-ink-700">Momentum</span>

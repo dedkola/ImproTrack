@@ -321,7 +321,7 @@ export function HabitTrackerApp() {
                   setEditingHabit(null);
                   setFormOpen(true);
                 }}
-                className="pill-btn tap-target-compact flex items-center gap-1.5 rounded-lg bg-ink-950 px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+                className="pill-btn tap-target-compact flex items-center gap-1.5 rounded-lg bg-[#3274C7] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
               >
                 <Plus className="h-3.5 w-3.5" strokeWidth={2} />
                 Add habit
@@ -347,7 +347,7 @@ export function HabitTrackerApp() {
                     }
                     className={`pill-btn tap-target-compact rounded-lg px-3 py-2 text-[13px] font-medium transition ${
                       active
-                        ? "bg-ink-950 text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+                        ? "bg-[#3274C7] text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
                         : "bg-ink-950/[0.04] text-ink-700 hover:bg-ink-950/[0.08]"
                     }`}
                   >
@@ -392,293 +392,296 @@ export function HabitTrackerApp() {
                 setEditingHabit(null);
                 setFormOpen(true);
               }}
-              className="pill-btn tap-target mt-2 rounded-lg bg-ink-950 px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+              className="pill-btn tap-target mt-2 rounded-lg bg-[#3274C7] px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
             >
               Create first habit
             </button>
           </div>
         ) : (
           <>
-        {/* Matrix */}
-        <section className="animate-scale-in surface-panel relative overflow-visible rounded-2xl">
-          <div className="flex items-center justify-between border-b border-black/[0.04] px-5 py-3 sm:px-6">
-            <h2 className="text-[14px] font-semibold text-ink-950">
-              Habit matrix
-            </h2>
-            <p className="hidden text-[13px] text-ink-700 md:block">
-              Tap a cell to toggle completion
-            </p>
-          </div>
+            {/* Matrix */}
+            <section className="animate-scale-in surface-panel relative overflow-visible rounded-2xl">
+              <div className="flex items-center justify-between border-b border-black/[0.04] px-5 py-3 sm:px-6">
+                <h2 className="text-[14px] font-semibold text-ink-950">
+                  Habit matrix
+                </h2>
+                <p className="hidden text-[13px] text-ink-700 md:block">
+                  Tap a cell to toggle completion
+                </p>
+              </div>
 
-          <div className="overflow-x-auto">
-            <div
-              className="min-w-max px-3 pb-3 pt-2 sm:px-4"
-              style={{ minWidth: `${280 + days.length * 44}px` }}
-            >
-              <div
-                className="grid gap-px rounded-xl bg-black/[0.02] p-px"
-                style={{
-                  gridTemplateColumns: `280px repeat(${days.length}, 44px)`,
-                }}
-              >
-                {/* Column headers */}
-                <div className="rounded-tl-[11px] bg-white px-4 py-3 text-left text-[12px] font-semibold uppercase tracking-wider text-ink-700">
-                  Habit
-                </div>
-                {days.map((dateKey, index) => {
-                  const isFuture = dateKey > todayKey;
-                  const weekday = new Intl.DateTimeFormat("en", {
-                    weekday: "narrow",
-                  }).format(parseDateKey(dateKey));
-
-                  return (
-                    <div
-                      key={dateKey}
-                      className={`bg-white px-1 py-3 text-center text-[12px] ${
-                        index === days.length - 1 ? "rounded-tr-[11px]" : ""
-                      }`}
-                    >
-                      <p className="font-semibold text-ink-950">
-                        {dateKey.slice(-2)}
-                      </p>
-                      <p
-                        className={
-                          isFuture ? "text-ink-700/30" : "text-ink-700"
-                        }
-                      >
-                        {weekday}
-                      </p>
+              <div className="overflow-x-auto">
+                <div
+                  className="min-w-max px-3 pb-3 pt-2 sm:px-4"
+                  style={{ minWidth: `${280 + days.length * 44}px` }}
+                >
+                  <div
+                    className="grid gap-px rounded-xl bg-black/[0.02] p-px"
+                    style={{
+                      gridTemplateColumns: `280px repeat(${days.length}, 44px)`,
+                    }}
+                  >
+                    {/* Column headers */}
+                    <div className="rounded-tl-[11px] bg-white px-4 py-3 text-left text-[12px] font-semibold uppercase tracking-wider text-ink-700">
+                      Habit
                     </div>
-                  );
-                })}
+                    {days.map((dateKey, index) => {
+                      const isFuture = dateKey > todayKey;
+                      const weekday = new Intl.DateTimeFormat("en", {
+                        weekday: "narrow",
+                      }).format(parseDateKey(dateKey));
 
-                {/* Rows */}
-                {gridRows.map((row, rowIndex) => {
-                  const { habit, slotName, isFirstSlot, isLastSlot } = row;
-                  const isLastRow = rowIndex === gridRows.length - 1;
-                  const displaySlotName =
-                    habit.frequencyPerDay === 1 ? null : slotName;
-                  const matrixTone = getMatrixTone(habit.tone.fill);
-
-                  return (
-                    <div key={`${habit.id}-${slotName}`} className="contents">
-                      {/* Row label */}
-                      <div
-                        className={`sticky left-0 z-30 flex items-center gap-3 bg-white px-4 py-2.5 ${
-                          isLastRow ? "rounded-bl-[11px]" : ""
-                        } ${
-                          !isLastSlot && habit.frequencyPerDay > 1
-                            ? "border-b border-dashed border-black/[0.06]"
-                            : ""
-                        }`}
-                      >
-                        {isFirstSlot ? (
-                          <div className="flex flex-1 items-center justify-between gap-2">
-                            <div className="flex items-center gap-2.5">
-                              <span className="text-[18px] leading-none">
-                                {habit.icon}
-                              </span>
-                              <div className="min-w-0">
-                                <p className="truncate text-[14px] font-semibold text-ink-950">
-                                  {habit.name}
-                                  {displaySlotName && (
-                                    <span className="ml-1.5 text-[12px] font-normal text-ink-700">
-                                      — {displaySlotName}
-                                    </span>
-                                  )}
-                                </p>
-                                <p className="truncate text-[12px] text-ink-700">
-                                  {habit.goalLabel}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <span
-                                className={`rounded-md px-2 py-0.5 text-[12px] font-semibold ${habit.tone.softFill} ${habit.tone.badge}`}
-                              >
-                                {completionRate(
-                                  records,
-                                  habit.id,
-                                  range,
-                                  todayKey,
-                                  habit.timeSlots,
-                                )}
-                                %
-                              </span>
-                              <HabitMenu
-                                tone={habit.tone}
-                                onEdit={() => {
-                                  setEditingHabit(habit);
-                                  setFormOpen(true);
-                                }}
-                                onArchive={() => archiveHabit(habit.id)}
-                                onDelete={() => setDeleteTarget(habit)}
-                              />
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex flex-1 items-center pl-8">
-                            <p className="text-[13px] text-ink-700">
-                              {displaySlotName}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Day cells */}
-                      {days.map((dateKey, colIndex) => {
-                        const daySlots = records[habit.id]?.[dateKey];
-                        const slotChecked = isSlotCompleted(
-                          daySlots,
-                          slotName,
-                          {
-                            fallbackToAny: habit.timeSlots.length <= 1,
-                          },
-                        );
-                        const isFuture = dateKey > todayKey;
-                        const checked = slotChecked;
-                        const partial = false;
-                        const buttonStyle = checked
-                          ? {
-                              backgroundColor: matrixTone.cellTint,
-                              boxShadow: `inset 0 0 0 1.5px ${matrixTone.fill}`,
+                      return (
+                        <div
+                          key={dateKey}
+                          className={`bg-white px-1 py-3 text-center text-[12px] ${
+                            index === days.length - 1 ? "rounded-tr-[11px]" : ""
+                          }`}
+                        >
+                          <p className="font-semibold text-ink-950">
+                            {dateKey.slice(-2)}
+                          </p>
+                          <p
+                            className={
+                              isFuture ? "text-ink-700/30" : "text-ink-700"
                             }
-                          : undefined;
-                        const checkStyle = checked
-                          ? {
-                              backgroundColor: matrixTone.fill,
-                              borderColor: matrixTone.fill,
-                              boxShadow: `0 6px 14px ${matrixTone.glow}, 0 1px 2px rgba(10, 22, 40, 0.12)`,
-                            }
-                          : partial
-                            ? {
-                                backgroundColor: matrixTone.partial,
-                                borderColor: matrixTone.fill,
-                              }
-                            : undefined;
+                          >
+                            {weekday}
+                          </p>
+                        </div>
+                      );
+                    })}
 
-                        return (
-                          <button
-                            key={`${habit.id}-${slotName}-${dateKey}`}
-                            type="button"
-                            onClick={() => {
-                              if (!isFuture) {
-                                toggleHabitDay(habit.id, dateKey, slotName);
-                              }
-                            }}
-                            disabled={isFuture}
-                            aria-pressed={slotChecked}
-                            aria-label={`${habit.name}${displaySlotName ? ` ${displaySlotName}` : ""} on ${formatLongDate(dateKey)}`}
-                            className={`matrix-day-btn relative flex h-10 items-center justify-center ${
-                              isLastRow && colIndex === days.length - 1
-                                ? "rounded-br-[11px]"
+                    {/* Rows */}
+                    {gridRows.map((row, rowIndex) => {
+                      const { habit, slotName, isFirstSlot, isLastSlot } = row;
+                      const isLastRow = rowIndex === gridRows.length - 1;
+                      const displaySlotName =
+                        habit.frequencyPerDay === 1 ? null : slotName;
+                      const matrixTone = getMatrixTone(habit.tone.fill);
+
+                      return (
+                        <div
+                          key={`${habit.id}-${slotName}`}
+                          className="contents"
+                        >
+                          {/* Row label */}
+                          <div
+                            className={`sticky left-0 z-30 flex items-center gap-3 bg-white px-4 py-2.5 ${
+                              isLastRow ? "rounded-bl-[11px]" : ""
+                            } ${
+                              !isLastSlot && habit.frequencyPerDay > 1
+                                ? "border-b border-dashed border-black/[0.06]"
                                 : ""
                             }`}
-                            style={buttonStyle}
                           >
-                            {checked ? (
-                              <span
-                                aria-hidden="true"
-                                className="pointer-events-none absolute inset-[6px] rounded-[10px] opacity-100 transition-all duration-200"
-                                style={{
-                                  background: `linear-gradient(180deg, ${matrixTone.cellTint} 0%, rgba(255,255,255,0.88) 100%)`,
-                                }}
-                              />
-                            ) : null}
-                            <span
-                              style={checkStyle}
-                              className={`matrix-check relative z-10 flex h-[26px] w-[26px] items-center justify-center rounded-lg text-white transition-all duration-200 ${
-                                checked
-                                  ? `matrix-check-pop matrix-check-checked`
-                                  : partial
-                                    ? `matrix-check-partial ${habit.tone.badge} text-transparent`
-                                    : "matrix-check-idle text-transparent"
-                              }`}
-                            >
-                              {checked ? (
-                                <Check
-                                  aria-hidden="true"
-                                  className="h-3 w-3 opacity-100"
-                                  strokeWidth={2.2}
-                                />
-                              ) : partial ? (
-                                <span
-                                  className={`h-2 w-2 rounded-full ${habit.tone.fill} opacity-40`}
-                                />
-                              ) : (
-                                <Check
-                                  aria-hidden="true"
-                                  className="h-3 w-3 opacity-0"
-                                  strokeWidth={2.2}
-                                />
-                              )}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </section>
+                            {isFirstSlot ? (
+                              <div className="flex flex-1 items-center justify-between gap-2">
+                                <div className="flex items-center gap-2.5">
+                                  <span className="text-[18px] leading-none">
+                                    {habit.icon}
+                                  </span>
+                                  <div className="min-w-0">
+                                    <p className="truncate text-[14px] font-semibold text-ink-950">
+                                      {habit.name}
+                                      {displaySlotName && (
+                                        <span className="ml-1.5 text-[12px] font-normal text-ink-700">
+                                          — {displaySlotName}
+                                        </span>
+                                      )}
+                                    </p>
+                                    <p className="truncate text-[12px] text-ink-700">
+                                      {habit.goalLabel}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <span
+                                    className={`rounded-md px-2 py-0.5 text-[12px] font-semibold ${habit.tone.softFill} ${habit.tone.badge}`}
+                                  >
+                                    {completionRate(
+                                      records,
+                                      habit.id,
+                                      range,
+                                      todayKey,
+                                      habit.timeSlots,
+                                    )}
+                                    %
+                                  </span>
+                                  <HabitMenu
+                                    tone={habit.tone}
+                                    onEdit={() => {
+                                      setEditingHabit(habit);
+                                      setFormOpen(true);
+                                    }}
+                                    onArchive={() => archiveHabit(habit.id)}
+                                    onDelete={() => setDeleteTarget(habit)}
+                                  />
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="flex flex-1 items-center pl-8">
+                                <p className="text-[13px] text-ink-700">
+                                  {displaySlotName}
+                                </p>
+                              </div>
+                            )}
+                          </div>
 
-        {/* Habit cards */}
-        <section className="stagger-children grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {habitSummaries.map(({ habit, completed, rate }) => (
-            <Link
-              key={habit.id}
-              href={`/dashboard/habits/${habit.slug}`}
-              className={`group relative overflow-hidden rounded-2xl border border-white/75 bg-linear-to-br ${getAppleCardGradient(habit.tone.fill)} p-4 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)]`}
-            >
-              <div className="absolute inset-x-6 bottom-0 h-16 rounded-full bg-white/60 blur-3xl transition-transform duration-500 group-hover:scale-125" />
-              <div className="relative z-10 flex flex-col gap-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[18px]">{habit.icon}</span>
-                    <h3 className="text-[16px] font-semibold text-ink-950">
-                      {habit.name}
-                    </h3>
+                          {/* Day cells */}
+                          {days.map((dateKey, colIndex) => {
+                            const daySlots = records[habit.id]?.[dateKey];
+                            const slotChecked = isSlotCompleted(
+                              daySlots,
+                              slotName,
+                              {
+                                fallbackToAny: habit.timeSlots.length <= 1,
+                              },
+                            );
+                            const isFuture = dateKey > todayKey;
+                            const checked = slotChecked;
+                            const partial = false;
+                            const buttonStyle = checked
+                              ? {
+                                  backgroundColor: matrixTone.cellTint,
+                                  boxShadow: `inset 0 0 0 1.5px ${matrixTone.fill}`,
+                                }
+                              : undefined;
+                            const checkStyle = checked
+                              ? {
+                                  backgroundColor: matrixTone.fill,
+                                  borderColor: matrixTone.fill,
+                                  boxShadow: `0 6px 14px ${matrixTone.glow}, 0 1px 2px rgba(10, 22, 40, 0.12)`,
+                                }
+                              : partial
+                                ? {
+                                    backgroundColor: matrixTone.partial,
+                                    borderColor: matrixTone.fill,
+                                  }
+                                : undefined;
+
+                            return (
+                              <button
+                                key={`${habit.id}-${slotName}-${dateKey}`}
+                                type="button"
+                                onClick={() => {
+                                  if (!isFuture) {
+                                    toggleHabitDay(habit.id, dateKey, slotName);
+                                  }
+                                }}
+                                disabled={isFuture}
+                                aria-pressed={slotChecked}
+                                aria-label={`${habit.name}${displaySlotName ? ` ${displaySlotName}` : ""} on ${formatLongDate(dateKey)}`}
+                                className={`matrix-day-btn relative flex h-10 items-center justify-center ${
+                                  isLastRow && colIndex === days.length - 1
+                                    ? "rounded-br-[11px]"
+                                    : ""
+                                }`}
+                                style={buttonStyle}
+                              >
+                                {checked ? (
+                                  <span
+                                    aria-hidden="true"
+                                    className="pointer-events-none absolute inset-[6px] rounded-[10px] opacity-100 transition-all duration-200"
+                                    style={{
+                                      background: `linear-gradient(180deg, ${matrixTone.cellTint} 0%, rgba(255,255,255,0.88) 100%)`,
+                                    }}
+                                  />
+                                ) : null}
+                                <span
+                                  style={checkStyle}
+                                  className={`matrix-check relative z-10 flex h-[26px] w-[26px] items-center justify-center rounded-lg text-white transition-all duration-200 ${
+                                    checked
+                                      ? `matrix-check-pop matrix-check-checked`
+                                      : partial
+                                        ? `matrix-check-partial ${habit.tone.badge} text-transparent`
+                                        : "matrix-check-idle text-transparent"
+                                  }`}
+                                >
+                                  {checked ? (
+                                    <Check
+                                      aria-hidden="true"
+                                      className="h-3 w-3 opacity-100"
+                                      strokeWidth={2.2}
+                                    />
+                                  ) : partial ? (
+                                    <span
+                                      className={`h-2 w-2 rounded-full ${habit.tone.fill} opacity-40`}
+                                    />
+                                  ) : (
+                                    <Check
+                                      aria-hidden="true"
+                                      className="h-3 w-3 opacity-0"
+                                      strokeWidth={2.2}
+                                    />
+                                  )}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      );
+                    })}
                   </div>
-                  <span
-                    className={`rounded-md px-2 py-0.5 text-[12px] font-semibold ${habit.tone.softFill}`}
-                  >
-                    {rate}%
-                  </span>
-                </div>
-                <p className="text-[14px] leading-5 text-ink-700">
-                  {habit.description}
-                </p>
-                {habit.frequencyPerDay > 1 && (
-                  <div className="flex flex-wrap gap-1">
-                    {habit.timeSlots.map((slot) => (
-                      <span
-                        key={slot}
-                        className={`rounded-md px-1.5 py-0.5 text-[11px] font-medium ${habit.tone.softFill}`}
-                      >
-                        {slot}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                <div className="flex items-end justify-between pt-1">
-                  <div>
-                    <p className="text-[12px] text-ink-700">Completed</p>
-                    <p className="font-display text-[22px] font-semibold tabular-nums text-ink-950">
-                      {completed}
-                    </p>
-                  </div>
-                  <span
-                    className={`text-[13px] font-medium ${habit.tone.accent} transition-transform duration-200 group-hover:translate-x-0.5`}
-                  >
-                    View stats &rarr;
-                  </span>
                 </div>
               </div>
-            </Link>
-          ))}
-        </section>
+            </section>
+
+            {/* Habit cards */}
+            <section className="stagger-children grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {habitSummaries.map(({ habit, completed, rate }) => (
+                <Link
+                  key={habit.id}
+                  href={`/dashboard/habits/${habit.slug}`}
+                  className={`group relative overflow-hidden rounded-2xl border border-white/75 bg-linear-to-br ${getAppleCardGradient(habit.tone.fill)} p-4 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)]`}
+                >
+                  <div className="absolute inset-x-6 bottom-0 h-16 rounded-full bg-white/60 blur-3xl transition-transform duration-500 group-hover:scale-125" />
+                  <div className="relative z-10 flex flex-col gap-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[18px]">{habit.icon}</span>
+                        <h3 className="text-[16px] font-semibold text-ink-950">
+                          {habit.name}
+                        </h3>
+                      </div>
+                      <span
+                        className={`rounded-md px-2 py-0.5 text-[12px] font-semibold ${habit.tone.softFill}`}
+                      >
+                        {rate}%
+                      </span>
+                    </div>
+                    <p className="text-[14px] leading-5 text-ink-700">
+                      {habit.description}
+                    </p>
+                    {habit.frequencyPerDay > 1 && (
+                      <div className="flex flex-wrap gap-1">
+                        {habit.timeSlots.map((slot) => (
+                          <span
+                            key={slot}
+                            className={`rounded-md px-1.5 py-0.5 text-[11px] font-medium ${habit.tone.softFill}`}
+                          >
+                            {slot}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <div className="flex items-end justify-between pt-1">
+                      <div>
+                        <p className="text-[12px] text-ink-700">Completed</p>
+                        <p className="font-display text-[22px] font-semibold tabular-nums text-ink-950">
+                          {completed}
+                        </p>
+                      </div>
+                      <span
+                        className={`text-[13px] font-medium ${habit.tone.accent} transition-transform duration-200 group-hover:translate-x-0.5`}
+                      >
+                        View stats &rarr;
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </section>
           </>
         )}
       </div>

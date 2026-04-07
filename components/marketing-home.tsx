@@ -97,7 +97,7 @@ export function MarketingHome() {
       <header className="header-bar sticky top-0 z-40">
         <div className="page-shell mx-auto flex max-w-7xl items-center justify-between gap-6 py-3.5">
           <Link href="/" className="flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ink-950 text-[13px] font-semibold text-white">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#3274C7] text-[13px] font-semibold text-white">
               M
             </span>
             <span className="font-display text-[18px] font-semibold text-ink-950">
@@ -205,7 +205,7 @@ export function MarketingHome() {
                               ? "bg-white border border-black/[0.08]"
                               : index % 4 === 0
                                 ? "bg-amber-200/80"
-                                : "bg-ink-950"
+                                : "bg-[#3274C7]"
                           }`}
                         />
                       ))}
@@ -247,7 +247,7 @@ export function MarketingHome() {
                           </div>
                           <div className="h-[7px] overflow-hidden rounded-full bg-black/[0.05]">
                             <div
-                              className="h-[7px] rounded-full bg-ink-950"
+                              className="h-[7px] rounded-full bg-[#3274C7]"
                               style={{ width: `${value}%` }}
                             />
                           </div>
@@ -315,7 +315,7 @@ export function MarketingHome() {
                 key={feature.title}
                 className="feature-panel rounded-[28px] p-5"
               >
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-ink-950 text-[15px] font-semibold text-white">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[#3274C7] text-[15px] font-semibold text-white">
                   {feature.icon}
                 </span>
                 <h3 className="mt-5 text-[18px] font-semibold text-ink-950">
@@ -428,7 +428,7 @@ export function MarketingHome() {
                           </div>
                           <div className="h-[6px] overflow-hidden rounded-full bg-black/[0.05]">
                             <div
-                              className="h-[6px] rounded-full bg-ink-950"
+                              className="h-[6px] rounded-full bg-[#3274C7]"
                               style={{ width: `${value}%` }}
                             />
                           </div>
@@ -452,7 +452,7 @@ export function MarketingHome() {
                           key={step}
                           className="flex items-start gap-3 rounded-[18px] bg-paper-50 px-3 py-3"
                         >
-                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ink-950 text-[12px] font-semibold text-white">
+                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#3274C7] text-[12px] font-semibold text-white">
                             {step}
                           </span>
                           <div>
@@ -591,7 +591,7 @@ export function MarketingHome() {
         <div className="page-shell mx-auto flex max-w-7xl flex-col gap-5 py-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink-950 text-[12px] font-semibold text-white">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3274C7] text-[12px] font-semibold text-white">
                 M
               </span>
               <span className="font-display text-[17px] font-semibold text-ink-950">

@@ -496,7 +496,7 @@ function LineChartViz({
                   y={finalTy + 15}
                   fontSize={10}
                   fontWeight="600"
-                  fill="#0a1628"
+                  fill="#3274C7"
                   textAnchor="middle"
                 >
                   {Math.round(hRate * 100)}% —{" "}
@@ -638,7 +638,7 @@ export function HabitChart({
                 aria-pressed={view === value}
                 className={`${CONTROL_BTN_BASE} ${
                   view === value
-                    ? "bg-ink-950 text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+                    ? "bg-[#3274C7] text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
                     : "bg-ink-950/[0.04] text-ink-700 hover:bg-ink-950/[0.08]"
                 }`}
               >
@@ -646,8 +646,6 @@ export function HabitChart({
               </button>
             ))}
           </div>
-
-          {/* Time preset */}
           <div className="flex gap-1">
             {PRESET_OPTIONS.map(({ value, label }) => (
               <button
@@ -657,7 +655,7 @@ export function HabitChart({
                 aria-pressed={preset === value}
                 className={`${CONTROL_BTN_BASE} ${
                   preset === value
-                    ? "bg-ink-950 text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+                    ? "bg-[#3274C7] text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
                     : "bg-ink-950/[0.04] text-ink-700 hover:bg-ink-950/[0.08]"
                 }`}
               >

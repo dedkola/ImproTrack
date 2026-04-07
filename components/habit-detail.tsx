@@ -47,7 +47,7 @@ export function HabitDetail({ slug }: { slug: string }) {
           </h1>
           <Link
             href="/dashboard"
-            className="pill-btn tap-target mt-4 inline-flex rounded-lg bg-ink-950 px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+            className="pill-btn tap-target mt-4 inline-flex rounded-lg bg-[#3274C7] px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
           >
             Back to tracker
           </Link>

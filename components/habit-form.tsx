@@ -188,7 +188,7 @@ export function HabitForm({
                   onClick={() => setIcon(emoji)}
                   className={`tap-target flex items-center justify-center rounded-lg text-[20px] transition ${
                     icon === emoji
-                      ? "bg-ink-950 shadow-sm ring-2 ring-ink-950/20"
+                      ? "bg-[#3274C7] shadow-sm ring-2 ring-[#3274C7]/20"
                       : "bg-black/[0.04] hover:bg-black/[0.08]"
                   }`}
                 >
@@ -417,7 +417,7 @@ export function HabitForm({
           <button
             type="submit"
             disabled={!name.trim()}
-            className="pill-btn tap-target-compact rounded-lg bg-ink-950 px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] disabled:opacity-50"
+            className="pill-btn tap-target-compact rounded-lg bg-[#3274C7] px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] disabled:opacity-50"
           >
             {initial ? "Save changes" : "Create habit"}
           </button>

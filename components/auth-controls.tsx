@@ -77,7 +77,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
         ) : user ? (
           <>
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-ink-950 text-[14px] font-semibold text-white">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#3274C7] text-[14px] font-semibold text-white">
                 {initial}
               </span>
               <div className="min-w-0">
@@ -98,7 +98,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
                 type="button"
                 onClick={() => void handleSignOut()}
                 disabled={isPending}
-                className="pill-btn min-h-10 rounded-lg bg-ink-950 px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="pill-btn min-h-10 rounded-lg bg-[#3274C7] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isPending ? "Signing out..." : "Sign out"}
               </button>
@@ -116,7 +116,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
               type="button"
               onClick={() => void handleSignIn()}
               disabled={isPending}
-              className="pill-btn mt-3 min-h-10 w-full rounded-lg bg-ink-950 px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] disabled:cursor-not-allowed disabled:opacity-60"
+              className="pill-btn mt-3 min-h-10 w-full rounded-lg bg-[#3274C7] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isPending ? "Signing in..." : "Continue with Google"}
             </button>
@@ -140,7 +140,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
             <div className="flex flex-col gap-2 sm:flex-row">
               <Link
                 href="/dashboard"
-                className="pill-btn inline-flex min-h-11 items-center justify-center rounded-xl bg-ink-950 px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_24px_rgba(10,22,40,0.16)]"
+                className="pill-btn inline-flex min-h-11 items-center justify-center rounded-xl bg-[#3274C7] px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_24px_rgba(10,22,40,0.16)]"
               >
                 Open dashboard
               </Link>
@@ -160,7 +160,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
               type="button"
               onClick={() => void handleSignIn()}
               disabled={isPending}
-              className="pill-btn inline-flex min-h-11 items-center justify-center rounded-xl bg-ink-950 px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_24px_rgba(10,22,40,0.16)] disabled:cursor-not-allowed disabled:opacity-60"
+              className="pill-btn inline-flex min-h-11 items-center justify-center rounded-xl bg-[#3274C7] px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_24px_rgba(10,22,40,0.16)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isPending ? "Signing in..." : "Continue with Google"}
             </button>
@@ -189,7 +189,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
         ) : user ? (
           <>
             <div className="hidden items-center gap-3 rounded-lg border border-black/[0.06] bg-white/75 px-3 py-2 shadow-[var(--shadow-card)] sm:flex">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink-950 text-[12px] font-semibold text-white">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3274C7] text-[12px] font-semibold text-white">
                 {initial}
               </span>
               <div className="max-w-[180px] leading-tight">
