@@ -23,6 +23,7 @@ export function getFirebaseAuth(): Auth {
 export function getGoogleAuthProvider(): GoogleAuthProvider {
   if (!googleAuthProvider) {
     googleAuthProvider = new GoogleAuthProvider();
+    googleAuthProvider.setCustomParameters({ prompt: "select_account" });
   }
 
   return googleAuthProvider;
