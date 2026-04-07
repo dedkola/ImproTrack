@@ -1,4 +1,4 @@
-import { DateRange, eachDay, parseDateKey, toDateKey } from "@/lib/date";
+import { addDays, DateRange, eachDay, parseDateKey, toDateKey } from "@/lib/date";
 import { HabitRecords } from "@/lib/storage";
 
 function normalizeSlotKey(slotName: string) {
@@ -148,14 +148,24 @@ export function getBestStreak(
   const days = Object.keys(records[habitId] ?? {}).sort();
   let best = 0;
   let active = 0;
+  let prevCompletedKey: string | null = null;
 
   days.forEach((day) => {
-    if (isDayFullyCompleted(records, habitId, day, timeSlots)) {
-      active += 1;
-      best = Math.max(best, active);
+    if (!isDayFullyCompleted(records, habitId, day, timeSlots)) {
+      active = 0;
       return;
     }
-    active = 0;
+
+    if (prevCompletedKey !== null) {
+      const expectedKey = toDateKey(addDays(parseDateKey(prevCompletedKey), 1));
+      if (day !== expectedKey) {
+        active = 0;
+      }
+    }
+
+    active += 1;
+    best = Math.max(best, active);
+    prevCompletedKey = day;
   });
 
   return best;

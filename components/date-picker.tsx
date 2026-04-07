@@ -32,6 +32,7 @@ export function DatePicker({
   max,
   label,
   size = "default",
+  align = "left",
 }: {
   value: string;
   onChange: (dateKey: string) => void;
@@ -39,6 +40,7 @@ export function DatePicker({
   max?: string;
   label?: string;
   size?: "default" | "compact";
+  align?: "left" | "right";
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -132,7 +134,7 @@ export function DatePicker({
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 z-50 mt-1.5 w-[272px] rounded-xl bg-white p-3 shadow-[0_8px_30px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)]">
+        <div className={`absolute top-full z-50 mt-1.5 w-[272px] rounded-xl bg-white p-3 shadow-[0_8px_30px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)] ${align === "right" ? "right-0" : "left-0"}`}>
           {/* Month navigation */}
           <div className="flex items-center justify-between pb-2.5">
             <button
