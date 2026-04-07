@@ -426,7 +426,7 @@ export function HabitTrackerApp() {
               <div
                 className="grid gap-px rounded-xl bg-black/[0.02] p-px"
                 style={{
-                  gridTemplateColumns: `280px repeat(${days.length}, minmax(40px, 1fr))`,
+                  gridTemplateColumns: `280px repeat(${days.length}, 44px)`,
                 }}
               >
                 {/* Column headers */}
