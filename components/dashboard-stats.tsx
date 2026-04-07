@@ -370,7 +370,7 @@ export function DashboardStats() {
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
-        <div className="animate-fade-in-up surface-panel rounded-[28px] p-5 sm:p-6">
+        <div className="animate-fade-in-up surface-panel min-w-0 rounded-[28px] p-5 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-[14px] font-semibold text-ink-950">
@@ -408,17 +408,15 @@ export function DashboardStats() {
                   key={day.dateKey}
                   className="flex flex-col items-center gap-2"
                 >
-                  <div className="flex h-40 w-full items-end">
-                    <div className="w-full overflow-hidden rounded-t-[16px] rounded-b-[12px] bg-black/[0.04]">
-                      <div
-                        className="w-full rounded-[12px] bg-ink-950 transition-all duration-500"
-                        style={{
-                          height: `${Math.max(day.rate, day.total === 0 ? 8 : 16)}%`,
-                          opacity:
-                            day.rate === 100 ? 0.95 : day.rate > 0 ? 0.72 : 0.2,
-                        }}
-                      />
-                    </div>
+                  <div className="relative h-40 w-full overflow-hidden rounded-[16px] bg-black/[0.04]">
+                    <div
+                      className="absolute bottom-0 left-0 right-0 rounded-t-[16px] bg-ink-950 transition-all duration-500"
+                      style={{
+                        height: `${Math.max(day.rate, day.total === 0 ? 8 : 16)}%`,
+                        opacity:
+                          day.rate === 100 ? 0.95 : day.rate > 0 ? 0.72 : 0.2,
+                      }}
+                    />
                   </div>
                   <div className="text-center">
                     <p className="text-[11px] font-semibold tabular-nums text-ink-950">
@@ -438,7 +436,7 @@ export function DashboardStats() {
         </div>
 
         <div
-          className="animate-fade-in-up surface-panel rounded-[28px] p-5 sm:p-6"
+          className="animate-fade-in-up surface-panel min-w-0 rounded-[28px] p-5 sm:p-6"
           style={{ animationDelay: "80ms" }}
         >
           <div className="flex items-start justify-between gap-3">
@@ -506,7 +504,7 @@ export function DashboardStats() {
 
       <section className="grid gap-4 xl:grid-cols-[0.92fr_1.08fr]">
         <div
-          className="animate-fade-in-up surface-panel rounded-[28px] p-5 sm:p-6"
+          className="animate-fade-in-up surface-panel min-w-0 rounded-[28px] p-5 sm:p-6"
           style={{ animationDelay: "120ms" }}
         >
           <div className="flex items-center justify-between">
@@ -544,7 +542,7 @@ export function DashboardStats() {
         </div>
 
         <div
-          className="animate-fade-in-up surface-panel rounded-[28px] p-5 sm:p-6"
+          className="animate-fade-in-up surface-panel min-w-0 rounded-[28px] p-5 sm:p-6"
           style={{ animationDelay: "160ms" }}
         >
           <div className="flex items-center justify-between">
@@ -737,8 +735,8 @@ function StatsHeader({
                     onClick={() => onPresetChange(option.value)}
                     className={`${controlButtonBase} ${
                       selectedPreset === option.value
-                        ? "bg-ink-950 text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
-                        : "bg-ink-950/[0.04] text-ink-700 hover:bg-ink-950/[0.08]"
+                        ? "bg-white text-ink-950 shadow-[0_0_0_1px_rgba(0,0,0,0.1),0_1px_3px_rgba(0,0,0,0.08)]"
+                        : "bg-transparent text-ink-700 hover:bg-black/[0.05]"
                     }`}
                   >
                     {option.label}
@@ -779,8 +777,8 @@ function StatsHeader({
                 onClick={() => onCategoryChange("all")}
                 className={`${controlButtonBase} ${
                   category === "all"
-                    ? "bg-ink-950 text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
-                    : "bg-ink-950/[0.04] text-ink-700 hover:bg-ink-950/[0.08]"
+                    ? "bg-white text-ink-950 shadow-[0_0_0_1px_rgba(0,0,0,0.1),0_1px_3px_rgba(0,0,0,0.08)]"
+                    : "bg-transparent text-ink-700 hover:bg-black/[0.05]"
                 }`}
               >
                 All categories
@@ -792,8 +790,8 @@ function StatsHeader({
                   onClick={() => onCategoryChange(item)}
                   className={`${controlButtonBase} ${
                     category === item
-                      ? "bg-ink-950 text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
-                      : "bg-ink-950/[0.04] text-ink-700 hover:bg-ink-950/[0.08]"
+                      ? "bg-white text-ink-950 shadow-[0_0_0_1px_rgba(0,0,0,0.1),0_1px_3px_rgba(0,0,0,0.08)]"
+                      : "bg-transparent text-ink-700 hover:bg-black/[0.05]"
                   }`}
                 >
                   {item}
