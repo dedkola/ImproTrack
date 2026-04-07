@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { Check, Plus } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Check, GripVertical, Plus } from "lucide-react";
 import {
   clampDateKey,
   DateRange,
@@ -191,6 +191,63 @@ export function HabitTrackerApp() {
     null,
   );
 
+  // Drag-and-drop state
+  const [dragHabitId, setDragHabitId] = useState<string | null>(null);
+  const [dragOverHabitId, setDragOverHabitId] = useState<string | null>(null);
+  const [dragOverPosition, setDragOverPosition] = useState<"above" | "below">(
+    "below",
+  );
+
+  // Persist habit order in localStorage
+  const [habitOrder, setHabitOrder] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const stored = localStorage.getItem("momentum-habit-order");
+      return stored ? (JSON.parse(stored) as string[]) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Merge activeHabits with the stored order
+  const orderedActiveHabits = useMemo(() => {
+    if (habitOrder.length === 0) return activeHabits;
+    const orderMap = new Map(habitOrder.map((id, i) => [id, i]));
+    return [...activeHabits].sort((a, b) => {
+      // Habits not in the stored order keep their original relative position
+      // after all ordered habits.
+      const ai =
+        orderMap.get(a.id) ??
+        habitOrder.length + activeHabits.indexOf(a);
+      const bi =
+        orderMap.get(b.id) ??
+        habitOrder.length + activeHabits.indexOf(b);
+      return ai - bi;
+    });
+  }, [activeHabits, habitOrder]);
+
+  const reorderHabits = (
+    fromId: string,
+    toId: string,
+    position: "above" | "below",
+  ) => {
+    const ids = orderedActiveHabits.map((h) => h.id);
+    const fromIndex = ids.indexOf(fromId);
+    if (fromIndex === -1) return;
+    const newIds = [...ids];
+    newIds.splice(fromIndex, 1);
+    const newToIndex = newIds.indexOf(toId);
+    if (newToIndex === -1) return;
+    const insertAt = position === "above" ? newToIndex : newToIndex + 1;
+    newIds.splice(insertAt, 0, fromId);
+    setHabitOrder(newIds);
+    try {
+      localStorage.setItem("momentum-habit-order", JSON.stringify(newIds));
+    } catch {
+      // localStorage unavailable
+    }
+  };
+
   // Build row data: each habit produces 1 row (if freq=1) or N rows (one per slot)
   type GridRow = {
     habit: HabitDefinition;
@@ -201,7 +258,7 @@ export function HabitTrackerApp() {
   };
 
   const gridRows: GridRow[] = [];
-  activeHabits.forEach((habit) => {
+  orderedActiveHabits.forEach((habit) => {
     habit.timeSlots.forEach((slotName, slotIndex) => {
       gridRows.push({
         habit,
@@ -213,7 +270,7 @@ export function HabitTrackerApp() {
     });
   });
 
-  const habitSummaries = activeHabits.map((habit) => {
+  const habitSummaries = orderedActiveHabits.map((habit) => {
     const completed = countCompleted(
       records,
       habit.id,
@@ -459,6 +516,9 @@ export function HabitTrackerApp() {
                       const displaySlotName =
                         habit.frequencyPerDay === 1 ? null : slotName;
                       const matrixTone = getMatrixTone(habit.tone.fill);
+                      const isDraggedItem = dragHabitId === habit.id;
+                      const isDragTarget =
+                        dragOverHabitId === habit.id && isFirstSlot;
 
                       return (
                         <div
@@ -467,58 +527,118 @@ export function HabitTrackerApp() {
                         >
                           {/* Row label */}
                           <div
-                            className={`sticky left-0 z-30 flex items-center gap-3 bg-white px-4 py-2.5 ${
+                            draggable={isFirstSlot}
+                            onDragStart={
+                              isFirstSlot
+                                ? (e) => {
+                                    setDragHabitId(habit.id);
+                                    e.dataTransfer.effectAllowed = "move";
+                                  }
+                                : undefined
+                            }
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              if (!dragHabitId || dragHabitId === habit.id)
+                                return;
+                              const rect =
+                                e.currentTarget.getBoundingClientRect();
+                              setDragOverHabitId(habit.id);
+                              setDragOverPosition(
+                                e.clientY < rect.top + rect.height / 2
+                                  ? "above"
+                                  : "below",
+                              );
+                              e.dataTransfer.dropEffect = "move";
+                            }}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              if (dragHabitId && dragHabitId !== habit.id) {
+                                reorderHabits(
+                                  dragHabitId,
+                                  habit.id,
+                                  dragOverPosition,
+                                );
+                              }
+                              setDragHabitId(null);
+                              setDragOverHabitId(null);
+                            }}
+                            onDragEnd={() => {
+                              setDragHabitId(null);
+                              setDragOverHabitId(null);
+                            }}
+                            className={`sticky left-0 z-30 flex items-center gap-2 bg-white px-4 py-2.5 transition-opacity ${
                               isLastRow ? "rounded-bl-[11px]" : ""
                             } ${
                               !isLastSlot && habit.frequencyPerDay > 1
                                 ? "border-b border-dashed border-black/[0.06]"
                                 : ""
+                            } ${isDraggedItem ? "opacity-40" : ""} ${
+                              isDragTarget && dragOverPosition === "above"
+                                ? "border-t-2 border-t-[#3274C7]"
+                                : ""
+                            } ${
+                              isDragTarget && dragOverPosition === "below"
+                                ? "border-b-2 border-b-[#3274C7]"
+                                : ""
                             }`}
                           >
                             {isFirstSlot ? (
-                              <div className="flex flex-1 items-center justify-between gap-2">
-                                <div className="flex items-center gap-2.5">
-                                  <span className="text-[18px] leading-none">
-                                    {habit.icon}
-                                  </span>
-                                  <div className="min-w-0">
-                                    <p className="truncate text-[14px] font-semibold text-ink-950">
-                                      {habit.name}
-                                      {displaySlotName && (
-                                        <span className="ml-1.5 text-[12px] font-normal text-ink-700">
-                                          — {displaySlotName}
-                                        </span>
-                                      )}
-                                    </p>
-                                    <p className="truncate text-[12px] text-ink-700">
-                                      {habit.goalLabel}
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                  <span
-                                    className={`rounded-md px-2 py-0.5 text-[12px] font-semibold ${habit.tone.softFill} ${habit.tone.badge}`}
-                                  >
-                                    {completionRate(
-                                      records,
-                                      habit.id,
-                                      range,
-                                      todayKey,
-                                      habit.timeSlots,
-                                    )}
-                                    %
-                                  </span>
-                                  <HabitMenu
-                                    tone={habit.tone}
-                                    onEdit={() => {
-                                      setEditingHabit(habit);
-                                      setFormOpen(true);
-                                    }}
-                                    onArchive={() => archiveHabit(habit.id)}
-                                    onDelete={() => setDeleteTarget(habit)}
+                              <>
+                                <div
+                                  role="img"
+                                  aria-label="Drag to reorder"
+                                  className="flex-shrink-0 cursor-grab touch-none text-ink-700/30 hover:text-ink-700/60 active:cursor-grabbing"
+                                  title="Drag to reorder"
+                                >
+                                  <GripVertical
+                                    className="h-4 w-4"
+                                    strokeWidth={2}
                                   />
                                 </div>
-                              </div>
+                                <div className="flex flex-1 items-center justify-between gap-2">
+                                  <div className="flex items-center gap-2.5">
+                                    <span className="text-[18px] leading-none">
+                                      {habit.icon}
+                                    </span>
+                                    <div className="min-w-0">
+                                      <p className="truncate text-[14px] font-semibold text-ink-950">
+                                        {habit.name}
+                                        {displaySlotName && (
+                                          <span className="ml-1.5 text-[12px] font-normal text-ink-700">
+                                            — {displaySlotName}
+                                          </span>
+                                        )}
+                                      </p>
+                                      <p className="truncate text-[12px] text-ink-700">
+                                        {habit.goalLabel}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-1.5">
+                                    <span
+                                      className={`rounded-md px-2 py-0.5 text-[12px] font-semibold ${habit.tone.softFill} ${habit.tone.badge}`}
+                                    >
+                                      {completionRate(
+                                        records,
+                                        habit.id,
+                                        range,
+                                        todayKey,
+                                        habit.timeSlots,
+                                      )}
+                                      %
+                                    </span>
+                                    <HabitMenu
+                                      tone={habit.tone}
+                                      onEdit={() => {
+                                        setEditingHabit(habit);
+                                        setFormOpen(true);
+                                      }}
+                                      onArchive={() => archiveHabit(habit.id)}
+                                      onDelete={() => setDeleteTarget(habit)}
+                                    />
+                                  </div>
+                                </div>
+                              </>
                             ) : (
                               <div className="flex flex-1 items-center pl-8">
                                 <p className="text-[13px] text-ink-700">
