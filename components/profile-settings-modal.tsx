@@ -15,6 +15,11 @@ export function ProfileSettingsModal({ onClose }: ProfileSettingsModalProps) {
   const { user } = useFirebaseAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // The photo URL provided by Google Sign-In (from provider data)
+  const googlePhotoUrl =
+    user?.providerData.find((p) => p.providerId === "google.com")?.photoURL ??
+    null;
+
   const [displayName, setDisplayName] = useState(user?.displayName ?? "");
   const [previewUrl, setPreviewUrl] = useState<string | null>(
     user?.photoURL ?? null,
@@ -58,6 +63,13 @@ export function ProfileSettingsModal({ onClose }: ProfileSettingsModalProps) {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
+  function handleUseGooglePhoto() {
+    if (!googlePhotoUrl) return;
+    setPendingFile(null);
+    setPreviewUrl(googlePhotoUrl);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
   async function handleSave() {
     if (!user) return;
     setError(null);
@@ -68,8 +80,13 @@ export function ProfileSettingsModal({ onClose }: ProfileSettingsModalProps) {
       let photoURL = user.photoURL;
 
       if (pendingFile) {
+        // Upload a new custom avatar
         photoURL = await uploadUserAvatar(user.uid, pendingFile);
+      } else if (previewUrl === googlePhotoUrl) {
+        // Restoring the Google provider photo — no upload, just use the URL
+        photoURL = googlePhotoUrl;
       } else if (previewUrl === null && user.photoURL) {
+        // Explicitly removed avatar
         await deleteUserAvatar(user.uid);
         photoURL = null;
       }
@@ -140,7 +157,7 @@ export function ProfileSettingsModal({ onClose }: ProfileSettingsModalProps) {
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
@@ -148,6 +165,18 @@ export function ProfileSettingsModal({ onClose }: ProfileSettingsModalProps) {
             >
               Upload photo
             </button>
+            {googlePhotoUrl && previewUrl !== googlePhotoUrl && (
+              <>
+                <span className="text-ink-400 text-[12px]">·</span>
+                <button
+                  type="button"
+                  onClick={handleUseGooglePhoto}
+                  className="text-[12px] font-medium text-ink-500 hover:text-ink-950 hover:underline"
+                >
+                  Use Google photo
+                </button>
+              </>
+            )}
             {previewUrl && (
               <>
                 <span className="text-ink-400 text-[12px]">·</span>
