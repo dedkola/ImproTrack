@@ -49,7 +49,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
         <div className="header-bar sticky top-0 z-40">
           <div className="page-shell flex h-14 items-center">
             <span className="font-display text-[16px] font-semibold text-ink-950">
-              Momentum
+              ImproTrack
             </span>
           </div>
         </div>
@@ -78,7 +78,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
         <div className="header-bar sticky top-0 z-40">
           <div className="page-shell flex h-14 items-center">
             <span className="font-display text-[16px] font-semibold text-ink-950">
-              Momentum
+              ImproTrack
             </span>
           </div>
         </div>
@@ -90,7 +90,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
               Sign in to open your dashboard
             </h1>
             <p className="max-w-xl text-[15px] leading-7 text-ink-700">
-              Momentum now stores habits per account, so the dashboard unlocks
+              ImproTrack now stores habits per account, so the dashboard unlocks
               after you sign in with Google.
             </p>
             <AuthControls variant="panel" />
@@ -108,7 +108,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
         <div className="header-bar sticky top-0 z-40">
           <div className="page-shell flex h-14 items-center">
             <span className="font-display text-[16px] font-semibold text-ink-950">
-              Momentum
+              ImproTrack
             </span>
           </div>
         </div>
@@ -147,7 +147,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
           <div className="page-shell flex h-14 items-center">
             <SidebarToggle onToggle={() => setSidebarOpen(true)} />
             <span className="ml-3 font-display text-[16px] font-semibold text-ink-950">
-              Momentum
+              ImproTrack
             </span>
           </div>
         </div>

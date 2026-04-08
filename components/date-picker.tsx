@@ -187,7 +187,7 @@ export function DatePicker({
                   }}
                   className={`flex h-8 w-full items-center justify-center rounded-lg text-[12px] font-medium transition ${
                     sel
-                      ? "bg-[#3274C7] text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+                      ? "bg-[#6D28D9] text-white shadow-[0_1px_3px_rgba(109,40,217,0.35)]"
                       : disabled
                         ? "text-ink-400 cursor-not-allowed"
                         : tod

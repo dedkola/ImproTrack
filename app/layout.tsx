@@ -18,11 +18,11 @@ const display = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: {
-    default: "Momentum",
-    template: "%s | Momentum",
+    default: "ImproTrack",
+    template: "%s | ImproTrack",
   },
   description:
-    "A focused habit tracker with a calm homepage, dashboard, archive, and statistics.",
+    "ImproTrack — a focused habit tracker with a calm homepage, dashboard, archive, and statistics.",
 };
 
 export default function RootLayout({

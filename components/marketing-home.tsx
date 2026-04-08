@@ -97,11 +97,13 @@ export function MarketingHome() {
       <header className="header-bar sticky top-0 z-40">
         <div className="page-shell mx-auto flex max-w-7xl items-center justify-between gap-6 py-3.5">
           <Link href="/" className="flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#3274C7] text-[13px] font-semibold text-white">
-              M
-            </span>
+            <img
+              src="/logo.svg"
+              alt="ImproTrack"
+              className="h-9 w-9 drop-shadow-[0_2px_10px_rgba(109,40,217,0.45)]"
+            />
             <span className="font-display text-[18px] font-semibold text-ink-950">
-              Momentum
+              ImproTrack
             </span>
           </Link>
 
@@ -138,7 +140,7 @@ export function MarketingHome() {
                 Habit tracking that feels clear the moment you land.
               </h1>
               <p className="mt-6 max-w-2xl text-[17px] leading-8 text-ink-700 sm:text-[18px]">
-                Momentum gives you a focused homepage, a dashboard for active
+                ImproTrack gives you a focused homepage, a dashboard for active
                 routines, an archive for habits you have retired, and a
                 statistics area that makes progress impossible to ignore.
               </p>
@@ -146,7 +148,7 @@ export function MarketingHome() {
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/dashboard"
-                  className="pill-btn inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 text-[15px] font-semibold text-[#3274C7] shadow-[0_8px_24px_rgba(10,22,40,0.16)]"
+                  className="pill-btn inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 text-[15px] font-semibold text-[#6D28D9] shadow-[0_8px_24px_rgba(10,22,40,0.16)]"
                 >
                   Open dashboard
                 </Link>
@@ -205,7 +207,7 @@ export function MarketingHome() {
                               ? "bg-white border border-black/[0.08]"
                               : index % 4 === 0
                                 ? "bg-amber-200/80"
-                                : "bg-[#3274C7]"
+                                : "bg-[#6D28D9]"
                           }`}
                         />
                       ))}
@@ -247,7 +249,7 @@ export function MarketingHome() {
                           </div>
                           <div className="h-[7px] overflow-hidden rounded-full bg-black/[0.05]">
                             <div
-                              className="h-[7px] rounded-full bg-[#3274C7]"
+                              className="h-[7px] rounded-full bg-[#6D28D9]"
                               style={{ width: `${value}%` }}
                             />
                           </div>
@@ -315,7 +317,7 @@ export function MarketingHome() {
                 key={feature.title}
                 className="feature-panel rounded-[28px] p-5"
               >
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[#3274C7] text-[15px] font-semibold text-white">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[#6D28D9] text-[15px] font-semibold text-white">
                   {feature.icon}
                 </span>
                 <h3 className="mt-5 text-[18px] font-semibold text-ink-950">
@@ -343,9 +345,10 @@ export function MarketingHome() {
               </h2>
               <div className="mt-5 space-y-4 text-[15px] leading-8 text-ink-700">
                 <p>
-                  Momentum is structured so guests land on a homepage, logged-in
-                  users work inside a dedicated dashboard, inactive habits move
-                  into archive, and overall analytics live in a statistics page.
+                  ImproTrack is structured so guests land on a homepage,
+                  logged-in users work inside a dedicated dashboard, inactive
+                  habits move into archive, and overall analytics live in a
+                  statistics page.
                 </p>
                 <p>
                   That split matters because it keeps marketing content out of
@@ -428,7 +431,7 @@ export function MarketingHome() {
                           </div>
                           <div className="h-[6px] overflow-hidden rounded-full bg-black/[0.05]">
                             <div
-                              className="h-[6px] rounded-full bg-[#3274C7]"
+                              className="h-[6px] rounded-full bg-[#6D28D9]"
                               style={{ width: `${value}%` }}
                             />
                           </div>
@@ -452,7 +455,7 @@ export function MarketingHome() {
                           key={step}
                           className="flex items-start gap-3 rounded-[18px] bg-paper-50 px-3 py-3"
                         >
-                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#3274C7] text-[12px] font-semibold text-white">
+                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#6D28D9] text-[12px] font-semibold text-white">
                             {step}
                           </span>
                           <div>
@@ -498,12 +501,12 @@ export function MarketingHome() {
                   Comparison
                 </p>
                 <h2 className="mt-2 font-display text-[32px] font-semibold tracking-tight text-ink-950 sm:text-[40px]">
-                  Why Momentum is stronger than the usual alternatives.
+                  Why ImproTrack is stronger than the usual alternatives.
                 </h2>
               </div>
               <p className="max-w-xl text-[15px] leading-7 text-ink-700">
                 Most alternatives either stop at a checklist or bury analytics
-                behind complexity. Momentum keeps the flow readable from
+                behind complexity. ImproTrack keeps the flow readable from
                 homepage to dashboard to archive to statistics.
               </p>
             </div>
@@ -514,7 +517,7 @@ export function MarketingHome() {
                   <tr className="bg-paper-50 text-left text-[12px] uppercase tracking-[0.14em] text-ink-600">
                     <th className="px-4 py-4 font-semibold">Capability</th>
                     <th className="px-4 py-4 font-semibold text-ink-950">
-                      Momentum
+                      ImproTrack
                     </th>
                     <th className="px-4 py-4 font-semibold">Notes</th>
                     <th className="px-4 py-4 font-semibold">Spreadsheet</th>
@@ -591,11 +594,13 @@ export function MarketingHome() {
         <div className="page-shell mx-auto flex max-w-7xl flex-col gap-5 py-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3274C7] text-[12px] font-semibold text-white">
-                M
-              </span>
+              <img
+                src="/logo.svg"
+                alt="ImproTrack"
+                className="h-8 w-8 drop-shadow-[0_2px_8px_rgba(109,40,217,0.45)]"
+              />
               <span className="font-display text-[17px] font-semibold text-ink-950">
-                Momentum
+                ImproTrack
               </span>
             </div>
             <p className="mt-2 text-[13px] text-ink-700">
