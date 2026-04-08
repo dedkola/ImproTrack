@@ -4,13 +4,10 @@ import Link from "next/link";
 import { useState, useMemo } from "react";
 import { Check, GripVertical, Plus } from "lucide-react";
 import {
-  clampDateKey,
-  DateRange,
   eachDay,
   formatLongDate,
   formatMonthLabel,
   getCurrentMonthRange,
-  getRollingRange,
   parseDateKey,
   startOfDay,
   toDateKey,
@@ -20,19 +17,9 @@ import { completionRate, countCompleted, isSlotCompleted } from "@/lib/stats";
 import { useHabits, useHabitRecords } from "@/lib/storage";
 import { HabitForm, HabitMenu, ConfirmDialog } from "@/components/habit-form";
 import { HabitIcon } from "@/components/habit-icon";
-import { DatePicker } from "@/components/date-picker";
-
-type PeriodPreset = "month" | "7" | "30" | "90" | "custom";
 
 const today = startOfDay(new Date());
 const todayKey = toDateKey(today);
-
-function getPresetRange(preset: Exclude<PeriodPreset, "custom">) {
-  if (preset === "month") {
-    return getCurrentMonthRange(today);
-  }
-  return getRollingRange(Number(preset), today);
-}
 
 function getOverallRate(rates: number[]) {
   if (rates.length === 0) return 0;
@@ -179,8 +166,7 @@ export function HabitTrackerApp() {
   } = useHabits();
   const { records, toggleHabitDay } = useHabitRecords(activeHabits);
 
-  const [selectedPreset, setSelectedPreset] = useState<PeriodPreset>("month");
-  const [range, setRange] = useState<DateRange>(getCurrentMonthRange(today));
+  const range = getCurrentMonthRange(today);
   const days = eachDay(range);
 
   // CRUD modals
@@ -293,24 +279,6 @@ export function HabitTrackerApp() {
     0,
   );
 
-  const handlePreset = (preset: Exclude<PeriodPreset, "custom">) => {
-    setSelectedPreset(preset);
-    setRange(getPresetRange(preset));
-  };
-
-  const updateCustomRange = (field: keyof DateRange, value: string) => {
-    const nextRange = { ...range, [field]: value };
-    const orderedRange =
-      nextRange.from <= nextRange.to
-        ? nextRange
-        : { from: nextRange.to, to: nextRange.from };
-    setSelectedPreset("custom");
-    setRange({
-      from: clampDateKey(orderedRange.from, "2025-01-01", "2030-12-31"),
-      to: clampDateKey(orderedRange.to, "2025-01-01", "2030-12-31"),
-    });
-  };
-
   const handleSave = (
     data: Omit<HabitDefinition, "id" | "slug" | "createdAt" | "archived">,
   ) => {
@@ -356,13 +324,7 @@ export function HabitTrackerApp() {
 
             <div className="flex items-center gap-3">
               <span className="font-display text-[14px] font-medium text-ink-950">
-                {selectedPreset === "7"
-                  ? "Last 7 days"
-                  : selectedPreset === "30"
-                    ? "Last 30 days"
-                    : selectedPreset === "90"
-                      ? "Last 90 days"
-                      : formatMonthLabel(range)}
+                {formatMonthLabel(range)}
               </span>
               <Link
                 href="/dashboard/stats"
@@ -382,51 +344,6 @@ export function HabitTrackerApp() {
                 <Plus className="h-3.5 w-3.5" strokeWidth={2} />
                 Add habit
               </button>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-wrap gap-1.5">
-              {[
-                ["month", "Monthly"],
-                ["7", "7 d"],
-                ["30", "30 d"],
-                ["90", "90 d"],
-              ].map(([value, label]) => {
-                const active = selectedPreset === value;
-                return (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() =>
-                      handlePreset(value as Exclude<PeriodPreset, "custom">)
-                    }
-                    className={`pill-btn tap-target-compact rounded-lg px-3 py-2 text-[13px] font-medium transition ${
-                      active
-                        ? "bg-[#3274C7] text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
-                        : "bg-ink-950/[0.04] text-ink-700 hover:bg-ink-950/[0.08]"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <DatePicker
-                label="From"
-                value={range.from}
-                max={range.to}
-                onChange={(v) => updateCustomRange("from", v)}
-              />
-              <DatePicker
-                label="To"
-                value={range.to}
-                min={range.from}
-                onChange={(v) => updateCustomRange("to", v)}
-                align="right"
-              />
             </div>
           </div>
         </div>
@@ -454,7 +371,7 @@ export function HabitTrackerApp() {
             </button>
           </div>
         ) : (
-          <>
+          <div className="flex flex-col gap-4">
             {/* Matrix */}
             <section className="animate-scale-in surface-panel relative overflow-visible rounded-2xl">
               <div className="flex items-center justify-between border-b border-black/[0.04] px-5 py-3 sm:px-6">
@@ -467,14 +384,11 @@ export function HabitTrackerApp() {
               </div>
 
               <div className="overflow-x-auto">
-                <div
-                  className="min-w-max px-3 pb-3 pt-2 sm:px-4"
-                  style={{ minWidth: `${280 + days.length * 44}px` }}
-                >
+                <div className="px-3 pb-3 pt-2 sm:px-4">
                   <div
-                    className="grid gap-px rounded-xl bg-black/[0.02] p-px"
+                    className="grid gap-px rounded-xl p-px"
                     style={{
-                      gridTemplateColumns: `280px repeat(${days.length}, 44px)`,
+                      gridTemplateColumns: `210px repeat(${days.length}, minmax(28px, 1fr))`,
                     }}
                   >
                     {/* Column headers */}
@@ -483,6 +397,7 @@ export function HabitTrackerApp() {
                     </div>
                     {days.map((dateKey, index) => {
                       const isFuture = dateKey > todayKey;
+                      const isToday = dateKey === todayKey;
                       const weekday = new Intl.DateTimeFormat("en", {
                         weekday: "narrow",
                       }).format(parseDateKey(dateKey));
@@ -490,20 +405,29 @@ export function HabitTrackerApp() {
                       return (
                         <div
                           key={dateKey}
-                          className={`bg-white px-1 py-3 text-center text-[12px] ${
+                          className={`px-1 py-3 text-center text-[12px] ${
                             index === days.length - 1 ? "rounded-tr-[11px]" : ""
-                          }`}
+                          } ${isToday ? "bg-[#3274C7]/[0.07]" : "bg-white"}`}
                         >
-                          <p className="font-semibold text-ink-950">
+                          <p
+                            className={`font-semibold ${isToday ? "text-[#3274C7]" : "text-ink-950"}`}
+                          >
                             {dateKey.slice(-2)}
                           </p>
                           <p
                             className={
-                              isFuture ? "text-ink-700/30" : "text-ink-700"
+                              isFuture
+                                ? "text-ink-700/30"
+                                : isToday
+                                  ? "text-[#3274C7]/70"
+                                  : "text-ink-700"
                             }
                           >
                             {weekday}
                           </p>
+                          {isToday && (
+                            <span className="mx-auto mt-1 block h-1 w-1 rounded-full bg-[#3274C7]" />
+                          )}
                         </div>
                       );
                     })}
@@ -660,18 +584,13 @@ export function HabitTrackerApp() {
                               },
                             );
                             const isFuture = dateKey > todayKey;
+                            const isToday = dateKey === todayKey;
                             const checked = slotChecked;
                             const partial = false;
-                            const buttonStyle = checked
-                              ? {
-                                  backgroundColor: matrixTone.cellTint,
-                                  boxShadow: `inset 0 0 0 1.5px ${matrixTone.fill}`,
-                                }
-                              : undefined;
                             const checkStyle = checked
                               ? {
                                   backgroundColor: matrixTone.fill,
-                                  borderColor: matrixTone.fill,
+                                  borderColor: "transparent",
                                   boxShadow: `0 6px 14px ${matrixTone.glow}, 0 1px 2px rgba(10, 22, 40, 0.12)`,
                                 }
                               : partial
@@ -697,23 +616,13 @@ export function HabitTrackerApp() {
                                   isLastRow && colIndex === days.length - 1
                                     ? "rounded-br-[11px]"
                                     : ""
-                                }`}
-                                style={buttonStyle}
+                                } ${isToday && !checked ? "bg-[#3274C7]/[0.05]" : ""}`}
                               >
-                                {checked ? (
-                                  <span
-                                    aria-hidden="true"
-                                    className="pointer-events-none absolute inset-[6px] rounded-[10px] opacity-100 transition-all duration-200"
-                                    style={{
-                                      background: `linear-gradient(180deg, ${matrixTone.cellTint} 0%, rgba(255,255,255,0.88) 100%)`,
-                                    }}
-                                  />
-                                ) : null}
                                 <span
                                   style={checkStyle}
-                                  className={`matrix-check relative z-10 flex h-[26px] w-[26px] items-center justify-center rounded-lg text-white transition-all duration-200 ${
+                                  className={`matrix-check relative z-10 flex h-[26px] w-[26px] items-center justify-center rounded-lg transition-all duration-200 ${
                                     checked
-                                      ? `matrix-check-pop matrix-check-checked`
+                                      ? `matrix-check-pop matrix-check-checked text-white`
                                       : partial
                                         ? `matrix-check-partial ${habit.tone.badge} text-transparent`
                                         : "matrix-check-idle text-transparent"
@@ -749,7 +658,7 @@ export function HabitTrackerApp() {
             </section>
 
             {/* Habit cards */}
-            <section className="stagger-children grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <section className="stagger-children grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
               {habitSummaries.map(({ habit, completed, rate }) => (
                 <Link
                   key={habit.id}
@@ -807,7 +716,7 @@ export function HabitTrackerApp() {
                 </Link>
               ))}
             </section>
-          </>
+          </div>
         )}
       </div>
 
