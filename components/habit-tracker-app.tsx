@@ -13,7 +13,12 @@ import {
   toDateKey,
 } from "@/lib/date";
 import { HabitDefinition } from "@/lib/habits";
-import { completionRate, countCompleted, isSlotCompleted } from "@/lib/stats";
+import {
+  completedSlotsInDay,
+  completionRate,
+  countCompleted,
+  isSlotCompleted,
+} from "@/lib/stats";
 import { useHabits, useHabitRecords } from "@/lib/storage";
 import { HabitForm, HabitMenu, ConfirmDialog } from "@/components/habit-form";
 import { HabitIcon } from "@/components/habit-icon";
@@ -233,9 +238,10 @@ export function HabitTrackerApp() {
     }
   };
 
-  // Build row data: each habit produces 1 row (if freq=1) or N rows (one per slot)
+  // Build row data: single-slot habits → 1 row; multi-slot → 1 total summary row + N slot rows
   type GridRow = {
     habit: HabitDefinition;
+    rowType: "single" | "total" | "slot";
     slotName: string;
     slotIndex: number;
     isFirstSlot: boolean;
@@ -244,15 +250,38 @@ export function HabitTrackerApp() {
 
   const gridRows: GridRow[] = [];
   orderedActiveHabits.forEach((habit) => {
-    habit.timeSlots.forEach((slotName, slotIndex) => {
+    const isMultiSlot = habit.frequencyPerDay > 1 && habit.timeSlots.length > 1;
+    if (isMultiSlot) {
       gridRows.push({
         habit,
-        slotName,
-        slotIndex,
-        isFirstSlot: slotIndex === 0,
-        isLastSlot: slotIndex === habit.timeSlots.length - 1,
+        rowType: "total",
+        slotName: "total",
+        slotIndex: -1,
+        isFirstSlot: true,
+        isLastSlot: false,
       });
-    });
+      habit.timeSlots.forEach((slotName, slotIndex) => {
+        gridRows.push({
+          habit,
+          rowType: "slot",
+          slotName,
+          slotIndex,
+          isFirstSlot: false,
+          isLastSlot: slotIndex === habit.timeSlots.length - 1,
+        });
+      });
+    } else {
+      habit.timeSlots.forEach((slotName, slotIndex) => {
+        gridRows.push({
+          habit,
+          rowType: "single",
+          slotName,
+          slotIndex,
+          isFirstSlot: slotIndex === 0,
+          isLastSlot: slotIndex === habit.timeSlots.length - 1,
+        });
+      });
+    }
   });
 
   const habitSummaries = orderedActiveHabits.map((habit) => {
@@ -437,10 +466,16 @@ export function HabitTrackerApp() {
 
                     {/* Rows */}
                     {gridRows.map((row, rowIndex) => {
-                      const { habit, slotName, isFirstSlot, isLastSlot } = row;
+                      const {
+                        habit,
+                        slotName,
+                        rowType,
+                        isFirstSlot,
+                        isLastSlot,
+                      } = row;
                       const isLastRow = rowIndex === gridRows.length - 1;
                       const displaySlotName =
-                        habit.frequencyPerDay === 1 ? null : slotName;
+                        rowType === "slot" ? slotName : null;
                       const matrixTone = getMatrixTone(habit.tone.fill);
                       const isDraggedItem = dragHabitId === habit.id;
                       const isDragTarget =
@@ -567,30 +602,88 @@ export function HabitTrackerApp() {
 
                           {/* Day cells */}
                           {days.map((dateKey, colIndex) => {
+                            const isFuture = dateKey > todayKey;
+                            const isToday = dateKey === todayKey;
+
+                            if (rowType === "total") {
+                              const completedCount = completedSlotsInDay(
+                                records,
+                                habit.id,
+                                dateKey,
+                                habit.timeSlots,
+                              );
+                              const totalSlotCount = habit.timeSlots.length;
+                              const fraction =
+                                totalSlotCount > 0
+                                  ? completedCount / totalSlotCount
+                                  : 0;
+                              const isFull = fraction >= 1;
+
+                              return (
+                                <div
+                                  key={`${habit.id}-total-${dateKey}`}
+                                  className={`relative flex h-full min-h-[44px] items-center justify-center border-b border-dashed border-black/[0.05] ${
+                                    isLastRow && colIndex === days.length - 1
+                                      ? "rounded-br-[11px]"
+                                      : ""
+                                  } ${isToday ? "bg-[#3274C7]/[0.05]" : ""} ${
+                                    isFuture ? "opacity-40" : ""
+                                  }`}
+                                >
+                                  <span
+                                    className={`matrix-check relative flex h-[26px] w-[26px] items-center justify-center overflow-hidden rounded-lg ${
+                                      isFull
+                                        ? "matrix-check-checked text-white"
+                                        : "matrix-check-idle"
+                                    }`}
+                                    style={
+                                      isFull
+                                        ? {
+                                            backgroundColor: matrixTone.fill,
+                                            borderColor: "transparent",
+                                            boxShadow: `0 6px 14px ${matrixTone.glow}, 0 1px 2px rgba(10, 22, 40, 0.12)`,
+                                          }
+                                        : fraction > 0
+                                          ? { borderColor: matrixTone.fill }
+                                          : undefined
+                                    }
+                                  >
+                                    {fraction > 0 && !isFull && (
+                                      <span
+                                        className="absolute inset-x-0 bottom-0"
+                                        style={{
+                                          height: `${fraction * 100}%`,
+                                          backgroundColor: matrixTone.fill,
+                                          opacity: 0.65,
+                                        }}
+                                      />
+                                    )}
+                                    {isFull && (
+                                      <Check
+                                        aria-hidden="true"
+                                        className="relative z-10 h-3 w-3"
+                                        strokeWidth={2.2}
+                                      />
+                                    )}
+                                  </span>
+                                </div>
+                              );
+                            }
+
                             const daySlots = records[habit.id]?.[dateKey];
                             const slotChecked = isSlotCompleted(
                               daySlots,
                               slotName,
-                              {
-                                fallbackToAny: habit.timeSlots.length <= 1,
-                              },
+                              { fallbackToAny: rowType === "single" },
                             );
-                            const isFuture = dateKey > todayKey;
-                            const isToday = dateKey === todayKey;
                             const checked = slotChecked;
-                            const partial = false;
                             const checkStyle = checked
                               ? {
                                   backgroundColor: matrixTone.fill,
                                   borderColor: "transparent",
                                   boxShadow: `0 6px 14px ${matrixTone.glow}, 0 1px 2px rgba(10, 22, 40, 0.12)`,
                                 }
-                              : partial
-                                ? {
-                                    backgroundColor: matrixTone.partial,
-                                    borderColor: matrixTone.fill,
-                                  }
-                                : undefined;
+                              : undefined;
 
                             return (
                               <button
@@ -618,10 +711,8 @@ export function HabitTrackerApp() {
                                   style={checkStyle}
                                   className={`matrix-check relative z-10 flex h-[26px] w-[26px] items-center justify-center rounded-lg transition-all duration-200 ${
                                     checked
-                                      ? `matrix-check-pop matrix-check-checked text-white`
-                                      : partial
-                                        ? `matrix-check-partial ${habit.tone.badge} text-transparent`
-                                        : "matrix-check-idle text-transparent"
+                                      ? "matrix-check-pop matrix-check-checked text-white"
+                                      : "matrix-check-idle text-transparent"
                                   }`}
                                 >
                                   {checked ? (
@@ -629,10 +720,6 @@ export function HabitTrackerApp() {
                                       aria-hidden="true"
                                       className="h-3 w-3 opacity-100"
                                       strokeWidth={2.2}
-                                    />
-                                  ) : partial ? (
-                                    <span
-                                      className={`h-2 w-2 rounded-full ${habit.tone.fill} opacity-40`}
                                     />
                                   ) : (
                                     <Check
