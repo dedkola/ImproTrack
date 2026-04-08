@@ -384,7 +384,10 @@ export function HabitTrackerApp() {
               </div>
 
               <div className="overflow-x-auto">
-                <div className="px-3 pb-3 pt-2 sm:px-4">
+                <div
+                  className="px-3 pb-3 pt-2 sm:px-4"
+                  style={{ minWidth: `${210 + days.length * 28}px` }}
+                >
                   <div
                     className="grid gap-px rounded-xl p-px"
                     style={{
@@ -489,11 +492,15 @@ export function HabitTrackerApp() {
                               setDragHabitId(null);
                               setDragOverHabitId(null);
                             }}
-                            className={`sticky left-0 z-30 flex items-center gap-2 bg-white px-4 py-2.5 transition-opacity ${
+                            className={`sticky left-0 z-30 flex min-w-0 flex-col justify-center bg-white px-3 py-2 transition-opacity ${
                               isLastRow ? "rounded-bl-[11px]" : ""
                             } ${
+                              isLastSlot && !isLastRow
+                                ? "border-b border-black/[0.07]"
+                                : ""
+                            } ${
                               !isLastSlot && habit.frequencyPerDay > 1
-                                ? "border-b border-dashed border-black/[0.06]"
+                                ? "border-b border-dashed border-black/[0.05]"
                                 : ""
                             } ${isDraggedItem ? "opacity-40" : ""} ${
                               isDragTarget && dragOverPosition === "above"
@@ -506,70 +513,55 @@ export function HabitTrackerApp() {
                             }`}
                           >
                             {isFirstSlot ? (
-                              <>
-                                <div
-                                  role="img"
-                                  aria-label="Drag to reorder"
-                                  className="flex-shrink-0 cursor-grab touch-none text-ink-700/30 hover:text-ink-700/60 active:cursor-grabbing"
-                                  title="Drag to reorder"
-                                >
-                                  <GripVertical
-                                    className="h-4 w-4"
-                                    strokeWidth={2}
+                              <div className="flex min-w-0 flex-col gap-1">
+                                <div className="flex items-center gap-1">
+                                  <div
+                                    role="img"
+                                    aria-label="Drag to reorder"
+                                    className="shrink-0 cursor-grab touch-none text-ink-700/25 hover:text-ink-700/60 active:cursor-grabbing"
+                                    title="Drag to reorder"
+                                  >
+                                    <GripVertical
+                                      className="h-3.5 w-3.5"
+                                      strokeWidth={2}
+                                    />
+                                  </div>
+                                  <HabitIcon
+                                    name={habit.icon}
+                                    size={14}
+                                    className="shrink-0 text-ink-700/70"
+                                  />
+                                  <div className="flex-1" />
+                                  <span
+                                    className={`rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${habit.tone.softFill} ${habit.tone.badge}`}
+                                  >
+                                    {completionRate(
+                                      records,
+                                      habit.id,
+                                      range,
+                                      todayKey,
+                                      habit.timeSlots,
+                                    )}
+                                    %
+                                  </span>
+                                  <HabitMenu
+                                    tone={habit.tone}
+                                    onEdit={() => {
+                                      setEditingHabit(habit);
+                                      setFormOpen(true);
+                                    }}
+                                    onArchive={() => archiveHabit(habit.id)}
+                                    onDelete={() => setDeleteTarget(habit)}
                                   />
                                 </div>
-                                <div className="flex flex-1 items-center justify-between gap-2">
-                                  <div className="flex items-center gap-2.5">
-                                    <HabitIcon
-                                      name={habit.icon}
-                                      size={18}
-                                      className="text-ink-700 shrink-0"
-                                    />
-                                    <div className="min-w-0">
-                                      <p className="truncate text-[14px] font-semibold text-ink-950">
-                                        {habit.name}
-                                        {displaySlotName && (
-                                          <span className="ml-1.5 text-[12px] font-normal text-ink-700">
-                                            — {displaySlotName}
-                                          </span>
-                                        )}
-                                      </p>
-                                      <p className="truncate text-[12px] text-ink-700">
-                                        {habit.goalLabel}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center gap-1.5">
-                                    <span
-                                      className={`rounded-md px-2 py-0.5 text-[12px] font-semibold ${habit.tone.softFill} ${habit.tone.badge}`}
-                                    >
-                                      {completionRate(
-                                        records,
-                                        habit.id,
-                                        range,
-                                        todayKey,
-                                        habit.timeSlots,
-                                      )}
-                                      %
-                                    </span>
-                                    <HabitMenu
-                                      tone={habit.tone}
-                                      onEdit={() => {
-                                        setEditingHabit(habit);
-                                        setFormOpen(true);
-                                      }}
-                                      onArchive={() => archiveHabit(habit.id)}
-                                      onDelete={() => setDeleteTarget(habit)}
-                                    />
-                                  </div>
-                                </div>
-                              </>
-                            ) : (
-                              <div className="flex flex-1 items-center pl-8">
-                                <p className="text-[13px] text-ink-700">
-                                  {displaySlotName}
+                                <p className="truncate text-[13px] font-semibold leading-tight text-ink-950">
+                                  {habit.name}
                                 </p>
                               </div>
+                            ) : (
+                              <p className="pl-5 text-[12px] text-ink-700">
+                                {displaySlotName}
+                              </p>
                             )}
                           </div>
 
@@ -612,11 +604,15 @@ export function HabitTrackerApp() {
                                 disabled={isFuture}
                                 aria-pressed={slotChecked}
                                 aria-label={`${habit.name}${displaySlotName ? ` ${displaySlotName}` : ""} on ${formatLongDate(dateKey)}`}
-                                className={`matrix-day-btn relative flex h-10 items-center justify-center ${
+                                className={`matrix-day-btn relative flex h-full min-h-[44px] items-center justify-center ${
                                   isLastRow && colIndex === days.length - 1
                                     ? "rounded-br-[11px]"
                                     : ""
-                                } ${isToday && !checked ? "bg-[#3274C7]/[0.05]" : ""}`}
+                                } ${isToday && !checked ? "bg-[#3274C7]/[0.05]" : ""} ${
+                                  isLastSlot && !isLastRow
+                                    ? "border-b border-black/[0.07]"
+                                    : ""
+                                }`}
                               >
                                 <span
                                   style={checkStyle}
