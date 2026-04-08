@@ -55,14 +55,14 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
         </div>
 
         <main className="page-shell flex flex-1 items-center justify-center py-8">
-          <div className="surface-panel flex max-w-lg flex-col items-center gap-3 rounded-[28px] px-8 py-10 text-center">
-            <span className="text-[34px]">⏳</span>
-            <h1 className="font-display text-[28px] font-semibold tracking-tight text-ink-950">
-              Loading your dashboard
-            </h1>
-            <p className="max-w-md text-[15px] leading-7 text-ink-700">
-              ImproTrack is checking your session and syncing the latest habits
-              from Firestore.
+          <div className="flex flex-col items-center gap-5">
+            <div className="flex items-center gap-2">
+              <span className="loading-dot" />
+              <span className="loading-dot" />
+              <span className="loading-dot" />
+            </div>
+            <p className="text-[15px] text-ink-600">
+              Loading your dashboard&hellip;
             </p>
           </div>
         </main>
