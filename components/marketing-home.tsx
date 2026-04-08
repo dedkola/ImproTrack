@@ -531,7 +531,7 @@ export function MarketingHome() {
                     >
                       {row.map((cell, cellIndex) => (
                         <td
-                          key={`${row[0]}-${cell}`}
+                          key={`${row[0]}-${cellIndex}`}
                           className={`border-t border-black/[0.06] px-4 py-4 text-[14px] ${
                             cellIndex === 0
                               ? "font-semibold text-ink-950"
@@ -571,7 +571,7 @@ export function MarketingHome() {
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/dashboard"
-                  className="pill-btn inline-flex items-center justify-center rounded-xl px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_24px_rgba(10,22,40,0.16)]"
+                  className="pill-btn inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 text-[15px] font-semibold text-ink-950 shadow-[0_8px_24px_rgba(10,22,40,0.16)]"
                 >
                   Go to dashboard
                 </Link>

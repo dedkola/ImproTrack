@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ConfirmDialog } from "@/components/habit-form";
+import { HabitIcon } from "@/components/habit-icon";
 import { useHabits } from "@/lib/storage";
 
 export function ArchivePage() {
@@ -39,7 +40,11 @@ export function ArchivePage() {
               className="animate-fade-in-up surface-panel flex items-center justify-between rounded-2xl px-5 py-4 sm:px-6"
             >
               <div className="flex items-center gap-3">
-                <span className="text-[22px]">{habit.icon}</span>
+                <HabitIcon
+                  name={habit.icon}
+                  size={22}
+                  className="text-ink-700 shrink-0"
+                />
                 <div>
                   <p className="text-[16px] font-semibold text-ink-950">
                     {habit.name}

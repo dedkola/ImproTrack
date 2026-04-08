@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { AuthControls } from "@/components/auth-controls";
+import { HabitIcon } from "@/components/habit-icon";
 import { HabitDefinition } from "@/lib/habits";
 
 type SidebarProps = {
@@ -101,9 +102,11 @@ export function Sidebar({
                   href={`/dashboard/habits/${habit.slug}`}
                   label={habit.name}
                   icon={
-                    <span className="text-[14px] leading-none">
-                      {habit.icon}
-                    </span>
+                    <HabitIcon
+                      name={habit.icon}
+                      size={14}
+                      className="text-ink-700"
+                    />
                   }
                   active={pathname === `/dashboard/habits/${habit.slug}`}
                   badge={

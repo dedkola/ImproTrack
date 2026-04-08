@@ -16,6 +16,7 @@ import {
 } from "@/lib/stats";
 import { useHabits, useHabitRecords } from "@/lib/storage";
 import { HabitForm, HabitMenu, ConfirmDialog } from "@/components/habit-form";
+import { HabitIcon } from "@/components/habit-icon";
 import { HabitChart } from "@/components/habit-chart";
 
 const today = startOfDay(new Date());
@@ -103,7 +104,11 @@ export function HabitDetail({ slug }: { slug: string }) {
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <span className="text-[28px]">{habit.icon}</span>
+              <HabitIcon
+                name={habit.icon}
+                size={28}
+                className="text-ink-700 shrink-0"
+              />
               <div>
                 <h1 className="text-[22px] font-semibold tracking-tight text-ink-950 sm:text-[26px]">
                   {habit.name}

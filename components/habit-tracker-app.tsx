@@ -19,6 +19,7 @@ import { HabitDefinition } from "@/lib/habits";
 import { completionRate, countCompleted, isSlotCompleted } from "@/lib/stats";
 import { useHabits, useHabitRecords } from "@/lib/storage";
 import { HabitForm, HabitMenu, ConfirmDialog } from "@/components/habit-form";
+import { HabitIcon } from "@/components/habit-icon";
 import { DatePicker } from "@/components/date-picker";
 
 type PeriodPreset = "month" | "7" | "30" | "90" | "custom";
@@ -217,11 +218,9 @@ export function HabitTrackerApp() {
       // Habits not in the stored order keep their original relative position
       // after all ordered habits.
       const ai =
-        orderMap.get(a.id) ??
-        habitOrder.length + activeHabits.indexOf(a);
+        orderMap.get(a.id) ?? habitOrder.length + activeHabits.indexOf(a);
       const bi =
-        orderMap.get(b.id) ??
-        habitOrder.length + activeHabits.indexOf(b);
+        orderMap.get(b.id) ?? habitOrder.length + activeHabits.indexOf(b);
       return ai - bi;
     });
   }, [activeHabits, habitOrder]);
@@ -597,9 +596,11 @@ export function HabitTrackerApp() {
                                 </div>
                                 <div className="flex flex-1 items-center justify-between gap-2">
                                   <div className="flex items-center gap-2.5">
-                                    <span className="text-[18px] leading-none">
-                                      {habit.icon}
-                                    </span>
+                                    <HabitIcon
+                                      name={habit.icon}
+                                      size={18}
+                                      className="text-ink-700 shrink-0"
+                                    />
                                     <div className="min-w-0">
                                       <p className="truncate text-[14px] font-semibold text-ink-950">
                                         {habit.name}
@@ -759,7 +760,11 @@ export function HabitTrackerApp() {
                   <div className="relative z-10 flex flex-col gap-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-2">
-                        <span className="text-[18px]">{habit.icon}</span>
+                        <HabitIcon
+                          name={habit.icon}
+                          size={18}
+                          className="text-ink-700 shrink-0"
+                        />
                         <h3 className="text-[16px] font-semibold text-ink-950">
                           {habit.name}
                         </h3>

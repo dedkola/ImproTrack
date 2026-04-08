@@ -14,6 +14,7 @@ import {
   toDateKey,
 } from "@/lib/date";
 import { DatePicker } from "@/components/date-picker";
+import { HabitIcon } from "@/components/habit-icon";
 import type { HabitDefinition } from "@/lib/habits";
 import { useHabits, useHabitRecords } from "@/lib/storage";
 import {
@@ -461,7 +462,13 @@ export function DashboardStats() {
             <div className="mt-6 rounded-[24px] border border-black/[0.06] bg-white p-5 shadow-[var(--shadow-card)]">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-[28px]">{summary.topHabit.habit.icon}</p>
+                  <p className="text-[28px]">
+                    <HabitIcon
+                      name={summary.topHabit.habit.icon}
+                      size={28}
+                      className="text-ink-700"
+                    />
+                  </p>
                   <h3 className="mt-3 text-[20px] font-semibold text-ink-950">
                     {summary.topHabit.habit.name}
                   </h3>
@@ -572,7 +579,11 @@ export function DashboardStats() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[18px]">{snapshot.habit.icon}</span>
+                    <HabitIcon
+                      name={snapshot.habit.icon}
+                      size={18}
+                      className="text-ink-700 shrink-0"
+                    />
                     <p className="truncate text-[14px] font-semibold text-ink-950">
                       {snapshot.habit.name}
                     </p>

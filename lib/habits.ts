@@ -6,6 +6,27 @@ export type HabitTone = {
   badge: string;
 };
 
+export const HABIT_ICON_NAMES = [
+  "Footprints",
+  "Dumbbell",
+  "BookOpen",
+  "BookMarked",
+  "Pill",
+  "Heart",
+  "Target",
+  "Pencil",
+  "Droplet",
+  "LeafyGreen",
+  "Moon",
+  "Brain",
+  "Music",
+  "Leaf",
+  "Flame",
+  "Activity",
+] as const;
+
+export type HabitIconName = (typeof HABIT_ICON_NAMES)[number];
+
 export type HabitDefinition = {
   id: string;
   slug: string;
@@ -151,7 +172,7 @@ export const DEFAULT_HABITS: HabitDefinition[] = [
     slug: "ten-thousand-steps",
     name: "10,000 steps",
     description: "Daily movement target with an easy visual pulse.",
-    icon: "🚶",
+    icon: "Footprints",
     category: "Health",
     unitLabel: "days hit",
     goalLabel: "10,000 steps",
@@ -166,7 +187,7 @@ export const DEFAULT_HABITS: HabitDefinition[] = [
     slug: "exercise",
     name: "Exercise",
     description: "A short workout, walk, or stretching session.",
-    icon: "💪",
+    icon: "Dumbbell",
     category: "Health",
     unitLabel: "sessions",
     goalLabel: "Active body",
@@ -182,7 +203,7 @@ export const DEFAULT_HABITS: HabitDefinition[] = [
     name: "Studying English",
     description:
       "Focused language practice with lessons, reading, or speaking.",
-    icon: "📖",
+    icon: "BookOpen",
     category: "Learning",
     unitLabel: "study days",
     goalLabel: "Language practice",
@@ -197,7 +218,7 @@ export const DEFAULT_HABITS: HabitDefinition[] = [
     slug: "reading",
     name: "Reading",
     description: "Quiet reading time for focus and recovery.",
-    icon: "📚",
+    icon: "BookMarked",
     category: "Learning",
     unitLabel: "reading days",
     goalLabel: "Reading habit",

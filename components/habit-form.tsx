@@ -5,11 +5,13 @@ import { createPortal } from "react-dom";
 import { MoreVertical, X } from "lucide-react";
 import {
   getNormalizedFrequency,
+  HABIT_ICON_NAMES,
   HabitDefinition,
   HabitTone,
   normalizeTimeSlots,
   TONE_PRESETS,
 } from "@/lib/habits";
+import { HabitIcon } from "@/components/habit-icon";
 
 type HabitFormProps = {
   open: boolean;
@@ -21,25 +23,6 @@ type HabitFormProps = {
   existingCategories: string[];
 };
 
-const EMOJI_SUGGESTIONS = [
-  "💪",
-  "🏃",
-  "📖",
-  "📚",
-  "💊",
-  "🧘",
-  "🎯",
-  "✍️",
-  "💧",
-  "🥗",
-  "😴",
-  "🧠",
-  "🎵",
-  "🌱",
-  "🏋️",
-  "🚶",
-];
-
 export function HabitForm({
   open,
   onClose,
@@ -50,7 +33,7 @@ export function HabitForm({
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [icon, setIcon] = useState("🎯");
+  const [icon, setIcon] = useState("Target");
   const [category, setCategory] = useState("");
   const [newCategory, setNewCategory] = useState("");
   const [goalLabel, setGoalLabel] = useState("");
@@ -104,7 +87,7 @@ export function HabitForm({
   function resetForm() {
     setName("");
     setDescription("");
-    setIcon("🎯");
+    setIcon("Target");
     setCategory(existingCategories[0] ?? "");
     setNewCategory("");
     setGoalLabel("");
@@ -181,28 +164,20 @@ export function HabitForm({
               Icon
             </label>
             <div className="flex flex-wrap gap-2">
-              {EMOJI_SUGGESTIONS.map((emoji) => (
+              {HABIT_ICON_NAMES.map((name) => (
                 <button
-                  key={emoji}
+                  key={name}
                   type="button"
-                  onClick={() => setIcon(emoji)}
-                  className={`tap-target flex items-center justify-center rounded-lg text-[20px] transition ${
-                    icon === emoji
-                      ? "bg-[#3274C7] shadow-sm ring-2 ring-[#3274C7]/20"
-                      : "bg-black/[0.04] hover:bg-black/[0.08]"
+                  onClick={() => setIcon(name)}
+                  className={`tap-target flex items-center justify-center rounded-lg transition ${
+                    icon === name
+                      ? "bg-[#3274C7] text-white shadow-sm ring-2 ring-[#3274C7]/20"
+                      : "bg-black/[0.04] text-ink-700 hover:bg-black/[0.08]"
                   }`}
                 >
-                  {emoji}
+                  <HabitIcon name={name} size={20} />
                 </button>
               ))}
-              <input
-                type="text"
-                value={icon}
-                onChange={(e) => setIcon(e.target.value.slice(-2))}
-                aria-label="Custom icon"
-                className="h-11 w-16 rounded-lg border border-black/[0.16] bg-white px-2 text-center text-[20px] placeholder:text-ink-500 focus:border-ink-950/30"
-                maxLength={2}
-              />
             </div>
           </div>
 
