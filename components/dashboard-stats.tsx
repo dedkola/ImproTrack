@@ -282,7 +282,7 @@ export function DashboardStats() {
             Statistics wake up after your first habit
           </h1>
           <p className="max-w-md text-[15px] leading-7 text-ink-700">
-            Add a habit on the dashboard and Momentum will start filling this
+            Add a habit on the dashboard and ImproTrack will start filling this
             page with completion trends, category signals, and streak summaries.
           </p>
           <Link
@@ -411,7 +411,7 @@ export function DashboardStats() {
                 >
                   <div className="relative h-40 w-full overflow-hidden rounded-[16px] bg-black/[0.04]">
                     <div
-                      className="absolute bottom-0 left-0 right-0 rounded-t-[16px] bg-[#3274C7] transition-all duration-500"
+                      className="absolute bottom-0 left-0 right-0 rounded-t-[16px] bg-linear-to-t from-[#6D28D9] to-[#C026D3] transition-all duration-500"
                       style={{
                         height: `${Math.max(day.rate, day.total === 0 ? 8 : 16)}%`,
                         opacity:
@@ -539,7 +539,7 @@ export function DashboardStats() {
                 </div>
                 <div className="h-[8px] overflow-hidden rounded-full bg-black/[0.05]">
                   <div
-                    className="h-[8px] rounded-full bg-[#3274C7] transition-all duration-700 ease-out"
+                    className="h-[8px] rounded-full bg-[#6D28D9] transition-all duration-700 ease-out"
                     style={{ width: `${category.rate}%` }}
                   />
                 </div>
@@ -574,7 +574,7 @@ export function DashboardStats() {
                 href={`/dashboard/habits/${snapshot.habit.slug}`}
                 className="group flex items-center gap-3 rounded-[22px] border border-black/[0.06] bg-white px-4 py-3 shadow-[var(--shadow-card)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)]"
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#3274C7] text-[12px] font-semibold text-white">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#6D28D9] text-[12px] font-semibold text-white">
                   {index + 1}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -644,7 +644,7 @@ export function DashboardStats() {
               </div>
               <div className="mt-3 h-[7px] overflow-hidden rounded-full bg-black/[0.05]">
                 <div
-                  className="h-[7px] rounded-full bg-[#3274C7] transition-all duration-700 ease-out"
+                  className="h-[7px] rounded-full bg-[#6D28D9] transition-all duration-700 ease-out"
                   style={{ width: `${day.rate}%` }}
                 />
               </div>

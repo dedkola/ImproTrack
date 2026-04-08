@@ -91,7 +91,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
                     className="h-10 w-10 rounded-xl object-cover border border-black/[0.08]"
                   />
                 ) : (
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#3274C7] text-[14px] font-semibold text-white">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-[#6D28D9] to-[#C026D3] text-[14px] font-semibold text-white">
                     {initial}
                   </span>
                 )}
@@ -123,7 +123,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
                   type="button"
                   onClick={() => void handleSignOut()}
                   disabled={isPending}
-                  className="pill-btn min-h-10 rounded-lg bg-[#3274C7] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="pill-btn min-h-10 rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isPending ? "Signing out..." : "Sign out"}
                 </button>
@@ -141,7 +141,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
                 type="button"
                 onClick={() => void handleSignIn()}
                 disabled={isPending}
-                className="pill-btn mt-3 min-h-10 w-full rounded-lg bg-[#3274C7] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="pill-btn mt-3 min-h-10 w-full rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isPending ? "Signing in..." : "Continue with Google"}
               </button>
@@ -166,7 +166,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
             <div className="flex flex-col gap-2 sm:flex-row">
               <Link
                 href="/dashboard"
-                className="pill-btn inline-flex min-h-11 items-center justify-center rounded-xl bg-[#3274C7] px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_24px_rgba(10,22,40,0.16)]"
+                className="pill-btn inline-flex min-h-11 items-center justify-center rounded-xl bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_28px_rgba(109,40,217,0.45)]"
               >
                 Open dashboard
               </Link>
@@ -186,7 +186,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
               type="button"
               onClick={() => void handleSignIn()}
               disabled={isPending}
-              className="pill-btn inline-flex min-h-11 items-center justify-center rounded-xl bg-[#3274C7] px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_24px_rgba(10,22,40,0.16)] disabled:cursor-not-allowed disabled:opacity-60"
+              className="pill-btn inline-flex min-h-11 items-center justify-center rounded-xl bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_28px_rgba(109,40,217,0.45)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isPending ? "Signing in..." : "Continue with Google"}
             </button>
@@ -222,7 +222,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
                   className="h-8 w-8 rounded-lg object-cover border border-black/[0.08]"
                 />
               ) : (
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3274C7] text-[12px] font-semibold text-white">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-[#6D28D9] to-[#C026D3] text-[12px] font-semibold text-white">
                   {initial}
                 </span>
               )}

@@ -143,7 +143,7 @@ export function ProfileSettingsModal({ onClose }: ProfileSettingsModalProps) {
                 className="h-20 w-20 rounded-2xl object-cover border border-black/[0.08]"
               />
             ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[#3274C7] text-[28px] font-semibold text-white select-none">
+              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-linear-to-br from-[#6D28D9] to-[#C026D3] text-[28px] font-semibold text-white select-none">
                 {initial}
               </div>
             )}
@@ -161,7 +161,7 @@ export function ProfileSettingsModal({ onClose }: ProfileSettingsModalProps) {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="text-[12px] font-medium text-[#3274C7] hover:underline"
+              className="text-[12px] font-medium text-[#6D28D9] hover:underline"
             >
               Upload photo
             </button>
@@ -215,7 +215,7 @@ export function ProfileSettingsModal({ onClose }: ProfileSettingsModalProps) {
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="Your name"
             maxLength={60}
-            className="w-full rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[14px] text-ink-950 placeholder:text-ink-400 outline-none focus:border-[#3274C7] focus:ring-2 focus:ring-[#3274C7]/20 transition-shadow"
+            className="w-full rounded-lg border border-black/[0.1] bg-white px-3 py-2 text-[14px] text-ink-950 placeholder:text-ink-400 outline-none focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/20 transition-shadow"
           />
         </div>
 
@@ -242,7 +242,7 @@ export function ProfileSettingsModal({ onClose }: ProfileSettingsModalProps) {
             type="button"
             onClick={() => void handleSave()}
             disabled={isSaving}
-            className="flex-1 min-h-10 rounded-lg bg-[#3274C7] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] disabled:cursor-not-allowed disabled:opacity-60 flex items-center justify-center gap-1.5 transition-opacity"
+            className="flex-1 min-h-10 rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)] disabled:cursor-not-allowed disabled:opacity-60 flex items-center justify-center gap-1.5 transition-opacity"
           >
             {isSaving ? (
               <>

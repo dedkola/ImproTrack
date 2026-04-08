@@ -194,7 +194,7 @@ export function HabitTrackerApp() {
   const [habitOrder, setHabitOrder] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
     try {
-      const stored = localStorage.getItem("momentum-habit-order");
+      const stored = localStorage.getItem("improtrack-habit-order");
       return stored ? (JSON.parse(stored) as string[]) : [];
     } catch {
       return [];
@@ -232,7 +232,7 @@ export function HabitTrackerApp() {
     newIds.splice(insertAt, 0, fromId);
     setHabitOrder(newIds);
     try {
-      localStorage.setItem("momentum-habit-order", JSON.stringify(newIds));
+      localStorage.setItem("improtrack-habit-order", JSON.stringify(newIds));
     } catch {
       // localStorage unavailable
     }
@@ -368,7 +368,7 @@ export function HabitTrackerApp() {
                   setEditingHabit(null);
                   setFormOpen(true);
                 }}
-                className="pill-btn tap-target-compact flex items-center gap-1.5 rounded-lg bg-[#3274C7] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+                className="pill-btn tap-target-compact flex items-center gap-1.5 rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)]"
               >
                 <Plus className="h-3.5 w-3.5" strokeWidth={2} />
                 Add habit
@@ -394,7 +394,7 @@ export function HabitTrackerApp() {
                 setEditingHabit(null);
                 setFormOpen(true);
               }}
-              className="pill-btn tap-target mt-2 rounded-lg bg-[#3274C7] px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)]"
+              className="pill-btn tap-target mt-2 rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)]"
             >
               Create first habit
             </button>
@@ -439,10 +439,10 @@ export function HabitTrackerApp() {
                           key={dateKey}
                           className={`px-1 py-3 text-center text-[12px] ${
                             index === days.length - 1 ? "rounded-tr-[11px]" : ""
-                          } ${isToday ? "bg-[#3274C7]/[0.07]" : "bg-white"}`}
+                          } ${isToday ? "bg-[#6D28D9]/[0.07]" : "bg-white"}`}
                         >
                           <p
-                            className={`font-semibold ${isToday ? "text-[#3274C7]" : "text-ink-950"}`}
+                            className={`font-semibold ${isToday ? "text-[#6D28D9]" : "text-ink-950"}`}
                           >
                             {dateKey.slice(-2)}
                           </p>
@@ -451,14 +451,14 @@ export function HabitTrackerApp() {
                               isFuture
                                 ? "text-ink-700/30"
                                 : isToday
-                                  ? "text-[#3274C7]/70"
+                                  ? "text-[#6D28D9]/70"
                                   : "text-ink-700"
                             }
                           >
                             {weekday}
                           </p>
                           {isToday && (
-                            <span className="mx-auto mt-1 block h-1 w-1 rounded-full bg-[#3274C7]" />
+                            <span className="mx-auto mt-1 block h-1 w-1 rounded-full bg-[#6D28D9]" />
                           )}
                         </div>
                       );
@@ -539,11 +539,11 @@ export function HabitTrackerApp() {
                                 : ""
                             } ${isDraggedItem ? "opacity-40" : ""} ${
                               isDragTarget && dragOverPosition === "above"
-                                ? "border-t-2 border-t-[#3274C7]"
+                                ? "border-t-2 border-t-[#6D28D9]"
                                 : ""
                             } ${
                               isDragTarget && dragOverPosition === "below"
-                                ? "border-b-2 border-b-[#3274C7]"
+                                ? "border-b-2 border-b-[#6D28D9]"
                                 : ""
                             }`}
                           >
@@ -626,7 +626,7 @@ export function HabitTrackerApp() {
                                     isLastRow && colIndex === days.length - 1
                                       ? "rounded-br-[11px]"
                                       : ""
-                                  } ${isToday ? "bg-[#3274C7]/[0.05]" : ""} ${
+                                  } ${isToday ? "bg-[#6D28D9]/[0.05]" : ""} ${
                                     isFuture ? "opacity-40" : ""
                                   }`}
                                 >
@@ -701,7 +701,7 @@ export function HabitTrackerApp() {
                                   isLastRow && colIndex === days.length - 1
                                     ? "rounded-br-[11px]"
                                     : ""
-                                } ${isToday && !checked ? "bg-[#3274C7]/[0.05]" : ""} ${
+                                } ${isToday && !checked ? "bg-[#6D28D9]/[0.05]" : ""} ${
                                   isLastSlot && !isLastRow
                                     ? "border-b border-black/[0.07]"
                                     : ""
