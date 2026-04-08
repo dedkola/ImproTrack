@@ -215,9 +215,17 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
         ) : user ? (
           <>
             <div className="hidden items-center gap-3 rounded-lg border border-black/[0.06] bg-white/75 px-3 py-2 shadow-[var(--shadow-card)] sm:flex">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3274C7] text-[12px] font-semibold text-white">
-                {initial}
-              </span>
+              {user.photoURL ? (
+                <img
+                  src={user.photoURL}
+                  alt="Profile"
+                  className="h-8 w-8 rounded-lg object-cover border border-black/[0.08]"
+                />
+              ) : (
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3274C7] text-[12px] font-semibold text-white">
+                  {initial}
+                </span>
+              )}
               <div className="max-w-[180px] leading-tight">
                 <p className="truncate text-[12px] font-semibold text-ink-950">
                   {primary}
