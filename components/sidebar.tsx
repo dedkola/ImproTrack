@@ -6,6 +6,7 @@ import { Archive, BarChart2, LayoutGrid, Menu, Plus, X } from "lucide-react";
 import { AuthControls } from "@/components/auth-controls";
 import { HabitIcon } from "@/components/habit-icon";
 import { HabitDefinition } from "@/lib/habits";
+import { fillClass, fillStyle } from "@/lib/tone-utils";
 
 type SidebarProps = {
   habits: HabitDefinition[];
@@ -105,7 +106,8 @@ export function Sidebar({
                   active={pathname === `/dashboard/habits/${habit.slug}`}
                   badge={
                     <span
-                      className={`h-2 w-2 rounded-full ${habit.tone.fill}`}
+                      className={`h-2 w-2 rounded-full ${fillClass(habit.tone)}`}
+                      style={fillStyle(habit.tone)}
                     />
                   }
                 />

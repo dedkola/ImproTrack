@@ -13,6 +13,7 @@ import {
 import type { HabitRecords } from "@/lib/storage";
 import { completedSlotsInDay } from "@/lib/stats";
 import type { HabitTone } from "@/lib/habits";
+import { getChartColorsFromHex } from "@/lib/tone-utils";
 import { DatePicker } from "@/components/date-picker";
 
 // ---- SVG smooth curve helper -----------------------------------------------
@@ -87,9 +88,11 @@ function buildPoints(
 function BarChartViz({
   points,
   fillClass,
+  inlineColor,
 }: {
   points: DayPoint[];
   fillClass: string;
+  inlineColor?: string;
 }) {
   if (points.length === 0) return <ChartEmpty />;
 
@@ -121,7 +124,8 @@ function BarChartViz({
             width={barW}
             height={PH}
             rx={Math.min(4, barW / 4)}
-            className={fillClass}
+            className={inlineColor ? undefined : fillClass}
+            fill={inlineColor}
             fillOpacity={0.07}
           />
         );
@@ -141,7 +145,8 @@ function BarChartViz({
             width={barW}
             height={barH}
             rx={Math.min(4, barW / 4)}
-            className={fillClass}
+            className={inlineColor ? undefined : fillClass}
+            fill={inlineColor}
             fillOpacity={p.ratio === 1 ? 0.9 : p.ratio > 0 ? 0.55 : 0.15}
           >
             <title>
@@ -185,9 +190,11 @@ function BarChartViz({
 function HistogramChart({
   points,
   fillClass,
+  inlineColor,
 }: {
   points: DayPoint[];
   fillClass: string;
+  inlineColor?: string;
 }) {
   if (points.length === 0) return <ChartEmpty />;
 
@@ -263,7 +270,8 @@ function HistogramChart({
             width={barW}
             height={PH}
             rx={Math.min(5, barW / 5)}
-            className={fillClass}
+            className={inlineColor ? undefined : fillClass}
+            fill={inlineColor}
             fillOpacity={0.06}
           />
         );
@@ -284,7 +292,8 @@ function HistogramChart({
               width={barW}
               height={barH}
               rx={Math.min(5, barW / 5)}
-              className={fillClass}
+              className={inlineColor ? undefined : fillClass}
+              fill={inlineColor}
               fillOpacity={completed === 0 ? 0.2 : 0.9}
             >
               <title>
@@ -327,10 +336,12 @@ function LineChartViz({
   points,
   fillClass,
   strokeClass,
+  inlineColor,
 }: {
   points: DayPoint[];
   fillClass: string;
   strokeClass: string;
+  inlineColor?: string;
 }) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -432,7 +443,8 @@ function LineChartViz({
       {/* Area fill */}
       <path
         d={areaPath}
-        className={fillClass}
+        className={inlineColor ? undefined : fillClass}
+        fill={inlineColor}
         fillOpacity={0.14}
         style={{ stroke: "none" }}
       />
@@ -440,8 +452,9 @@ function LineChartViz({
       {/* Line */}
       <path
         d={linePath}
-        className={strokeClass}
+        className={inlineColor ? undefined : strokeClass}
         style={{ fill: "none" }}
+        stroke={inlineColor}
         strokeWidth={2.5}
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -465,7 +478,8 @@ function LineChartViz({
             cx={hp.x}
             cy={hp.y}
             r={5}
-            className={fillClass}
+            className={inlineColor ? undefined : fillClass}
+            fill={inlineColor}
             stroke="white"
             strokeWidth={2.5}
           />
@@ -526,7 +540,8 @@ function LineChartViz({
           cx={pathPts[n - 1].x}
           cy={pathPts[n - 1].y}
           r={4}
-          className={fillClass}
+          className={inlineColor ? undefined : fillClass}
+          fill={inlineColor}
           stroke="white"
           strokeWidth={2}
         />
@@ -600,6 +615,7 @@ export function HabitChart({
     fill: "fill-slate-600",
     stroke: "stroke-slate-600",
   };
+  const hexColors = tone.hex ? getChartColorsFromHex(tone.hex) : null;
 
   const doneCount = points.filter((p) => p.ratio === 1).length;
   const rate = points.length
@@ -692,16 +708,25 @@ export function HabitChart({
       <div className="mt-4 min-h-[100px]">
         <div className="w-full">
           {view === "bar" && (
-            <BarChartViz points={points} fillClass={svgTone.fill} />
+            <BarChartViz
+              points={points}
+              fillClass={svgTone.fill}
+              inlineColor={hexColors?.fill}
+            />
           )}
           {view === "histogram" && (
-            <HistogramChart points={points} fillClass={svgTone.fill} />
+            <HistogramChart
+              points={points}
+              fillClass={svgTone.fill}
+              inlineColor={hexColors?.fill}
+            />
           )}
           {view === "line" && (
             <LineChartViz
               points={points}
               fillClass={svgTone.fill}
               strokeClass={svgTone.stroke}
+              inlineColor={hexColors?.fill}
             />
           )}
         </div>

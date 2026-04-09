@@ -168,6 +168,9 @@ const TONE_BY_FILL = new Map<string, HabitTone>(
 function normalizeTone(tone: HabitTone | undefined): HabitTone {
   if (!tone) return TONE_PRESETS[0].tone;
 
+  // Custom hex tones bypass preset normalization
+  if (tone.hex) return tone;
+
   const normalizedFill = LEGACY_FILL_TO_CURRENT[tone.fill] ?? tone.fill;
   const mappedByFill = TONE_BY_FILL.get(normalizedFill);
   if (mappedByFill) return mappedByFill;

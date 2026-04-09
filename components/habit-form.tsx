@@ -11,6 +11,12 @@ import {
   normalizeTimeSlots,
   TONE_PRESETS,
 } from "@/lib/habits";
+import {
+  buildToneFromHex,
+  isValidHex,
+  clampHex,
+  randomHabitColor,
+} from "@/lib/tone-utils";
 import { HabitIcon } from "@/components/habit-icon";
 
 type HabitFormProps = {
@@ -38,6 +44,8 @@ export function HabitForm({
   const [frequencyPerDay, setFrequencyPerDay] = useState(1);
   const [timeSlots, setTimeSlots] = useState<string[]>(["default"]);
   const [selectedToneIndex, setSelectedToneIndex] = useState(0);
+  const [customHex, setCustomHex] = useState<string | null>(null);
+  const [hexInput, setHexInput] = useState("");
   const nameId = "habit-name";
   const categoryId = "habit-category";
   const categoryNewId = "habit-new-category";
@@ -66,10 +74,18 @@ export function HabitForm({
       setCategory(initial.category);
       setFrequencyPerDay(normalizedFrequency);
       setTimeSlots(normalizeTimeSlots(normalizedFrequency, initial.timeSlots));
-      const toneIdx = TONE_PRESETS.findIndex(
-        (p) => p.tone.fill === initial.tone.fill,
-      );
-      setSelectedToneIndex(toneIdx >= 0 ? toneIdx : 0);
+      if (initial.tone.hex) {
+        setCustomHex(initial.tone.hex);
+        setHexInput(initial.tone.hex);
+        setSelectedToneIndex(-1);
+      } else {
+        const toneIdx = TONE_PRESETS.findIndex(
+          (p) => p.tone.fill === initial.tone.fill,
+        );
+        setSelectedToneIndex(toneIdx >= 0 ? toneIdx : 0);
+        setCustomHex(null);
+        setHexInput("");
+      }
     } else {
       resetForm();
     }
@@ -83,6 +99,8 @@ export function HabitForm({
     setFrequencyPerDay(1);
     setTimeSlots(["default"]);
     setSelectedToneIndex(0);
+    setCustomHex(null);
+    setHexInput("");
   }
 
   function handleFrequencyChange(value: number) {
@@ -114,7 +132,10 @@ export function HabitForm({
       goalLabel: name.trim(),
       frequencyPerDay,
       timeSlots: normalizeTimeSlots(frequencyPerDay, timeSlots),
-      tone: TONE_PRESETS[selectedToneIndex].tone,
+      tone:
+        customHex !== null
+          ? buildToneFromHex(customHex)
+          : TONE_PRESETS[selectedToneIndex].tone,
     });
     resetForm();
     onClose();
@@ -237,9 +258,13 @@ export function HabitForm({
                 <button
                   key={preset.label}
                   type="button"
-                  onClick={() => setSelectedToneIndex(index)}
+                  onClick={() => {
+                    setSelectedToneIndex(index);
+                    setCustomHex(null);
+                    setHexInput("");
+                  }}
                   className={`flex min-h-10 items-center gap-1.5 rounded-lg px-3 text-[13px] font-medium transition bg-linear-to-r ${preset.tone.surface} ${
-                    selectedToneIndex === index
+                    selectedToneIndex === index && customHex === null
                       ? "ring-2 ring-ink-950/20 shadow-sm"
                       : "hover:ring-1 hover:ring-black/10"
                   }`}
@@ -250,7 +275,91 @@ export function HabitForm({
                   {preset.label}
                 </button>
               ))}
+
+              {/* Custom color swatch */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (customHex === null) {
+                    const c = randomHabitColor();
+                    setCustomHex(c);
+                    setHexInput(c);
+                  }
+                  setSelectedToneIndex(-1);
+                }}
+                className={`flex min-h-10 items-center gap-1.5 rounded-lg px-3 text-[13px] font-medium transition ${
+                  customHex !== null
+                    ? "ring-2 ring-ink-950/20 shadow-sm"
+                    : "hover:ring-1 hover:ring-black/10"
+                }`}
+              >
+                <span
+                  className="h-3 w-3 rounded-full"
+                  style={
+                    customHex
+                      ? { backgroundColor: customHex }
+                      : {
+                          backgroundImage:
+                            "conic-gradient(#ef4444, #f59e0b, #22c55e, #3b82f6, #a855f7, #ef4444)",
+                        }
+                  }
+                />
+                Custom
+              </button>
             </div>
+
+            {/* Expanded custom color controls */}
+            {customHex !== null && (
+              <div className="mt-3 flex flex-wrap items-center gap-2.5">
+                <label className="relative flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-black/[0.12] transition hover:border-black/[0.24]">
+                  <span
+                    className="h-6 w-6 rounded-md"
+                    style={{ backgroundColor: customHex }}
+                  />
+                  <input
+                    type="color"
+                    value={customHex}
+                    onChange={(e) => {
+                      const clamped = clampHex(e.target.value);
+                      setCustomHex(clamped);
+                      setHexInput(clamped);
+                    }}
+                    className="absolute inset-0 cursor-pointer opacity-0"
+                    tabIndex={-1}
+                  />
+                </label>
+                <input
+                  type="text"
+                  value={hexInput}
+                  onChange={(e) => {
+                    let v = e.target.value;
+                    if (v && !v.startsWith("#")) v = "#" + v;
+                    setHexInput(v);
+                    if (isValidHex(v)) {
+                      setCustomHex(clampHex(v));
+                    }
+                  }}
+                  onBlur={() => {
+                    if (customHex) setHexInput(customHex);
+                  }}
+                  placeholder="#3b82f6"
+                  maxLength={7}
+                  className="w-24 rounded-lg border border-black/[0.16] bg-white px-3 py-2.5 font-mono text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const c = randomHabitColor();
+                    setCustomHex(c);
+                    setHexInput(c);
+                  }}
+                  title="Random color"
+                  className="tap-target-compact flex items-center justify-center rounded-lg bg-black/[0.04] text-[16px] text-ink-700 hover:bg-black/[0.08]"
+                >
+                  🎲
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Frequency per day */}

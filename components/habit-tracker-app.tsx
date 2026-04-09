@@ -14,6 +14,18 @@ import {
 } from "@/lib/date";
 import { HabitDefinition } from "@/lib/habits";
 import {
+  getMatrixToneFromHex,
+  getCardGradientStyleFromHex,
+  softFillClass,
+  softFillStyle,
+  accentClass,
+  accentStyle,
+  fillClass,
+  fillStyle,
+  badgeClass,
+  badgeStyle,
+} from "@/lib/tone-utils";
+import {
   completedSlotsInDay,
   completionRate,
   countCompleted,
@@ -52,6 +64,16 @@ function getAppleCardGradient(fillClass: string) {
   };
 
   return gradients[fillClass] ?? "from-sky-200/80 via-cyan-100/80 to-white";
+}
+
+function getAppleCardGradientStyle(tone: { fill: string; hex?: string }): {
+  className?: string;
+  style?: React.CSSProperties;
+} {
+  if (tone.hex) {
+    return { style: getCardGradientStyleFromHex(tone.hex) };
+  }
+  return { className: `bg-linear-to-br ${getAppleCardGradient(tone.fill)}` };
 }
 
 function getMatrixTone(fillClass: string) {
@@ -158,6 +180,11 @@ function getMatrixTone(fillClass: string) {
   };
 
   return tones[fillClass] ?? tones["bg-sky-600"];
+}
+
+function resolveMatrixTone(tone: { fill: string; hex?: string }) {
+  if (tone.hex) return getMatrixToneFromHex(tone.hex);
+  return getMatrixTone(tone.fill);
 }
 
 export function HabitTrackerApp() {
@@ -476,7 +503,7 @@ export function HabitTrackerApp() {
                       const isLastRow = rowIndex === gridRows.length - 1;
                       const displaySlotName =
                         rowType === "slot" ? slotName : null;
-                      const matrixTone = getMatrixTone(habit.tone.fill);
+                      const matrixTone = resolveMatrixTone(habit.tone);
                       const isDraggedItem = dragHabitId === habit.id;
                       const isDragTarget =
                         dragOverHabitId === habit.id && isFirstSlot;
@@ -568,7 +595,11 @@ export function HabitTrackerApp() {
                                   />
                                   <div className="flex-1" />
                                   <span
-                                    className={`rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${habit.tone.softFill} ${habit.tone.badge}`}
+                                    className={`rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${softFillClass(habit.tone)} ${badgeClass(habit.tone)}`}
+                                    style={{
+                                      ...softFillStyle(habit.tone),
+                                      ...badgeStyle(habit.tone),
+                                    }}
                                   >
                                     {completionRate(
                                       records,
@@ -742,62 +773,69 @@ export function HabitTrackerApp() {
 
             {/* Habit cards */}
             <section className="stagger-children grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-              {habitSummaries.map(({ habit, completed, rate }) => (
-                <Link
-                  key={habit.id}
-                  href={`/dashboard/habits/${habit.slug}`}
-                  className={`group relative overflow-hidden rounded-2xl border border-white/75 bg-linear-to-br ${getAppleCardGradient(habit.tone.fill)} p-4 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)]`}
-                >
-                  <div className="absolute inset-x-6 bottom-0 h-16 rounded-full bg-white/60 blur-3xl transition-transform duration-500 group-hover:scale-125" />
-                  <div className="relative z-10 flex flex-col gap-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-2">
-                        <HabitIcon
-                          name={habit.icon}
-                          size={18}
-                          className="text-ink-700 shrink-0"
-                        />
-                        <h3 className="text-[16px] font-semibold text-ink-950">
-                          {habit.name}
-                        </h3>
+              {habitSummaries.map(({ habit, completed, rate }) => {
+                const cardGradient = getAppleCardGradientStyle(habit.tone);
+                return (
+                  <Link
+                    key={habit.id}
+                    href={`/dashboard/habits/${habit.slug}`}
+                    className={`group relative overflow-hidden rounded-2xl border border-white/75 p-4 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)] ${cardGradient.className ?? ""}`}
+                    style={cardGradient.style}
+                  >
+                    <div className="absolute inset-x-6 bottom-0 h-16 rounded-full bg-white/60 blur-3xl transition-transform duration-500 group-hover:scale-125" />
+                    <div className="relative z-10 flex flex-col gap-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <HabitIcon
+                            name={habit.icon}
+                            size={18}
+                            className="text-ink-700 shrink-0"
+                          />
+                          <h3 className="text-[16px] font-semibold text-ink-950">
+                            {habit.name}
+                          </h3>
+                        </div>
+                        <span
+                          className={`rounded-md px-2 py-0.5 text-[12px] font-semibold ${softFillClass(habit.tone)}`}
+                          style={softFillStyle(habit.tone)}
+                        >
+                          {rate}%
+                        </span>
                       </div>
-                      <span
-                        className={`rounded-md px-2 py-0.5 text-[12px] font-semibold ${habit.tone.softFill}`}
-                      >
-                        {rate}%
-                      </span>
+                      <p className="text-[14px] leading-5 text-ink-700">
+                        {habit.description}
+                      </p>
+                      {habit.frequencyPerDay > 1 && (
+                        <div className="flex flex-wrap gap-1">
+                          {habit.timeSlots.map((slot) => (
+                            <span
+                              key={slot}
+                              className={`rounded-md px-1.5 py-0.5 text-[11px] font-medium ${softFillClass(habit.tone)}`}
+                              style={softFillStyle(habit.tone)}
+                            >
+                              {slot}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex items-end justify-between pt-1">
+                        <div>
+                          <p className="text-[12px] text-ink-700">Completed</p>
+                          <p className="font-display text-[22px] font-semibold tabular-nums text-ink-950">
+                            {completed}
+                          </p>
+                        </div>
+                        <span
+                          className={`text-[13px] font-medium ${accentClass(habit.tone)} transition-transform duration-200 group-hover:translate-x-0.5`}
+                          style={accentStyle(habit.tone)}
+                        >
+                          View stats &rarr;
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-[14px] leading-5 text-ink-700">
-                      {habit.description}
-                    </p>
-                    {habit.frequencyPerDay > 1 && (
-                      <div className="flex flex-wrap gap-1">
-                        {habit.timeSlots.map((slot) => (
-                          <span
-                            key={slot}
-                            className={`rounded-md px-1.5 py-0.5 text-[11px] font-medium ${habit.tone.softFill}`}
-                          >
-                            {slot}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    <div className="flex items-end justify-between pt-1">
-                      <div>
-                        <p className="text-[12px] text-ink-700">Completed</p>
-                        <p className="font-display text-[22px] font-semibold tabular-nums text-ink-950">
-                          {completed}
-                        </p>
-                      </div>
-                      <span
-                        className={`text-[13px] font-medium ${habit.tone.accent} transition-transform duration-200 group-hover:translate-x-0.5`}
-                      >
-                        View stats &rarr;
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </section>
           </div>
         )}

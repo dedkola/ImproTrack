@@ -4,6 +4,7 @@ export type HabitTone = {
   fill: string;
   softFill: string;
   badge: string;
+  hex?: string;
 };
 
 export const HABIT_ICON_NAMES = [
