@@ -18,6 +18,12 @@ import { useHabits, useHabitRecords } from "@/lib/storage";
 import { HabitForm, HabitMenu, ConfirmDialog } from "@/components/habit-form";
 import { HabitIcon } from "@/components/habit-icon";
 import { HabitChart } from "@/components/habit-chart";
+import {
+  softFillClass,
+  softFillStyle,
+  fillClass,
+  fillStyle,
+} from "@/lib/tone-utils";
 
 const today = startOfDay(new Date());
 const todayKey = toDateKey(today);
@@ -138,13 +144,15 @@ export function HabitDetail({ slug }: { slug: string }) {
           {/* Meta badges */}
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className={`rounded-md px-2 py-0.5 text-[12px] font-medium ${habit.tone.softFill}`}
+              className={`rounded-md px-2 py-0.5 text-[12px] font-medium ${softFillClass(habit.tone)}`}
+              style={softFillStyle(habit.tone)}
             >
               {habit.category}
             </span>
             {habit.frequencyPerDay > 1 && (
               <span
-                className={`rounded-md px-2 py-0.5 text-[12px] font-medium ${habit.tone.softFill}`}
+                className={`rounded-md px-2 py-0.5 text-[12px] font-medium ${softFillClass(habit.tone)}`}
+                style={softFillStyle(habit.tone)}
               >
                 {habit.frequencyPerDay}x / day
               </span>
@@ -182,8 +190,8 @@ export function HabitDetail({ slug }: { slug: string }) {
                 </div>
                 <div className="mt-2 h-[6px] overflow-hidden rounded-full bg-black/[0.04]">
                   <div
-                    className={`h-[6px] rounded-full ${habit.tone.fill} transition-all duration-700 ease-out`}
-                    style={{ width: `${slot.rate}%` }}
+                    className={`h-[6px] rounded-full ${fillClass(habit.tone)} transition-all duration-700 ease-out`}
+                    style={{ width: `${slot.rate}%`, ...fillStyle(habit.tone) }}
                   />
                 </div>
               </div>
@@ -237,7 +245,8 @@ export function HabitDetail({ slug }: { slug: string }) {
               Monthly trend
             </h2>
             <span
-              className={`rounded-md px-2 py-0.5 text-[12px] font-semibold ${habit.tone.softFill}`}
+              className={`rounded-md px-2 py-0.5 text-[12px] font-semibold ${softFillClass(habit.tone)}`}
+              style={softFillStyle(habit.tone)}
             >
               Last 6 months
             </span>
@@ -276,8 +285,11 @@ export function HabitDetail({ slug }: { slug: string }) {
                 </div>
                 <div className="h-[6px] overflow-hidden rounded-full bg-black/[0.04]">
                   <div
-                    className={`h-[6px] rounded-full ${habit.tone.fill} transition-all duration-700 ease-out`}
-                    style={{ width: `${entry.rate}%` }}
+                    className={`h-[6px] rounded-full ${fillClass(habit.tone)} transition-all duration-700 ease-out`}
+                    style={{
+                      width: `${entry.rate}%`,
+                      ...fillStyle(habit.tone),
+                    }}
                   />
                 </div>
               </div>

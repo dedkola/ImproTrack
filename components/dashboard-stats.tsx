@@ -18,6 +18,12 @@ import { HabitIcon } from "@/components/habit-icon";
 import type { HabitDefinition } from "@/lib/habits";
 import { useHabits, useHabitRecords } from "@/lib/storage";
 import {
+  softFillClass,
+  softFillStyle,
+  fillClass,
+  fillStyle,
+} from "@/lib/tone-utils";
+import {
   completedSlotsInDay,
   completionRate,
   countCompleted,
@@ -451,7 +457,8 @@ export function DashboardStats() {
             </div>
             {summary.topHabit && (
               <span
-                className={`rounded-full px-3 py-1 text-[12px] font-semibold ${summary.topHabit.habit.tone.softFill}`}
+                className={`rounded-full px-3 py-1 text-[12px] font-semibold ${softFillClass(summary.topHabit.habit.tone)}`}
+                style={softFillStyle(summary.topHabit.habit.tone)}
               >
                 {summary.topHabit.rate}%
               </span>
@@ -477,7 +484,8 @@ export function DashboardStats() {
                   </p>
                 </div>
                 <span
-                  className={`rounded-full px-3 py-1 text-[12px] font-semibold ${summary.topHabit.habit.tone.softFill}`}
+                  className={`rounded-full px-3 py-1 text-[12px] font-semibold ${softFillClass(summary.topHabit.habit.tone)}`}
+                  style={softFillStyle(summary.topHabit.habit.tone)}
                 >
                   {summary.topHabit.habit.category}
                 </span>
@@ -590,8 +598,11 @@ export function DashboardStats() {
                   </div>
                   <div className="mt-2 h-[6px] overflow-hidden rounded-full bg-black/[0.05]">
                     <div
-                      className={`h-[6px] rounded-full ${snapshot.habit.tone.fill}`}
-                      style={{ width: `${snapshot.rate}%` }}
+                      className={`h-[6px] rounded-full ${fillClass(snapshot.habit.tone)}`}
+                      style={{
+                        width: `${snapshot.rate}%`,
+                        ...fillStyle(snapshot.habit.tone),
+                      }}
                     />
                   </div>
                 </div>
