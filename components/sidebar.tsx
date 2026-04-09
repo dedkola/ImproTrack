@@ -2,15 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Archive,
-  BarChart2,
-  LayoutGrid,
-  Menu,
-  Plus,
-  Settings,
-  X,
-} from "lucide-react";
+import { Archive, BarChart2, LayoutGrid, Menu, Plus, X } from "lucide-react";
 import { AuthControls } from "@/components/auth-controls";
 import { HabitIcon } from "@/components/habit-icon";
 import { HabitDefinition } from "@/lib/habits";
@@ -146,7 +138,7 @@ export function Sidebar({
             </div>
           )}
 
-          {/* Archive & Settings */}
+          {/* Archive & Stats */}
           <div className="mt-5 border-t border-black/[0.06] pt-3">
             <NavItem
               href="/dashboard/archive"
@@ -159,13 +151,6 @@ export function Sidebar({
               label="Statistics"
               icon={<BarChart2 className="h-4 w-4" strokeWidth={1.5} />}
               active={pathname === "/dashboard/stats"}
-            />
-            <NavItem
-              href="#"
-              label="Settings"
-              icon={<Settings className="h-4 w-4" strokeWidth={1.5} />}
-              active={false}
-              disabled
             />
           </div>
         </nav>

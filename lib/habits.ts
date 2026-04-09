@@ -23,6 +23,17 @@ export const HABIT_ICON_NAMES = [
   "Leaf",
   "Flame",
   "Activity",
+  "Bike",
+  "Coffee",
+  "Sun",
+  "Apple",
+  "Timer",
+  "Bed",
+  "Smile",
+  "Wind",
+  "Salad",
+  "Palette",
+  "Waves",
 ] as const;
 
 export type HabitIconName = (typeof HABIT_ICON_NAMES)[number];

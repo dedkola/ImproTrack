@@ -32,21 +32,15 @@ export function HabitForm({
 }: HabitFormProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
   const [icon, setIcon] = useState("Target");
   const [category, setCategory] = useState("");
   const [newCategory, setNewCategory] = useState("");
-  const [goalLabel, setGoalLabel] = useState("");
-  const [unitLabel, setUnitLabel] = useState("days");
   const [frequencyPerDay, setFrequencyPerDay] = useState(1);
   const [timeSlots, setTimeSlots] = useState<string[]>(["default"]);
   const [selectedToneIndex, setSelectedToneIndex] = useState(0);
   const nameId = "habit-name";
-  const descriptionId = "habit-description";
   const categoryId = "habit-category";
   const categoryNewId = "habit-new-category";
-  const goalId = "habit-goal";
-  const unitId = "habit-unit";
 
   // Sync dialog open/close
   useEffect(() => {
@@ -68,11 +62,8 @@ export function HabitForm({
         initial.timeSlots,
       );
       setName(initial.name);
-      setDescription(initial.description);
       setIcon(initial.icon);
       setCategory(initial.category);
-      setGoalLabel(initial.goalLabel);
-      setUnitLabel(initial.unitLabel);
       setFrequencyPerDay(normalizedFrequency);
       setTimeSlots(normalizeTimeSlots(normalizedFrequency, initial.timeSlots));
       const toneIdx = TONE_PRESETS.findIndex(
@@ -86,12 +77,9 @@ export function HabitForm({
 
   function resetForm() {
     setName("");
-    setDescription("");
     setIcon("Target");
     setCategory(existingCategories[0] ?? "");
     setNewCategory("");
-    setGoalLabel("");
-    setUnitLabel("days");
     setFrequencyPerDay(1);
     setTimeSlots(["default"]);
     setSelectedToneIndex(0);
@@ -119,11 +107,11 @@ export function HabitForm({
 
     onSave({
       name: name.trim(),
-      description: description.trim(),
+      description: "",
       icon,
       category: finalCategory,
-      unitLabel: unitLabel.trim() || "days",
-      goalLabel: goalLabel.trim() || name.trim(),
+      unitLabel: "days",
+      goalLabel: name.trim(),
       frequencyPerDay,
       timeSlots: normalizeTimeSlots(frequencyPerDay, timeSlots),
       tone: TONE_PRESETS[selectedToneIndex].tone,
@@ -200,24 +188,6 @@ export function HabitForm({
             />
           </div>
 
-          {/* Description */}
-          <div>
-            <label
-              htmlFor={descriptionId}
-              className="mb-1.5 block text-[13px] font-medium text-ink-700"
-            >
-              Description
-            </label>
-            <textarea
-              id={descriptionId}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Optional short description"
-              rows={2}
-              className="w-full resize-none rounded-lg border border-black/[0.16] bg-white px-3 py-2.5 text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
-            />
-          </div>
-
           {/* Category */}
           <div>
             <label
@@ -280,42 +250,6 @@ export function HabitForm({
                   {preset.label}
                 </button>
               ))}
-            </div>
-          </div>
-
-          {/* Goal label & Unit label */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div>
-              <label
-                htmlFor={goalId}
-                className="mb-1.5 block text-[13px] font-medium text-ink-700"
-              >
-                Goal label
-              </label>
-              <input
-                id={goalId}
-                type="text"
-                value={goalLabel}
-                onChange={(e) => setGoalLabel(e.target.value)}
-                placeholder="e.g., Stay healthy"
-                className="w-full rounded-lg border border-black/[0.16] bg-white px-3 py-2.5 text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor={unitId}
-                className="mb-1.5 block text-[13px] font-medium text-ink-700"
-              >
-                Unit label
-              </label>
-              <input
-                id={unitId}
-                type="text"
-                value={unitLabel}
-                onChange={(e) => setUnitLabel(e.target.value)}
-                placeholder="e.g., sessions"
-                className="w-full rounded-lg border border-black/[0.16] bg-white px-3 py-2.5 text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
-              />
             </div>
           </div>
 

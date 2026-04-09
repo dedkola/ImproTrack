@@ -15,15 +15,27 @@ No test runner is configured — do not attempt to run tests.
 ## Architecture
 
 ```
-app/                   # Thin server components (route pages only; one import each)
-  layout.tsx           # Root: fonts, FirebaseAuthProvider, FirebaseAnalytics
-  dashboard/layout.tsx # Wraps all dashboard routes in <AppShell>
-components/            # "use client" UI components (all real logic lives here)
+app/                         # Thin server components (route pages only; one import each)
+  layout.tsx                 # Root: fonts, FirebaseAuthProvider, FirebaseAnalytics
+  page.tsx                   # Marketing home → <MarketingHome>
+  dashboard/
+    layout.tsx               # Wraps all dashboard routes in <AppShell>
+    page.tsx                 # → <HabitTrackerApp> (main habit grid)
+    habits/[slug]/page.tsx   # → <HabitDetail> (per-habit detail view)
+    archive/page.tsx         # → <ArchivePage>
+    stats/page.tsx           # → <DashboardStats>
+components/                  # "use client" UI components (all real logic lives here)
 lib/
   storage.ts           # HabitStorageContext — single source of truth for all state
   habits.ts            # Types: HabitDefinition, HabitTone; TONE_PRESETS; slug utils
+  stats.ts             # Pure stat functions: streaks, completion rates, month buckets
   date.ts              # dateKey helpers (YYYY-MM-DD strings)
-  firebase/            # Singletons: client.ts, auth.ts, firestore.ts, habit-store.ts
+  firebase/
+    client.ts          # getFirebaseApp() singleton
+    auth.ts            # getFirebaseAuth() singleton
+    firestore.ts       # getFirebaseFirestore() singleton
+    habit-store.ts     # Firestore read/write: listenToUserHabits, saveUserHabit, etc.
+    storage.ts         # getFirebaseStorage(); uploadUserAvatar / deleteUserAvatar
 ```
 
 ## State Management
@@ -38,6 +50,7 @@ All state flows through **`lib/storage.ts`** (React Context + Firestore `onSnaps
 
 ## Conventions
 
+- **`HabitTone` shape:** `{ surface, accent, fill, softFill, badge }` — all Tailwind class strings. `surface` is a gradient (`from-… via-… to-…`), `accent` is text color, `fill` is bg color, `softFill` is a compound bg+text class, `badge` is a ring color.
 - **`"use client"` is required** on any file that uses hooks, Firebase SDK, or browser APIs. Server components are thin wrappers in `app/` only. Missing this causes build failures.
 - **Path alias:** `@/` → repo root. E.g. `import { useHabits } from "@/lib/storage"`.
 - **No barrel/index files.** Import directly from the file path.
@@ -69,6 +82,16 @@ Do not create `tailwind.config.ts`. Do not use arbitrary values outside the exis
 
 All habit card surfaces use `"from-white via-white to-white"` — the white-surface look is intentional and consistent with the sidebar.
 
+## Stats — `lib/stats.ts`
+
+Pure functions that compute stats from `HabitRecords`. Always pass `timeSlots` to correctly handle multi-slot habits:
+
+- `isDayFullyCompleted(records, habitId, dateKey, timeSlots)` — all slots checked
+- `completedSlotsInDay(records, habitId, dateKey, timeSlots)` — partial count
+- `getCurrentStreak / getBestStreak` — consecutive fully-completed days
+- `completionRate(records, habitId, range, todayKey, timeSlots)` — % over a date range
+- `getMonthBuckets / getWeekdayPerformance / getSlotBreakdown` — chart data
+
 ## Firebase
 
 **Singletons only.** Never instantiate Firebase directly in components. Use the getters:
@@ -76,6 +99,7 @@ All habit card surfaces use `"from-white via-white to-white"` — the white-surf
 - `getFirebaseApp()` → `lib/firebase/client.ts`
 - `getFirebaseAuth()` → `lib/firebase/auth.ts`
 - `getFirebaseDb()` → `lib/firebase/firestore.ts`
+- `getFirebaseStorage()` → `lib/firebase/storage.ts` (avatar uploads)
 
 **Firestore data model:**
 
