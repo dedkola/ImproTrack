@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { FirebaseAnalytics } from "@/components/firebase-analytics";
 import { FirebaseAuthProvider } from "@/components/firebase-auth-provider";
 import "./globals.css";
@@ -37,6 +38,7 @@ export default function RootLayout({
         <FirebaseAnalytics />
         <FirebaseAuthProvider>{children}</FirebaseAuthProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
