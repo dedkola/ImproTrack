@@ -30,7 +30,6 @@ const todayKey = toDateKey(today);
 
 export function HabitDetail({ slug }: { slug: string }) {
   const {
-    activeHabits,
     categories,
     getHabitBySlug,
     updateHabit,
@@ -96,6 +95,10 @@ export function HabitDetail({ slug }: { slug: string }) {
     habit.frequencyPerDay > 1
       ? getSlotBreakdown(records, habit.id, habit.timeSlots)
       : null;
+  const habitDescription =
+    habit.description.trim().length > 0
+      ? habit.description
+      : "Use this page to watch the pattern, protect the streak, and tune the routine if it starts slipping.";
 
   const handleSave = (
     data: Omit<HabitDefinition, "id" | "slug" | "createdAt" | "archived">,
@@ -106,61 +109,101 @@ export function HabitDetail({ slug }: { slug: string }) {
   return (
     <div className="page-shell flex flex-col gap-4 py-5">
       {/* Header */}
-      <header className="animate-fade-in-up surface-panel overflow-hidden rounded-2xl px-5 py-4 sm:px-6">
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
-              <HabitIcon
-                name={habit.icon}
-                size={28}
-                className="text-ink-700 shrink-0"
-              />
-              <div>
-                <h1 className="text-[22px] font-semibold tracking-tight text-ink-950 sm:text-[26px]">
+      <header className="animate-fade-in-up surface-panel overflow-hidden rounded-[28px] px-5 py-5 sm:px-6">
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex min-w-0 items-start gap-3.5">
+              <div
+                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${softFillClass(habit.tone)}`}
+                style={softFillStyle(habit.tone)}
+              >
+                <HabitIcon
+                  name={habit.icon}
+                  size={24}
+                  className="shrink-0 text-ink-700"
+                />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span
+                    className={`rounded-full px-3 py-1 text-[12px] font-semibold ${softFillClass(habit.tone)}`}
+                    style={softFillStyle(habit.tone)}
+                  >
+                    {monthRate}% this month
+                  </span>
+                  <span className="rounded-full bg-white px-3 py-1 text-[12px] font-semibold text-ink-950 shadow-[var(--shadow-card)]">
+                    {currentStreak} day streak
+                  </span>
+                </div>
+                <h1 className="mt-3 text-[24px] font-semibold tracking-tight text-ink-950 sm:text-[28px]">
                   {habit.name}
                 </h1>
-                <p className="mt-2 max-w-xl text-[14px] leading-6 text-ink-700">
-                  {habit.description}
+                <p className="mt-2 max-w-2xl text-[14px] leading-6 text-ink-700 sm:text-[15px]">
+                  {habitDescription}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <HabitMenu
-                tone={habit.tone}
-                onEdit={() => setFormOpen(true)}
-                onArchive={() => archiveHabit(habit.id)}
-                onDelete={() => setDeleteOpen(true)}
-              />
+            <div className="flex flex-col gap-2 sm:flex-row lg:items-center">
               <Link
                 href="/dashboard"
-                className="pill-btn tap-target-compact inline-flex items-center justify-center rounded-lg bg-white/80 px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm transition-all hover:bg-white hover:shadow-[var(--shadow-card-hover)]"
+                className="pill-btn tap-target-compact inline-flex w-full items-center justify-center rounded-lg bg-white/80 px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm transition-all hover:bg-white hover:shadow-[var(--shadow-card-hover)] sm:w-auto"
               >
                 &larr; Back
               </Link>
+              <div className="flex justify-end sm:block">
+                <HabitMenu
+                  tone={habit.tone}
+                  onEdit={() => setFormOpen(true)}
+                  onArchive={() => archiveHabit(habit.id)}
+                  onDelete={() => setDeleteOpen(true)}
+                />
+              </div>
             </div>
           </div>
 
-          {/* Meta badges */}
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className={`rounded-md px-2 py-0.5 text-[12px] font-medium ${softFillClass(habit.tone)}`}
+              className={`rounded-md px-2.5 py-1 text-[12px] font-medium ${softFillClass(habit.tone)}`}
               style={softFillStyle(habit.tone)}
             >
               {habit.category}
             </span>
-            {habit.frequencyPerDay > 1 && (
-              <span
-                className={`rounded-md px-2 py-0.5 text-[12px] font-medium ${softFillClass(habit.tone)}`}
-                style={softFillStyle(habit.tone)}
-              >
-                {habit.frequencyPerDay}x / day
-              </span>
-            )}
-            <span className="text-[12px] text-ink-700">{habit.goalLabel}</span>
+            <span className="rounded-md bg-white px-2.5 py-1 text-[12px] font-medium text-ink-700 shadow-[var(--shadow-card)]">
+              {habit.frequencyPerDay > 1
+                ? `${habit.frequencyPerDay} slots per day`
+                : "Once per day"}
+            </span>
+            <span className="rounded-md bg-ink-950/[0.05] px-2.5 py-1 text-[12px] font-medium text-ink-700">
+              Goal: {habit.goalLabel}
+            </span>
           </div>
         </div>
       </header>
+
+      <section className="stagger-children grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatCard
+          label="This month"
+          value={`${monthRate}%`}
+          detail={`${monthCompleted} completed`}
+        />
+        <StatCard
+          label="All time"
+          value={String(total)}
+          detail={habit.unitLabel}
+        />
+        <StatCard
+          label="Current streak"
+          value={`${currentStreak}`}
+          detail="days"
+        />
+        <StatCard
+          label="Best streak"
+          value={`${bestStreak}`}
+          detail="best run"
+        />
+      </section>
 
       {/* Slot breakdown (for multi-slot habits) */}
       {slotBreakdown && (
@@ -200,39 +243,12 @@ export function HabitDetail({ slug }: { slug: string }) {
         </section>
       )}
 
-      {/* Chart + stat cards side by side */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
-        <div className="min-w-0 flex-1">
-          <HabitChart
-            records={records}
-            habitId={habit.id}
-            timeSlots={habit.timeSlots}
-            tone={habit.tone}
-          />
-        </div>
-        <div className="stagger-children grid grid-cols-2 gap-3 sm:grid-cols-4 lg:flex lg:flex-col lg:w-48 lg:shrink-0">
-          <StatCard
-            label="This month"
-            value={`${monthRate}%`}
-            detail={`${monthCompleted} completed`}
-          />
-          <StatCard
-            label="All time"
-            value={String(total)}
-            detail={habit.unitLabel}
-          />
-          <StatCard
-            label="Current streak"
-            value={`${currentStreak}`}
-            detail="days"
-          />
-          <StatCard
-            label="Best streak"
-            value={`${bestStreak}`}
-            detail="best run"
-          />
-        </div>
-      </div>
+      <HabitChart
+        records={records}
+        habitId={habit.id}
+        timeSlots={habit.timeSlots}
+        tone={habit.tone}
+      />
 
       {/* Monthly trend & weekday pattern */}
       <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
@@ -240,7 +256,7 @@ export function HabitDetail({ slug }: { slug: string }) {
           className="animate-fade-in-up surface-panel rounded-2xl p-5 sm:p-6"
           style={{ animationDelay: "100ms" }}
         >
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-[13px] font-semibold text-ink-950">
               Monthly trend
             </h2>
@@ -272,9 +288,14 @@ export function HabitDetail({ slug }: { slug: string }) {
           className="animate-fade-in-up surface-panel rounded-2xl p-5 sm:p-6"
           style={{ animationDelay: "150ms" }}
         >
-          <h2 className="text-[13px] font-semibold text-ink-950">
-            Weekday pattern
-          </h2>
+          <div className="flex flex-col gap-1.5 sm:flex-row sm:items-end sm:justify-between">
+            <h2 className="text-[13px] font-semibold text-ink-950">
+              Weekday pattern
+            </h2>
+            <p className="text-[12px] text-ink-700">
+              Where this routine fits your real week.
+            </p>
+          </div>
 
           <div className="mt-4 space-y-3.5">
             {weekdayPerformance.map((entry) => (
@@ -332,9 +353,9 @@ function StatCard({
   detail: string;
 }) {
   return (
-    <div className="rounded-xl border border-black/[0.06] bg-white p-3.5 shadow-[var(--shadow-card)] transition-all duration-200 hover:bg-black/[0.02] hover:shadow-[var(--shadow-card-hover)]">
+    <div className="rounded-[22px] border border-black/[0.06] bg-white p-3.5 shadow-[var(--shadow-card)] transition-all duration-200 hover:bg-black/[0.02] hover:shadow-[var(--shadow-card-hover)]">
       <p className="text-[13px] text-ink-700">{label}</p>
-      <p className="mt-1 font-display text-[22px] font-semibold tabular-nums text-ink-950">
+      <p className="mt-1 font-display text-[22px] font-semibold tabular-nums text-ink-950 sm:text-[24px]">
         {value}
       </p>
       <p className="mt-0.5 text-[12px] text-ink-700">{detail}</p>

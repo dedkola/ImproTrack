@@ -8,6 +8,7 @@ import {
   formatLongDate,
   formatMonthLabel,
   getCurrentMonthRange,
+  getRollingRange,
   parseDateKey,
   startOfDay,
   toDateKey,
@@ -187,6 +188,45 @@ function resolveMatrixTone(tone: { fill: string; hex?: string }) {
   return getMatrixTone(tone.fill);
 }
 
+const mobileWeekdayFormatter = new Intl.DateTimeFormat("en", {
+  weekday: "short",
+});
+
+const mobileDateFormatter = new Intl.DateTimeFormat("en", {
+  month: "short",
+  day: "numeric",
+});
+
+type MobileDaySlotStatus = {
+  slotName: string;
+  checked: boolean;
+};
+
+type MobileDaySummary = {
+  dateKey: string;
+  label: string;
+  secondaryLabel: string;
+  isToday: boolean;
+  isFuture: boolean;
+  completedCount: number;
+  totalSlots: number;
+  slotStatuses: MobileDaySlotStatus[];
+};
+
+type HabitSummary = {
+  habit: HabitDefinition;
+  monthCompleted: number;
+  monthRate: number;
+  todayCompletedCount: number;
+  totalSlots: number;
+  recentDays: MobileDaySummary[];
+};
+
+function getMobileDayLabel(dateKey: string) {
+  if (dateKey === todayKey) return "Today";
+  return mobileWeekdayFormatter.format(parseDateKey(dateKey));
+}
+
 export function HabitTrackerApp() {
   const {
     activeHabits,
@@ -200,6 +240,7 @@ export function HabitTrackerApp() {
 
   const range = getCurrentMonthRange(today);
   const days = eachDay(range);
+  const mobileDays = [...eachDay(getRollingRange(7, today))].reverse();
 
   // CRUD modals
   const [formOpen, setFormOpen] = useState(false);
@@ -311,27 +352,62 @@ export function HabitTrackerApp() {
     }
   });
 
-  const habitSummaries = orderedActiveHabits.map((habit) => {
-    const completed = countCompleted(
+  const habitSummaries: HabitSummary[] = orderedActiveHabits.map((habit) => {
+    const monthCompleted = countCompleted(
       records,
       habit.id,
       range,
       todayKey,
       habit.timeSlots,
     );
-    const rate = completionRate(
+    const monthRate = completionRate(
       records,
       habit.id,
       range,
       todayKey,
       habit.timeSlots,
     );
-    return { habit, completed, rate };
+    const totalSlots = habit.timeSlots.length;
+    const todayCompletedCount = completedSlotsInDay(
+      records,
+      habit.id,
+      todayKey,
+      habit.timeSlots,
+    );
+    const recentDays = mobileDays.map((dateKey) => {
+      const daySlots = records[habit.id]?.[dateKey];
+      const slotStatuses = habit.timeSlots.map((slotName) => ({
+        slotName,
+        checked: isSlotCompleted(daySlots, slotName, {
+          fallbackToAny: habit.timeSlots.length <= 1,
+        }),
+      }));
+
+      return {
+        dateKey,
+        label: getMobileDayLabel(dateKey),
+        secondaryLabel: mobileDateFormatter.format(parseDateKey(dateKey)),
+        isToday: dateKey === todayKey,
+        isFuture: dateKey > todayKey,
+        completedCount: slotStatuses.filter((slot) => slot.checked).length,
+        totalSlots,
+        slotStatuses,
+      };
+    });
+
+    return {
+      habit,
+      monthCompleted,
+      monthRate,
+      todayCompletedCount,
+      totalSlots,
+      recentDays,
+    };
   });
 
-  const averageRate = getOverallRate(habitSummaries.map((s) => s.rate));
+  const averageRate = getOverallRate(habitSummaries.map((s) => s.monthRate));
   const totalCompleted = habitSummaries.reduce(
-    (sum, s) => sum + s.completed,
+    (sum, s) => sum + s.monthCompleted,
     0,
   );
 
@@ -348,58 +424,66 @@ export function HabitTrackerApp() {
   return (
     <div className="flex min-h-full w-full flex-col">
       {/* Header */}
-      <header className="header-bar sticky top-0 z-30 w-full py-3 sm:py-3.5 lg:top-0">
-        <div className="page-shell flex flex-col gap-2.5">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-5">
-              <h1 className="font-display text-[20px] font-semibold leading-none tracking-tight text-ink-950">
-                Dashboard
-              </h1>
-              <span className="hidden h-4 w-px bg-ink-950/10 sm:block" />
-              <div className="hidden items-center gap-5 sm:flex">
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-[14px] text-ink-700">Habits</span>
-                  <span className="font-display text-[14px] font-semibold tabular-nums text-ink-950">
-                    {activeHabits.length}
-                  </span>
-                </div>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-[14px] text-ink-700">Hit rate</span>
-                  <span className="font-display text-[14px] font-semibold tabular-nums text-ink-950">
-                    {averageRate}%
-                  </span>
-                </div>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-[14px] text-ink-700">Total</span>
-                  <span className="font-display text-[14px] font-semibold tabular-nums text-ink-950">
-                    {totalCompleted}
-                  </span>
+      <header className="header-bar z-30 w-full py-3 sm:py-3.5 md:sticky md:top-0">
+        <div className="page-shell flex flex-col gap-3">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <div className="flex items-center gap-5">
+                <h1 className="font-display text-[20px] font-semibold leading-none tracking-tight text-ink-950">
+                  Dashboard
+                </h1>
+                <span className="hidden h-4 w-px bg-ink-950/10 md:block" />
+                <div className="hidden items-center gap-5 md:flex">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-[14px] text-ink-700">Habits</span>
+                    <span className="font-display text-[14px] font-semibold tabular-nums text-ink-950">
+                      {activeHabits.length}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-[14px] text-ink-700">Hit rate</span>
+                    <span className="font-display text-[14px] font-semibold tabular-nums text-ink-950">
+                      {averageRate}%
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-[14px] text-ink-700">Total</span>
+                    <span className="font-display text-[14px] font-semibold tabular-nums text-ink-950">
+                      {totalCompleted}
+                    </span>
+                  </div>
                 </div>
               </div>
+              <p className="text-[13px] text-ink-700 md:hidden">
+                {activeHabits.length} habits • {averageRate}% hit rate •{" "}
+                {totalCompleted} completed this month
+              </p>
             </div>
 
-            <div className="flex items-center gap-3">
-              <span className="font-display text-[14px] font-medium text-ink-950">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between md:justify-end">
+              <span className="inline-flex w-fit items-center rounded-full border border-black/[0.06] bg-white px-3 py-1.5 font-display text-[13px] font-medium text-ink-950 shadow-[var(--shadow-card)]">
                 {formatMonthLabel(range)}
               </span>
-              <Link
-                href="/dashboard/stats"
-                className="pill-btn tap-target-compact inline-flex items-center gap-1.5 rounded-lg bg-white/80 px-3 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm transition-all hover:bg-white hover:shadow-[var(--shadow-card-hover)]"
-              >
-                Statistics
-              </Link>
-              <button
-                type="button"
-                aria-label="Add habit"
-                onClick={() => {
-                  setEditingHabit(null);
-                  setFormOpen(true);
-                }}
-                className="pill-btn tap-target-compact flex items-center gap-1.5 rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)]"
-              >
-                <Plus className="h-3.5 w-3.5" strokeWidth={2} />
-                Add habit
-              </button>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/dashboard/stats"
+                  className="pill-btn tap-target-compact inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white/80 px-3 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm transition-all hover:bg-white hover:shadow-[var(--shadow-card-hover)] sm:flex-none"
+                >
+                  Statistics
+                </Link>
+                <button
+                  type="button"
+                  aria-label="Add habit"
+                  onClick={() => {
+                    setEditingHabit(null);
+                    setFormOpen(true);
+                  }}
+                  className="pill-btn tap-target-compact inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)] sm:flex-none"
+                >
+                  <Plus className="h-3.5 w-3.5" strokeWidth={2} />
+                  Add habit
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -428,8 +512,26 @@ export function HabitTrackerApp() {
           </div>
         ) : (
           <div className="flex flex-col gap-4">
+            <section className="stagger-children flex flex-col gap-3 md:hidden">
+              {habitSummaries.map((summary) => (
+                <MobileHabitCard
+                  key={summary.habit.id}
+                  summary={summary}
+                  onToggleDay={(dateKey, slotName) => {
+                    toggleHabitDay(summary.habit.id, dateKey, slotName);
+                  }}
+                  onEdit={() => {
+                    setEditingHabit(summary.habit);
+                    setFormOpen(true);
+                  }}
+                  onArchive={() => archiveHabit(summary.habit.id)}
+                  onDelete={() => setDeleteTarget(summary.habit)}
+                />
+              ))}
+            </section>
+
             {/* Matrix */}
-            <section className="animate-scale-in surface-panel relative overflow-visible rounded-2xl">
+            <section className="animate-scale-in surface-panel relative hidden overflow-visible rounded-2xl md:block">
               <div className="flex items-center justify-between border-b border-black/[0.04] px-5 py-3 sm:px-6">
                 <h2 className="text-[14px] font-semibold text-ink-950">
                   Habit matrix
@@ -726,7 +828,7 @@ export function HabitTrackerApp() {
                                   }
                                 }}
                                 disabled={isFuture}
-                                aria-pressed={slotChecked}
+                                aria-pressed={slotChecked ? "true" : "false"}
                                 aria-label={`${habit.name}${displaySlotName ? ` ${displaySlotName}` : ""} on ${formatLongDate(dateKey)}`}
                                 className={`matrix-day-btn relative flex h-full min-h-[44px] items-center justify-center ${
                                   isLastRow && colIndex === days.length - 1
@@ -772,8 +874,8 @@ export function HabitTrackerApp() {
             </section>
 
             {/* Habit cards */}
-            <section className="stagger-children grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-              {habitSummaries.map(({ habit, completed, rate }) => {
+            <section className="stagger-children hidden gap-3 md:grid md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+              {habitSummaries.map(({ habit, monthCompleted, monthRate }) => {
                 const cardGradient = getAppleCardGradientStyle(habit.tone);
                 return (
                   <Link
@@ -799,7 +901,7 @@ export function HabitTrackerApp() {
                           className={`rounded-md px-2 py-0.5 text-[12px] font-semibold ${softFillClass(habit.tone)}`}
                           style={softFillStyle(habit.tone)}
                         >
-                          {rate}%
+                          {monthRate}%
                         </span>
                       </div>
                       <p className="text-[14px] leading-5 text-ink-700">
@@ -822,7 +924,7 @@ export function HabitTrackerApp() {
                         <div>
                           <p className="text-[12px] text-ink-700">Completed</p>
                           <p className="font-display text-[22px] font-semibold tabular-nums text-ink-950">
-                            {completed}
+                            {monthCompleted}
                           </p>
                         </div>
                         <span
@@ -863,6 +965,261 @@ export function HabitTrackerApp() {
         }}
         onCancel={() => setDeleteTarget(null)}
       />
+    </div>
+  );
+}
+
+function MobileHabitCard({
+  summary,
+  onToggleDay,
+  onEdit,
+  onArchive,
+  onDelete,
+}: {
+  summary: HabitSummary;
+  onToggleDay: (dateKey: string, slotName: string) => void;
+  onEdit: () => void;
+  onArchive: () => void;
+  onDelete: () => void;
+}) {
+  const { habit, monthCompleted, monthRate, todayCompletedCount, totalSlots } =
+    summary;
+  const todaySummary =
+    totalSlots <= 1
+      ? todayCompletedCount === 1
+        ? "Done today"
+        : "Open today"
+      : `${todayCompletedCount}/${totalSlots} today`;
+
+  return (
+    <article className="surface-panel rounded-[24px] px-4 py-4 sm:px-5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-start gap-3">
+          <div
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${softFillClass(habit.tone)}`}
+            style={softFillStyle(habit.tone)}
+          >
+            <span
+              className={`flex shrink-0 items-center justify-center ${accentClass(habit.tone)}`}
+              style={accentStyle(habit.tone)}
+            >
+              <HabitIcon name={habit.icon} size={18} className="shrink-0" />
+            </span>
+          </div>
+
+          <div className="min-w-0">
+            <h2 className="truncate text-[16px] font-semibold text-ink-950">
+              {habit.name}
+            </h2>
+            <p className="mt-1 text-[12px] text-ink-700">
+              {habit.category}
+              {habit.frequencyPerDay > 1
+                ? ` • ${habit.timeSlots.length} slots`
+                : " • Daily"}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-2">
+          <span
+            className={`rounded-md px-2 py-1 text-[11px] font-semibold ${softFillClass(habit.tone)} ${badgeClass(habit.tone)}`}
+            style={{
+              ...softFillStyle(habit.tone),
+              ...badgeStyle(habit.tone),
+            }}
+          >
+            {monthRate}%
+          </span>
+          <HabitMenu
+            tone={habit.tone}
+            onEdit={onEdit}
+            onArchive={onArchive}
+            onDelete={onDelete}
+          />
+        </div>
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        <span className="rounded-lg bg-white px-2.5 py-1 text-[11px] font-medium text-ink-700 shadow-[var(--shadow-card)]">
+          {monthCompleted} days completed
+        </span>
+        <span
+          className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold ${softFillClass(habit.tone)}`}
+          style={softFillStyle(habit.tone)}
+        >
+          {todaySummary}
+        </span>
+      </div>
+
+      <div className="mt-4">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-ink-600">
+            Recent 7 days
+          </p>
+          <Link
+            href={`/dashboard/habits/${habit.slug}`}
+            className={`text-[12px] font-semibold ${accentClass(habit.tone)}`}
+            style={accentStyle(habit.tone)}
+          >
+            Open details
+          </Link>
+        </div>
+
+        <div className="space-y-2">
+          {summary.recentDays.map((day) => (
+            <MobileHabitDayRow
+              key={`${habit.id}-${day.dateKey}`}
+              habit={habit}
+              day={day}
+              onToggleDay={onToggleDay}
+            />
+          ))}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function MobileHabitDayRow({
+  habit,
+  day,
+  onToggleDay,
+}: {
+  habit: HabitDefinition;
+  day: MobileDaySummary;
+  onToggleDay: (dateKey: string, slotName: string) => void;
+}) {
+  const matrixTone = resolveMatrixTone(habit.tone);
+  const isSingleSlot = day.totalSlots <= 1;
+  const badgeClassName =
+    day.completedCount > 0
+      ? `${softFillClass(habit.tone)} ${badgeClass(habit.tone)}`
+      : "bg-black/[0.04] text-ink-700";
+  const badgeStyleValue =
+    day.completedCount > 0
+      ? {
+          ...softFillStyle(habit.tone),
+          ...badgeStyle(habit.tone),
+        }
+      : undefined;
+
+  return (
+    <div className="rounded-xl border border-black/[0.06] bg-white px-3 py-3 shadow-[var(--shadow-card)]">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[13px] font-semibold text-ink-950">{day.label}</p>
+          <p className="text-[12px] text-ink-700">{day.secondaryLabel}</p>
+        </div>
+        <span
+          className={`rounded-md px-2 py-1 text-[11px] font-semibold ${badgeClassName}`}
+          style={badgeStyleValue}
+        >
+          {isSingleSlot
+            ? day.completedCount === 1
+              ? "Done"
+              : "Open"
+            : `${day.completedCount}/${day.totalSlots}`}
+        </span>
+      </div>
+
+      {isSingleSlot ? (
+        <button
+          type="button"
+          disabled={day.isFuture}
+          onClick={() =>
+            onToggleDay(day.dateKey, day.slotStatuses[0]?.slotName ?? "default")
+          }
+          aria-pressed={day.slotStatuses[0]?.checked ? "true" : "false"}
+          aria-label={`${habit.name} on ${formatLongDate(day.dateKey)}`}
+          className={`pill-btn tap-target mt-3 flex w-full items-center justify-between rounded-xl border px-3 py-2.5 text-[13px] font-semibold transition ${
+            day.slotStatuses[0]?.checked
+              ? "text-white"
+              : "bg-white text-ink-950 hover:bg-black/[0.02]"
+          } ${day.isFuture ? "cursor-not-allowed opacity-50" : ""}`}
+          style={
+            day.slotStatuses[0]?.checked
+              ? {
+                  backgroundColor: matrixTone.fill,
+                  borderColor: "transparent",
+                  boxShadow: `0 10px 24px ${matrixTone.glow}, 0 1px 2px rgba(10, 22, 40, 0.12)`,
+                }
+              : undefined
+          }
+        >
+          <span>
+            {day.slotStatuses[0]?.checked ? "Completed" : "Mark complete"}
+          </span>
+          <span
+            className={`matrix-check flex h-[26px] w-[26px] items-center justify-center rounded-lg ${
+              day.slotStatuses[0]?.checked
+                ? "matrix-check-checked text-white"
+                : "matrix-check-idle text-transparent"
+            }`}
+            style={
+              day.slotStatuses[0]?.checked
+                ? {
+                    backgroundColor: "rgba(255, 255, 255, 0.18)",
+                    borderColor: "transparent",
+                    boxShadow: "none",
+                  }
+                : undefined
+            }
+          >
+            <Check aria-hidden="true" className="h-3 w-3" strokeWidth={2.2} />
+          </span>
+        </button>
+      ) : (
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {day.slotStatuses.map((slot) => (
+            <button
+              key={`${day.dateKey}-${slot.slotName}`}
+              type="button"
+              disabled={day.isFuture}
+              onClick={() => onToggleDay(day.dateKey, slot.slotName)}
+              aria-pressed={slot.checked ? "true" : "false"}
+              aria-label={`${habit.name} ${slot.slotName} on ${formatLongDate(day.dateKey)}`}
+              className={`pill-btn flex min-h-[44px] items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left text-[12px] font-semibold transition ${
+                slot.checked
+                  ? "text-white"
+                  : "bg-white text-ink-950 hover:bg-black/[0.02]"
+              } ${day.isFuture ? "cursor-not-allowed opacity-50" : ""}`}
+              style={
+                slot.checked
+                  ? {
+                      backgroundColor: matrixTone.fill,
+                      borderColor: "transparent",
+                      boxShadow: `0 10px 24px ${matrixTone.glow}, 0 1px 2px rgba(10, 22, 40, 0.12)`,
+                    }
+                  : undefined
+              }
+            >
+              <span className="truncate">{slot.slotName}</span>
+              <span
+                className={`matrix-check flex h-[24px] w-[24px] shrink-0 items-center justify-center rounded-lg ${
+                  slot.checked
+                    ? "matrix-check-checked text-white"
+                    : "matrix-check-idle text-transparent"
+                }`}
+                style={
+                  slot.checked
+                    ? {
+                        backgroundColor: "rgba(255, 255, 255, 0.18)",
+                        borderColor: "transparent",
+                        boxShadow: "none",
+                      }
+                    : undefined
+                }
+              >
+                <Check
+                  aria-hidden="true"
+                  className="h-3 w-3"
+                  strokeWidth={2.2}
+                />
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

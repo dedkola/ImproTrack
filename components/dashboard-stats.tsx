@@ -56,6 +56,11 @@ const today = startOfDay(new Date());
 const todayKey = toDateKey(today);
 const RANGE_MIN = "2025-01-01";
 const RANGE_MAX = "2030-12-31";
+const mobileTrendDateFormatter = new Intl.DateTimeFormat("en", {
+  weekday: "short",
+  month: "short",
+  day: "numeric",
+});
 
 function getPresetRange(preset: Exclude<StatsPreset, "custom">) {
   if (preset === "month") {
@@ -278,6 +283,7 @@ export function DashboardStats() {
     selectedPreset === "custom"
       ? `${formatLongDate(range.from)} to ${formatLongDate(range.to)}`
       : `Analytics for ${formatLongDate(range.from)} through ${formatLongDate(range.to)}`;
+  const mobileTrend = summary.trend.slice(-7).reverse();
 
   if (activeHabits.length === 0) {
     return (
@@ -349,7 +355,7 @@ export function DashboardStats() {
         selectedPreset={selectedPreset}
       />
 
-      <section className="stagger-children grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="stagger-children grid grid-cols-2 gap-3 xl:grid-cols-4">
         <StatsCard
           label="Tracked in scope"
           value={String(filteredHabits.length)}
@@ -378,7 +384,7 @@ export function DashboardStats() {
 
       <section className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
         <div className="animate-fade-in-up surface-panel min-w-0 rounded-[28px] p-5 sm:p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h2 className="text-[14px] font-semibold text-ink-950">
                 {periodHeading}
@@ -387,12 +393,12 @@ export function DashboardStats() {
                 Daily completion across all selected habit slots.
               </p>
             </div>
-            <span className="rounded-full bg-ink-950/[0.05] px-3 py-1 text-[12px] font-semibold text-ink-700">
+            <span className="w-fit rounded-full bg-ink-950/[0.05] px-3 py-1 text-[12px] font-semibold text-ink-700">
               Peak {summary.bestRate}%
             </span>
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px] text-ink-700">
+          <div className="mt-3 flex flex-col gap-2 text-[12px] text-ink-700 sm:flex-row sm:flex-wrap sm:items-center">
             <span className="rounded-full bg-white px-3 py-1.5 font-semibold text-ink-950 shadow-[var(--shadow-card)]">
               {rangeDescription}
             </span>
@@ -402,7 +408,39 @@ export function DashboardStats() {
             )}
           </div>
 
-          <div className="comparison-scroll mt-6 overflow-x-auto pb-1">
+          <div className="mt-5 space-y-2 md:hidden">
+            {mobileTrend.map((day) => (
+              <div
+                key={day.dateKey}
+                className="rounded-[20px] border border-black/[0.06] bg-white px-4 py-3 shadow-[var(--shadow-card)]"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-semibold text-ink-950">
+                      {mobileTrendDateFormatter.format(
+                        parseDateKey(day.dateKey),
+                      )}
+                    </p>
+                    <p className="mt-1 text-[12px] text-ink-700">
+                      {day.completed} of {day.total} slots completed
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-ink-950/[0.05] px-3 py-1 text-[12px] font-semibold text-ink-950">
+                    {day.rate}%
+                  </span>
+                </div>
+
+                <div className="mt-3 h-[7px] overflow-hidden rounded-full bg-black/[0.05]">
+                  <div
+                    className="h-[7px] rounded-full bg-linear-to-r from-[#6D28D9] to-[#C026D3] transition-all duration-500"
+                    style={{ width: `${day.rate}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="comparison-scroll mt-6 hidden overflow-x-auto pb-1 md:block">
             <div
               className="grid min-w-full items-end gap-2"
               style={{
@@ -467,24 +505,25 @@ export function DashboardStats() {
 
           {summary.topHabit ? (
             <div className="mt-6 rounded-[24px] border border-black/[0.06] bg-white p-5 shadow-[var(--shadow-card)]">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-[28px]">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0 flex-1">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-ink-950/[0.04]">
                     <HabitIcon
                       name={summary.topHabit.habit.icon}
-                      size={28}
+                      size={24}
                       className="text-ink-700"
                     />
-                  </p>
+                  </div>
                   <h3 className="mt-3 text-[20px] font-semibold text-ink-950">
                     {summary.topHabit.habit.name}
                   </h3>
                   <p className="mt-2 text-[14px] leading-6 text-ink-700">
-                    {summary.topHabit.habit.description}
+                    {summary.topHabit.habit.description ||
+                      "This routine is carrying the strongest completion signal in the selected range."}
                   </p>
                 </div>
                 <span
-                  className={`rounded-full px-3 py-1 text-[12px] font-semibold ${softFillClass(summary.topHabit.habit.tone)}`}
+                  className={`w-fit rounded-full px-3 py-1 text-[12px] font-semibold ${softFillClass(summary.topHabit.habit.tone)}`}
                   style={softFillStyle(summary.topHabit.habit.tone)}
                 >
                   {summary.topHabit.habit.category}
@@ -508,7 +547,7 @@ export function DashboardStats() {
 
               <Link
                 href={`/dashboard/habits/${summary.topHabit.habit.slug}`}
-                className="pill-btn mt-5 inline-flex items-center rounded-lg bg-white px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)]"
+                className="pill-btn mt-5 inline-flex w-full items-center justify-center rounded-lg bg-white px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)] sm:w-auto"
               >
                 Open habit details
               </Link>
@@ -560,7 +599,7 @@ export function DashboardStats() {
           className="animate-fade-in-up surface-panel min-w-0 rounded-[28px] p-5 sm:p-6"
           style={{ animationDelay: "160ms" }}
         >
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-[14px] font-semibold text-ink-950">
                 Habit leaderboard
@@ -580,39 +619,51 @@ export function DashboardStats() {
               <Link
                 key={snapshot.habit.id}
                 href={`/dashboard/habits/${snapshot.habit.slug}`}
-                className="group flex items-center gap-3 rounded-[22px] border border-black/[0.06] bg-white px-4 py-3 shadow-[var(--shadow-card)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)]"
+                className="group rounded-[22px] border border-black/[0.06] bg-white px-4 py-3 shadow-[var(--shadow-card)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)]"
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#6D28D9] text-[12px] font-semibold text-white">
-                  {index + 1}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <HabitIcon
-                      name={snapshot.habit.icon}
-                      size={18}
-                      className="text-ink-700 shrink-0"
-                    />
-                    <p className="truncate text-[14px] font-semibold text-ink-950">
-                      {snapshot.habit.name}
-                    </p>
+                <div className="flex items-start gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#6D28D9] text-[12px] font-semibold text-white">
+                    {index + 1}
                   </div>
-                  <div className="mt-2 h-[6px] overflow-hidden rounded-full bg-black/[0.05]">
-                    <div
-                      className={`h-[6px] rounded-full ${fillClass(snapshot.habit.tone)}`}
-                      style={{
-                        width: `${snapshot.rate}%`,
-                        ...fillStyle(snapshot.habit.tone),
-                      }}
-                    />
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <HabitIcon
+                            name={snapshot.habit.icon}
+                            size={18}
+                            className="shrink-0 text-ink-700"
+                          />
+                          <p className="truncate text-[14px] font-semibold text-ink-950">
+                            {snapshot.habit.name}
+                          </p>
+                        </div>
+                        <p className="mt-1 text-[12px] text-ink-600">
+                          {snapshot.completed} completed in range
+                        </p>
+                      </div>
+
+                      <div className="shrink-0 text-right">
+                        <p className="text-[14px] font-semibold tabular-nums text-ink-950">
+                          {snapshot.rate}%
+                        </p>
+                        <p className="text-[12px] text-ink-600">
+                          {snapshot.streak}d streak
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-2 h-[6px] overflow-hidden rounded-full bg-black/[0.05]">
+                      <div
+                        className={`h-[6px] rounded-full ${fillClass(snapshot.habit.tone)}`}
+                        style={{
+                          width: `${snapshot.rate}%`,
+                          ...fillStyle(snapshot.habit.tone),
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-[14px] font-semibold tabular-nums text-ink-950">
-                    {snapshot.rate}%
-                  </p>
-                  <p className="text-[12px] text-ink-600">
-                    {snapshot.streak}d streak
-                  </p>
                 </div>
               </Link>
             ))}
@@ -639,7 +690,7 @@ export function DashboardStats() {
           </p>
         </div>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-7">
+        <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
           {summary.weekdayBuckets.map((day) => (
             <div
               key={day.label}
@@ -704,14 +755,14 @@ function StatsHeader({
     "pill-btn tap-target-compact rounded-lg px-3 py-2 text-[13px] font-medium transition";
 
   return (
-    <header className="animate-fade-in-up surface-panel rounded-[28px] px-5 py-5 sm:px-6">
+    <header className="animate-fade-in-up surface-panel rounded-[28px] px-4 py-5 sm:px-6">
       <div className="flex flex-col gap-5">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <span className="inline-flex rounded-full bg-ink-950/[0.05] px-3 py-1 text-[12px] font-semibold uppercase tracking-[0.2em] text-ink-700">
               Statistics
             </span>
-            <h1 className="mt-4 font-display text-[32px] font-semibold tracking-tight text-ink-950 sm:text-[40px]">
+            <h1 className="mt-4 font-display text-[28px] font-semibold tracking-tight text-ink-950 sm:text-[40px]">
               See what is compounding and what is slipping.
             </h1>
             <p className="mt-3 max-w-2xl text-[15px] leading-7 text-ink-700">
@@ -721,7 +772,7 @@ function StatsHeader({
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
             <span className="rounded-full bg-white px-3 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)]">
               {rangeLabel}
             </span>
@@ -743,7 +794,7 @@ function StatsHeader({
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 rounded-[24px] border border-black/[0.06] bg-white px-4 py-4 shadow-[var(--shadow-card)]">
+        <div className="flex flex-col gap-4 rounded-[22px] border border-black/[0.06] bg-white px-4 py-4 shadow-[var(--shadow-card)]">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
