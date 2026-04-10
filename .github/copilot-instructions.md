@@ -5,9 +5,9 @@ Momentum is a habit-tracking PWA built with **Next.js 16 (App Router)**, **React
 ## Build & Dev Commands
 
 ```bash
-npm run dev    # start local dev server
-npm run build  # production build
-npm run start  # run production build
+pnpm dev    # start local dev server
+pnpm build  # production build
+pnpm start  # run production build
 ```
 
 No test runner is configured — do not attempt to run tests.

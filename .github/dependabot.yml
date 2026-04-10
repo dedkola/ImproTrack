@@ -1,13 +1,13 @@
 # `dependabot.yml` file with
-#  assignee for all npm pull requests
+#  assignee for all JavaScript dependency pull requests
 
 version: 2
 updates:
-  # Keep npm dependencies up to date
+  # Keep pnpm-managed dependencies up to date
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
-    # Raise all npm pull requests with assignees
+    # Raise dependency pull requests with assignees
     assignees:
       - "dedkola"
