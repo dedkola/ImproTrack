@@ -466,7 +466,7 @@ export function HabitTrackerApp() {
                           key={dateKey}
                           className={`px-1 py-3 text-center text-[12px] ${
                             index === days.length - 1 ? "rounded-tr-[11px]" : ""
-                          } ${isToday ? "bg-[#6D28D9]/[0.07]" : "bg-white"}`}
+                          } ${isToday ? "rounded-[10px] bg-[#6D28D9]/[0.07]" : "bg-white"}`}
                         >
                           <p
                             className={`font-semibold ${isToday ? "text-[#6D28D9]" : "text-ink-950"}`}
@@ -657,7 +657,7 @@ export function HabitTrackerApp() {
                                     isLastRow && colIndex === days.length - 1
                                       ? "rounded-br-[11px]"
                                       : ""
-                                  } ${isToday ? "bg-[#6D28D9]/[0.05]" : ""} ${
+                                  } ${isToday ? "rounded-[10px] bg-[#6D28D9]/[0.05]" : ""} ${
                                     isFuture ? "opacity-40" : ""
                                   }`}
                                 >
@@ -732,7 +732,7 @@ export function HabitTrackerApp() {
                                   isLastRow && colIndex === days.length - 1
                                     ? "rounded-br-[11px]"
                                     : ""
-                                } ${isToday && !checked ? "bg-[#6D28D9]/[0.05]" : ""} ${
+                                } ${isToday && !checked ? "rounded-[10px] bg-[#6D28D9]/[0.05]" : ""} ${
                                   isLastSlot && !isLastRow
                                     ? "border-b border-black/[0.07]"
                                     : ""
