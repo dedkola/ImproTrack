@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { FirebaseAnalytics } from "@/components/firebase-analytics";
 import { FirebaseAuthProvider } from "@/components/firebase-auth-provider";
 import "./globals.css";
@@ -35,6 +36,7 @@ export default function RootLayout({
       <body className={`${sans.variable} ${display.variable} antialiased`}>
         <FirebaseAnalytics />
         <FirebaseAuthProvider>{children}</FirebaseAuthProvider>
+        <Analytics />
       </body>
     </html>
   );
