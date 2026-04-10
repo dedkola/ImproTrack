@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { updateProfile } from "firebase/auth";
-import { X, Upload, Loader2 } from "lucide-react";
+import { Bell, Loader2, Upload, X } from "lucide-react";
+import { useDailyHabitReminder } from "@/components/daily-habit-reminder-provider";
 import { useFirebaseAuth } from "@/components/firebase-auth-provider";
 import { getFirebaseAuth } from "@/lib/firebase/auth";
 import { uploadUserAvatar, deleteUserAvatar } from "@/lib/firebase/storage";
@@ -13,6 +14,17 @@ type ProfileSettingsModalProps = {
 
 export function ProfileSettingsModal({ onClose }: ProfileSettingsModalProps) {
   const { user } = useFirebaseAuth();
+  const {
+    disableReminder,
+    enableReminder,
+    isEnabled,
+    isPushConfigured,
+    isSupported,
+    permission,
+    reminderTimeLabel,
+    setupError,
+    sendPreview,
+  } = useDailyHabitReminder();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // The photo URL provided by Google Sign-In (from provider data)
@@ -26,8 +38,11 @@ export function ProfileSettingsModal({ onClose }: ProfileSettingsModalProps) {
   );
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isReminderPending, setIsReminderPending] = useState(false);
+  const [isPreviewPending, setIsPreviewPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [reminderMessage, setReminderMessage] = useState<string | null>(null);
 
   // Close on Escape
   useEffect(() => {
@@ -105,6 +120,88 @@ export function ProfileSettingsModal({ onClose }: ProfileSettingsModalProps) {
     }
   }
 
+  async function handleReminderToggle() {
+    setReminderMessage(null);
+
+    if (isEnabled) {
+      setIsReminderPending(true);
+
+      try {
+        await disableReminder();
+        setReminderMessage("Background reminder turned off for this browser.");
+      } catch (err) {
+        setReminderMessage(
+          err instanceof Error
+            ? err.message
+            : "Unable to turn off the background reminder.",
+        );
+      } finally {
+        setIsReminderPending(false);
+      }
+
+      return;
+    }
+
+    setIsReminderPending(true);
+
+    try {
+      await enableReminder();
+      setReminderMessage(
+        `Background reminder enabled for ${reminderTimeLabel} on this browser.`,
+      );
+    } catch (err) {
+      setReminderMessage(
+        err instanceof Error
+          ? err.message
+          : "Unable to enable the background reminder.",
+      );
+    } finally {
+      setIsReminderPending(false);
+    }
+  }
+
+  async function handleSendPreview() {
+    setReminderMessage(null);
+    setIsPreviewPending(true);
+
+    try {
+      const sent = await sendPreview();
+      setReminderMessage(
+        sent
+          ? "Preview sent. Check your browser notification tray."
+          : "Preview could not be sent. Make sure notifications are allowed for this site.",
+      );
+    } finally {
+      setIsPreviewPending(false);
+    }
+  }
+
+  const reminderStatus = !isSupported
+    ? {
+        label: "Unavailable",
+        className: "border border-black/[0.08] bg-white text-ink-600",
+      }
+    : !isPushConfigured
+      ? {
+          label: "Setup",
+          className: "border border-amber-200 bg-amber-50 text-amber-700",
+        }
+      : permission === "denied"
+        ? {
+            label: "Blocked",
+            className: "border border-red-200 bg-red-50 text-red-700",
+          }
+        : isEnabled && permission === "granted"
+          ? {
+              label: "Enabled",
+              className:
+                "border border-emerald-200 bg-emerald-50 text-emerald-700",
+            }
+          : {
+              label: "Off",
+              className: "border border-black/[0.08] bg-white text-ink-600",
+            };
+
   const initial = (displayName || user?.email || "M")
     .trim()
     .charAt(0)
@@ -117,7 +214,7 @@ export function ProfileSettingsModal({ onClose }: ProfileSettingsModalProps) {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative w-full max-w-sm mx-4 rounded-2xl border border-black/[0.06] bg-white shadow-[0_8px_40px_rgba(0,0,0,0.14)] p-6">
+      <div className="relative mx-4 w-full max-w-md rounded-2xl border border-black/[0.06] bg-white p-6 shadow-[0_8px_40px_rgba(0,0,0,0.14)]">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-display text-[16px] font-semibold text-ink-950">
@@ -195,6 +292,7 @@ export function ProfileSettingsModal({ onClose }: ProfileSettingsModalProps) {
             ref={fileInputRef}
             type="file"
             accept="image/*"
+            aria-label="Upload profile photo"
             className="sr-only"
             onChange={handleFileChange}
           />
@@ -219,6 +317,69 @@ export function ProfileSettingsModal({ onClose }: ProfileSettingsModalProps) {
           />
         </div>
 
+        <section className="mb-6 rounded-2xl border border-black/[0.06] bg-paper-50/80 p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/[0.06] bg-white text-ink-700 shadow-[var(--shadow-card)]">
+                  <Bell className="h-4 w-4" strokeWidth={1.6} />
+                </span>
+                <div>
+                  <h3 className="font-display text-[15px] font-semibold text-ink-950">
+                    Daily reminder
+                  </h3>
+                  <p className="text-[12px] leading-5 text-ink-600">
+                    Send a push around {reminderTimeLabel} so this browser can
+                    still remind you after the site is closed.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <span
+              className={`inline-flex min-h-8 items-center rounded-full px-3 text-[11px] font-semibold ${reminderStatus.className}`}
+            >
+              {reminderStatus.label}
+            </span>
+          </div>
+
+          <p className="mt-3 text-[12px] leading-5 text-ink-600">
+            The reminder stays on this browser and this signed-in account. The
+            server sends it only when at least one habit is still incomplete for
+            today in this browser&apos;s local time zone.
+          </p>
+
+          {setupError && (
+            <p className="mt-3 text-[12px] leading-5 text-amber-700">
+              {setupError}
+            </p>
+          )}
+
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+            <button
+              type="button"
+              onClick={() => void handleReminderToggle()}
+              disabled={isReminderPending || !isSupported || !isPushConfigured}
+              className="flex min-h-10 flex-1 items-center justify-center rounded-xl border border-black/[0.08] bg-white px-3 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-colors hover:bg-black/[0.02] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isReminderPending
+                ? "Updating..."
+                : isEnabled
+                  ? "Turn off reminder"
+                  : "Enable background reminder"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => void handleSendPreview()}
+              disabled={isPreviewPending || permission !== "granted"}
+              className="flex min-h-10 flex-1 items-center justify-center rounded-xl border border-black/[0.08] bg-white px-3 py-2 text-[13px] font-semibold text-ink-950 transition-colors hover:bg-black/[0.02] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isPreviewPending ? "Sending preview..." : "Send preview"}
+            </button>
+          </div>
+        </section>
+
         {/* Error / Success */}
         {error && (
           <p className="mb-4 text-[12px] leading-5 text-red-700">{error}</p>
@@ -226,6 +387,11 @@ export function ProfileSettingsModal({ onClose }: ProfileSettingsModalProps) {
         {success && (
           <p className="mb-4 text-[12px] leading-5 text-emerald-700">
             Profile saved!
+          </p>
+        )}
+        {reminderMessage && (
+          <p className="mb-4 text-[12px] leading-5 text-ink-700">
+            {reminderMessage}
           </p>
         )}
 

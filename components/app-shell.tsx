@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AuthControls } from "@/components/auth-controls";
+import { DailyHabitReminderProvider } from "@/components/daily-habit-reminder-provider";
 import { useFirebaseAuth } from "@/components/firebase-auth-provider";
 import { Sidebar, SidebarToggle } from "@/components/sidebar";
 import { Footer } from "@/components/footer";
@@ -132,41 +133,43 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar
-        habits={activeHabits}
-        categories={categories}
-        isOpen={sidebarOpen}
-        onToggle={() => setSidebarOpen(!sidebarOpen)}
-        onAddHabit={handleAddHabit}
-      />
+    <DailyHabitReminderProvider userId={user.uid}>
+      <div className="flex min-h-screen">
+        <Sidebar
+          habits={activeHabits}
+          categories={categories}
+          isOpen={sidebarOpen}
+          onToggle={() => setSidebarOpen(!sidebarOpen)}
+          onAddHabit={handleAddHabit}
+        />
 
-      <div className="flex flex-1 flex-col">
-        {/* Mobile header bar with sidebar toggle */}
-        <div className="header-bar sticky top-0 z-40 lg:hidden">
-          <div className="page-shell flex h-14 items-center">
-            <SidebarToggle onToggle={() => setSidebarOpen(true)} />
-            <span className="ml-3 font-display text-[16px] font-semibold text-ink-950">
-              ImproTrack
-            </span>
+        <div className="flex flex-1 flex-col">
+          {/* Mobile header bar with sidebar toggle */}
+          <div className="header-bar sticky top-0 z-40 lg:hidden">
+            <div className="page-shell flex h-14 items-center">
+              <SidebarToggle onToggle={() => setSidebarOpen(true)} />
+              <span className="ml-3 font-display text-[16px] font-semibold text-ink-950">
+                ImproTrack
+              </span>
+            </div>
           </div>
+
+          <main className="flex-1">{children}</main>
+
+          <Footer />
         </div>
 
-        <main className="flex-1">{children}</main>
-
-        <Footer />
+        <HabitForm
+          open={formOpen}
+          onClose={() => {
+            setFormOpen(false);
+            setEditingHabit(null);
+          }}
+          onSave={handleSave}
+          initial={editingHabit}
+          existingCategories={categories}
+        />
       </div>
-
-      <HabitForm
-        open={formOpen}
-        onClose={() => {
-          setFormOpen(false);
-          setEditingHabit(null);
-        }}
-        onSave={handleSave}
-        initial={editingHabit}
-        existingCategories={categories}
-      />
-    </div>
+    </DailyHabitReminderProvider>
   );
 }
