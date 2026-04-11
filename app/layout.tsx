@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { FirebaseAnalytics } from "@/components/firebase-analytics";
 import { FirebaseAuthProvider } from "@/components/firebase-auth-provider";
+import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 const sans = Inter({
@@ -19,6 +20,7 @@ const display = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
   title: {
     default: "ImproTrack",
     template: "%s | ImproTrack",

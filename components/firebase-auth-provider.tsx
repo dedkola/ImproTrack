@@ -4,9 +4,14 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { onIdTokenChanged, type User } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebase/auth";
 
-type FirebaseAuthContextValue = {
+export type FirebaseAuthUser = Pick<
+  User,
+  "uid" | "displayName" | "email" | "photoURL" | "providerData"
+>;
+
+export type FirebaseAuthContextValue = {
   isLoading: boolean;
-  user: User | null;
+  user: FirebaseAuthUser | null;
 };
 
 const FirebaseAuthContext = createContext<FirebaseAuthContextValue | undefined>(
@@ -59,6 +64,20 @@ export function FirebaseAuthProvider({
 
   return (
     <FirebaseAuthContext.Provider value={{ isLoading, user }}>
+      {children}
+    </FirebaseAuthContext.Provider>
+  );
+}
+
+export function FirebaseAuthOverrideProvider({
+  children,
+  value,
+}: Readonly<{
+  children: React.ReactNode;
+  value: FirebaseAuthContextValue;
+}>) {
+  return (
+    <FirebaseAuthContext.Provider value={value}>
       {children}
     </FirebaseAuthContext.Provider>
   );

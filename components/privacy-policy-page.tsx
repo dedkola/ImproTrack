@@ -7,15 +7,15 @@ import {
 const highlights: LegalHighlight[] = [
   {
     label: "Account data",
-    value: "Google sign-in details only",
+    value: "Google profile details needed to sign you in",
   },
   {
     label: "Habit data",
-    value: "Stored only so your dashboard and progress work",
+    value: "Stored to sync your dashboard, records, and settings",
   },
   {
     label: "Advertising",
-    value: "No sale of personal data and no habit-data ad targeting",
+    value: "No sale of personal data or habit-based ad targeting",
   },
 ];
 
@@ -76,8 +76,8 @@ export function PrivacyPolicyPage() {
   return (
     <LegalPage
       eyebrow="Privacy Policy"
-      title="A simple policy for a focused habit tracker."
-      intro="ImproTrack keeps the policy short: we only process the data needed to let you sign in, save habits, and use the product reliably."
+      title="Privacy in plain language."
+      intro="ImproTrack only uses the account and product data required to sign you in, sync habits, and keep the app reliable. This page explains that scope without turning the policy into filler."
       lastUpdated="April 11, 2026"
       highlights={highlights}
       sections={sections}

@@ -112,6 +112,8 @@ users/{userId}/records/{dateKey}    → { entries: { [habitId]: { [slotName]: bo
 
 **Env vars** (required in `.env.local`): `NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`, `NEXT_PUBLIC_FIREBASE_PROJECT_ID`, `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`, `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`, `NEXT_PUBLIC_FIREBASE_APP_ID`.
 
+**SEO env** (recommended in local and production envs): `NEXT_PUBLIC_SITE_URL` or `SITE_URL`. This drives `metadataBase`, `sitemap.xml`, and `robots.txt` so they emit the canonical domain instead of falling back to localhost or platform defaults.
+
 ## Known Pitfalls
 
 - **Stale tone classes from legacy data:** Firestore records with old `tone.fill` class names (e.g. `bg-*-500`) may not match current TONE_PRESETS. Normalize on read.

@@ -7,7 +7,7 @@ import {
 const highlights: LegalHighlight[] = [
   {
     label: "License",
-    value: "Personal, non-exclusive use of the service",
+    value: "Personal, non-exclusive access to ImproTrack",
   },
   {
     label: "Your data",
@@ -15,7 +15,7 @@ const highlights: LegalHighlight[] = [
   },
   {
     label: "Availability",
-    value: "Provided as-is and may change over time",
+    value: "Features may change, pause, or evolve over time",
   },
 ];
 
@@ -89,8 +89,8 @@ export function TermsOfServicePage() {
   return (
     <LegalPage
       eyebrow="Terms of Service"
-      title="Clear rules for using ImproTrack."
-      intro="These terms are intentionally short and practical. They explain how you may use the service, what stays yours, and the limits of the product as provided today."
+      title="Practical terms for a focused habit tracker."
+      intro="These terms cover the public site, sign-in flow, dashboard, archive, statistics, and related product surfaces. The rules stay short: use the service lawfully, keep your account secure, and understand the platform is provided as-is."
       lastUpdated="April 11, 2026"
       highlights={highlights}
       sections={sections}

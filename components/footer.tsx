@@ -17,6 +17,12 @@ export function Footer() {
         </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[12px] font-medium text-ink-700">
           <Link
+            href="/sitemap"
+            className="transition-colors hover:text-ink-950"
+          >
+            Sitemap
+          </Link>
+          <Link
             href="/privacy"
             className="transition-colors hover:text-ink-950"
           >
