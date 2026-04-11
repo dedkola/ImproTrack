@@ -17,7 +17,6 @@ import {
   getCurrentReminderTimeZone,
   getNotificationPermissionState,
   getOrCreateReminderDeviceId,
-  getReminderTimeLabel,
   getStoredReminderDeviceId,
   getStoredReminderEnabled,
   getStoredReminderToken,
@@ -43,7 +42,6 @@ type DailyHabitReminderContextValue = {
   isPushConfigured: boolean;
   permission: ReminderPermissionState;
   isEnabled: boolean;
-  reminderTimeLabel: string;
   setupError: string | null;
   enableReminder: () => Promise<void>;
   disableReminder: () => Promise<void>;
@@ -361,7 +359,6 @@ export function DailyHabitReminderProvider({
       isPushConfigured,
       permission,
       isEnabled,
-      reminderTimeLabel: getReminderTimeLabel(),
       setupError,
       enableReminder,
       disableReminder,

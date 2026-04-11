@@ -21,7 +21,6 @@ export function ProfileSettingsModal({ onClose }: ProfileSettingsModalProps) {
     isPushConfigured,
     isSupported,
     permission,
-    reminderTimeLabel,
     setupError,
     sendPreview,
   } = useDailyHabitReminder();
@@ -146,9 +145,7 @@ export function ProfileSettingsModal({ onClose }: ProfileSettingsModalProps) {
 
     try {
       await enableReminder();
-      setReminderMessage(
-        `Background reminder enabled for ${reminderTimeLabel} on this browser.`,
-      );
+      setReminderMessage("Background reminder enabled for this browser.");
     } catch (err) {
       setReminderMessage(
         err instanceof Error
@@ -329,8 +326,8 @@ export function ProfileSettingsModal({ onClose }: ProfileSettingsModalProps) {
                     Daily reminder
                   </h3>
                   <p className="text-[12px] leading-5 text-ink-600">
-                    Send a push around {reminderTimeLabel} so this browser can
-                    still remind you after the site is closed.
+                    Send one push per day so this browser can still remind you
+                    after the site is closed.
                   </p>
                 </div>
               </div>
@@ -345,8 +342,14 @@ export function ProfileSettingsModal({ onClose }: ProfileSettingsModalProps) {
 
           <p className="mt-3 text-[12px] leading-5 text-ink-600">
             The reminder stays on this browser and this signed-in account. The
-            server sends it only when at least one habit is still incomplete for
-            today in this browser&apos;s local time zone.
+            server sends it at most once per day, and only when at least one
+            habit is still incomplete for today in this browser&apos;s local
+            time zone.
+          </p>
+
+          <p className="mt-2 text-[12px] leading-5 text-ink-500">
+            On the Vercel Hobby plan, delivery follows a fixed daily server
+            schedule and can drift within the hour.
           </p>
 
           {setupError && (

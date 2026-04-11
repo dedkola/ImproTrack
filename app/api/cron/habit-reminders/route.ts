@@ -5,7 +5,6 @@ import {
   DAILY_REMINDER_TITLE,
   DAILY_REMINDER_URL,
   getReminderDateKeyForTimeZone,
-  isReminderDueForTimeZone,
 } from "@/lib/browser-reminders";
 import {
   getFirebaseAdminFirestore,
@@ -141,10 +140,6 @@ function buildDueReminderDevices(
 
     const timeZone = data.timeZone ?? "UTC";
     const dateKey = getReminderDateKeyForTimeZone(timeZone, now);
-
-    if (!isReminderDueForTimeZone(timeZone, now)) {
-      return devices;
-    }
 
     if (data.lastSentDate === dateKey) {
       return devices;

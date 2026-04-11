@@ -1,28 +1,17 @@
-export const DAILY_REMINDER_HOUR = 17;
-export const DAILY_REMINDER_MINUTE = 0;
 export const DAILY_REMINDER_TITLE = "ImproTrack reminder";
-export const DAILY_REMINDER_BODY = "Are you done with your habits today?";
+export const DAILY_REMINDER_BODY =
+  "Don't forget to check in on your habits today.";
 export const DAILY_REMINDER_URL = "/dashboard";
 
 const STORAGE_PREFIX = "improtrack-daily-reminder";
 
 export type ReminderPermissionState = NotificationPermission | "unsupported";
 
-type ZonedDateTimeParts = {
+type ZonedDateParts = {
   year: string;
   month: string;
   day: string;
-  hour: number;
-  minute: number;
 };
-
-const reminderTimeFormatter = new Intl.DateTimeFormat("en", {
-  hour: "numeric",
-  minute: "2-digit",
-});
-
-const reminderTime = new Date();
-reminderTime.setHours(DAILY_REMINDER_HOUR, DAILY_REMINDER_MINUTE, 0, 0);
 
 function getFormatter(timeZone: string) {
   return new Intl.DateTimeFormat("en-CA", {
@@ -30,16 +19,10 @@ function getFormatter(timeZone: string) {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23",
   });
 }
 
-function getZonedDateTimeParts(
-  date: Date,
-  timeZone: string,
-): ZonedDateTimeParts {
+function getZonedDateTimeParts(date: Date, timeZone: string): ZonedDateParts {
   const safeTimeZone = timeZone || "UTC";
   let formatter: Intl.DateTimeFormat;
 
@@ -60,13 +43,7 @@ function getZonedDateTimeParts(
     year: values.get("year") ?? "0000",
     month: values.get("month") ?? "01",
     day: values.get("day") ?? "01",
-    hour: Number(values.get("hour") ?? "0"),
-    minute: Number(values.get("minute") ?? "0"),
   };
-}
-
-export function getReminderTimeLabel() {
-  return reminderTimeFormatter.format(reminderTime);
 }
 
 export function getReminderEnabledStorageKey(userId: string) {
@@ -199,18 +176,4 @@ export function getReminderDateKeyForTimeZone(
   const parts = getZonedDateTimeParts(now, timeZone);
 
   return `${parts.year}-${parts.month}-${parts.day}`;
-}
-
-export function isReminderDueForTimeZone(
-  timeZone: string,
-  now = new Date(),
-  minuteWindow = 15,
-) {
-  const parts = getZonedDateTimeParts(now, timeZone);
-
-  return (
-    parts.hour === DAILY_REMINDER_HOUR &&
-    parts.minute >= DAILY_REMINDER_MINUTE &&
-    parts.minute < DAILY_REMINDER_MINUTE + minuteWindow
-  );
 }

@@ -52,7 +52,7 @@ CRON_SECRET=some_long_random_secret
 This repo already includes `vercel.json` with a cron job:
 
 - Path: `/api/cron/habit-reminders`
-- Schedule: every 15 minutes
+- Schedule: once per day at `17:00 UTC`
 
 If you deploy on Vercel, add the env vars there and the cron will call the route automatically.
 
@@ -79,8 +79,9 @@ users/{userId}/notificationTokens/{deviceId}
 ## 6. How sending works
 
 - The cron route checks enabled browser tokens.
-- It respects each saved browser time zone.
-- Around `5:00 PM` local time, it sends a reminder only if at least one habit is still incomplete for that day.
+- It uses each saved browser time zone to decide which local date to inspect.
+- It sends at most one reminder per local day, and only if at least one habit is still incomplete for that date.
+- On the Vercel Hobby plan, delivery happens on a fixed daily schedule and can drift within the hour.
 
 ## 7. Quick test
 
