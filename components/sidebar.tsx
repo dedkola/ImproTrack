@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Archive, BarChart2, LayoutGrid, Menu, Plus, X } from "lucide-react";
+import {
+  Archive,
+  BarChart2,
+  LayoutGrid,
+  Menu,
+  Plus,
+  Settings,
+  X,
+} from "lucide-react";
 import { AuthControls } from "@/components/auth-controls";
 import { HabitIcon } from "@/components/habit-icon";
 import { HabitDefinition } from "@/lib/habits";
@@ -24,6 +32,16 @@ export function Sidebar({
   onAddHabit,
 }: SidebarProps) {
   const pathname = usePathname();
+  const closeOnMobile = () => {
+    if (typeof window !== "undefined" && window.innerWidth < 1024 && isOpen) {
+      onToggle();
+    }
+  };
+
+  const handleAddHabit = () => {
+    onAddHabit();
+    closeOnMobile();
+  };
 
   return (
     <>
@@ -43,7 +61,11 @@ export function Sidebar({
       >
         {/* Logo area */}
         <div className="flex h-14 items-center justify-between border-b border-black/[0.06] px-4">
-          <Link href="/dashboard" className="flex items-center gap-2.5">
+          <Link
+            href="/dashboard"
+            onClick={closeOnMobile}
+            className="flex items-center gap-2.5"
+          >
             <img
               src="/logo.svg"
               alt="ImproTrack"
@@ -65,13 +87,39 @@ export function Sidebar({
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-3 py-3">
-          {/* Dashboard */}
-          <NavItem
-            href="/dashboard"
-            label="Dashboard"
-            icon={<LayoutGrid className="h-4 w-4" strokeWidth={1.5} />}
-            active={pathname === "/dashboard"}
-          />
+          <div className="rounded-[24px] border border-black/[0.06] bg-white px-3 py-3 shadow-[var(--shadow-card)] lg:hidden">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
+              Quick actions
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={handleAddHabit}
+                className="pill-btn inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)]"
+              >
+                <Plus className="h-3.5 w-3.5" strokeWidth={2} />
+                Add habit
+              </button>
+              <Link
+                href="/dashboard/settings"
+                onClick={closeOnMobile}
+                className="pill-btn inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-3 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]"
+              >
+                <Settings className="h-3.5 w-3.5" strokeWidth={1.8} />
+                Settings
+              </Link>
+            </div>
+          </div>
+
+          <div className="mt-5 hidden lg:block">
+            <NavItem
+              href="/dashboard"
+              label="Dashboard"
+              icon={<LayoutGrid className="h-4 w-4" strokeWidth={1.5} />}
+              active={pathname === "/dashboard"}
+              onClick={closeOnMobile}
+            />
+          </div>
 
           {/* Habits section */}
           <div className="mt-5">
@@ -81,7 +129,7 @@ export function Sidebar({
               </span>
               <button
                 type="button"
-                onClick={onAddHabit}
+                onClick={handleAddHabit}
                 aria-label="Add habit"
                 className="tap-target-compact flex items-center justify-center rounded-md text-ink-700 hover:bg-black/[0.06] hover:text-ink-950"
                 title="Add habit"
@@ -110,6 +158,7 @@ export function Sidebar({
                       style={fillStyle(habit.tone)}
                     />
                   }
+                  onClick={closeOnMobile}
                 />
               ))}
             </div>
@@ -141,18 +190,27 @@ export function Sidebar({
           )}
 
           {/* Archive & Stats */}
-          <div className="mt-5 border-t border-black/[0.06] pt-3">
+          <div className="mt-5 hidden border-t border-black/[0.06] pt-3 lg:block">
             <NavItem
               href="/dashboard/archive"
               label="Archive"
               icon={<Archive className="h-4 w-4" strokeWidth={1.5} />}
               active={pathname === "/dashboard/archive"}
+              onClick={closeOnMobile}
             />
             <NavItem
               href="/dashboard/stats"
               label="Statistics"
               icon={<BarChart2 className="h-4 w-4" strokeWidth={1.5} />}
               active={pathname === "/dashboard/stats"}
+              onClick={closeOnMobile}
+            />
+            <NavItem
+              href="/dashboard/settings"
+              label="Settings"
+              icon={<Settings className="h-4 w-4" strokeWidth={1.5} />}
+              active={pathname === "/dashboard/settings"}
+              onClick={closeOnMobile}
             />
           </div>
         </nav>
@@ -172,6 +230,7 @@ function NavItem({
   active,
   badge,
   disabled,
+  onClick,
 }: {
   href: string;
   label: string;
@@ -179,6 +238,7 @@ function NavItem({
   active: boolean;
   badge?: React.ReactNode;
   disabled?: boolean;
+  onClick?: () => void;
 }) {
   const content = (
     <div
@@ -202,7 +262,11 @@ function NavItem({
     return content;
   }
 
-  return <Link href={href}>{content}</Link>;
+  return (
+    <Link href={href} onClick={onClick}>
+      {content}
+    </Link>
+  );
 }
 
 /** Hamburger button for mobile — placed in the header */

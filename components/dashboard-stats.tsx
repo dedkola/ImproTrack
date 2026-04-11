@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import {
   clampDateKey,
   eachDay,
@@ -56,6 +57,7 @@ const today = startOfDay(new Date());
 const todayKey = toDateKey(today);
 const RANGE_MIN = "2025-01-01";
 const RANGE_MAX = "2030-12-31";
+const MOBILE_TREND_WINDOW = 7;
 
 function getPresetRange(preset: Exclude<StatsPreset, "custom">) {
   if (preset === "month") {
@@ -92,6 +94,7 @@ export function DashboardStats() {
   const { habits, activeHabits, archivedHabits } = useHabits();
   const { records } = useHabitRecords(habits);
   const [selectedPreset, setSelectedPreset] = useState<StatsPreset>("month");
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [customFrom, setCustomFrom] = useState(getRollingRange(30, today).from);
   const [customTo, setCustomTo] = useState(todayKey);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -268,6 +271,13 @@ export function DashboardStats() {
     range,
     filteredHabits.length,
   );
+  const handlePresetChange = (value: StatsPreset) => {
+    setSelectedPreset(value);
+    if (value === "custom") {
+      setMobileFiltersOpen(true);
+    }
+  };
+  const recentTrend = summary.trend.slice(-MOBILE_TREND_WINDOW);
   const periodHeading =
     selectedPreset === "month"
       ? formatMonthLabel(range)
@@ -278,6 +288,12 @@ export function DashboardStats() {
     selectedPreset === "custom"
       ? `${formatLongDate(range.from)} to ${formatLongDate(range.to)}`
       : `Analytics for ${formatLongDate(range.from)} through ${formatLongDate(range.to)}`;
+  const compactRangeDetail =
+    selectedPreset === "month"
+      ? "Current month"
+      : selectedPreset === "custom"
+        ? "Selected range"
+        : `Last ${selectedPreset} days`;
 
   if (activeHabits.length === 0) {
     return (
@@ -304,7 +320,7 @@ export function DashboardStats() {
 
   if (filteredHabits.length === 0) {
     return (
-      <div className="page-shell flex flex-col gap-4 py-5">
+      <div className="page-shell flex flex-col gap-3.5 py-4 sm:gap-4 sm:py-5">
         <StatsHeader
           archivedCount={archivedHabits.length}
           category={activeCategory}
@@ -314,9 +330,13 @@ export function DashboardStats() {
           onCategoryChange={setSelectedCategory}
           onCustomFromChange={setCustomFrom}
           onCustomToChange={setCustomTo}
-          onPresetChange={setSelectedPreset}
+          onPresetChange={handlePresetChange}
           rangeLabel={rangeLabel}
           selectedPreset={selectedPreset}
+          mobileFiltersOpen={mobileFiltersOpen}
+          onToggleMobileFilters={() =>
+            setMobileFiltersOpen((current) => !current)
+          }
         />
 
         <div className="surface-panel flex min-h-[40vh] flex-col items-center justify-center gap-3 rounded-[28px] px-6 py-10 text-center">
@@ -334,7 +354,7 @@ export function DashboardStats() {
   }
 
   return (
-    <div className="page-shell flex flex-col gap-4 py-5">
+    <div className="page-shell flex flex-col gap-3.5 py-4 sm:gap-4 sm:py-5">
       <StatsHeader
         archivedCount={archivedHabits.length}
         category={activeCategory}
@@ -344,41 +364,45 @@ export function DashboardStats() {
         onCategoryChange={setSelectedCategory}
         onCustomFromChange={setCustomFrom}
         onCustomToChange={setCustomTo}
-        onPresetChange={setSelectedPreset}
+        onPresetChange={handlePresetChange}
         rangeLabel={rangeLabel}
         selectedPreset={selectedPreset}
+        mobileFiltersOpen={mobileFiltersOpen}
+        onToggleMobileFilters={() =>
+          setMobileFiltersOpen((current) => !current)
+        }
       />
 
-      <section className="stagger-children grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="stagger-children grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
         <StatsCard
-          label="Tracked in scope"
+          label="Habits in scope"
           value={String(filteredHabits.length)}
           detail={
             activeCategory === "all"
-              ? `${archivedHabits.length} archived outside current view`
+              ? `${archivedHabits.length} archived habits`
               : `${activeCategory} routines only`
           }
         />
         <StatsCard
           label="Average hit rate"
           value={`${summary.averageRate}%`}
-          detail={rangeLabel}
+          detail={compactRangeDetail}
         />
         <StatsCard
           label="Completed days"
           value={String(summary.totalCompleted)}
-          detail="Completed habit-days in the selected range"
+          detail="Habit-days in range"
         />
         <StatsCard
           label="Best live streak"
           value={String(summary.bestStreak)}
-          detail="Current best run in the filtered scope"
+          detail="Longest current run"
         />
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
-        <div className="animate-fade-in-up surface-panel min-w-0 rounded-[28px] p-5 sm:p-6">
-          <div className="flex items-center justify-between">
+        <div className="animate-fade-in-up surface-panel min-w-0 rounded-[28px] p-3.5 sm:p-6">
+          <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="text-[14px] font-semibold text-ink-950">
                 {periodHeading}
@@ -392,8 +416,11 @@ export function DashboardStats() {
             </span>
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px] text-ink-700">
-            <span className="rounded-full bg-white px-3 py-1.5 font-semibold text-ink-950 shadow-[var(--shadow-card)]">
+          <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-[12px] text-ink-700 sm:mt-3 sm:gap-2">
+            <span className="rounded-full bg-white px-3 py-1.5 font-semibold text-ink-950 shadow-[var(--shadow-card)] sm:hidden">
+              {rangeLabel}
+            </span>
+            <span className="hidden rounded-full bg-white px-3 py-1.5 font-semibold text-ink-950 shadow-[var(--shadow-card)] sm:inline-flex">
               {rangeDescription}
             </span>
             <span>Average daily rate {summary.trendAverage}%</span>
@@ -402,7 +429,43 @@ export function DashboardStats() {
             )}
           </div>
 
-          <div className="comparison-scroll mt-6 overflow-x-auto pb-1">
+          <div className="mt-6 md:hidden">
+            <div className="grid grid-cols-7 gap-2">
+              {recentTrend.map((day) => (
+                <div
+                  key={day.dateKey}
+                  className="flex flex-col items-center gap-2"
+                >
+                  <div className="relative h-28 w-full overflow-hidden rounded-[16px] bg-black/[0.04]">
+                    <div
+                      className="absolute bottom-0 left-0 right-0 rounded-t-[16px] bg-linear-to-t from-[#6D28D9] to-[#C026D3] transition-all duration-500"
+                      style={{
+                        height: `${Math.max(day.rate, day.total === 0 ? 8 : 16)}%`,
+                        opacity:
+                          day.rate === 100 ? 0.95 : day.rate > 0 ? 0.72 : 0.2,
+                      }}
+                    />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[11px] font-semibold tabular-nums text-ink-950">
+                      {day.rate}%
+                    </p>
+                    <p className="text-[10px] text-ink-600">
+                      {parseDateKey(day.dateKey).toLocaleString("en", {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-[12px] leading-5 text-ink-600">
+              Recent {recentTrend.length}-day snapshot from the selected range.
+            </p>
+          </div>
+
+          <div className="comparison-scroll mt-6 hidden overflow-x-auto pb-1 md:block">
             <div
               className="grid min-w-full items-end gap-2"
               style={{
@@ -443,7 +506,7 @@ export function DashboardStats() {
         </div>
 
         <div
-          className="animate-fade-in-up surface-panel min-w-0 rounded-[28px] p-5 sm:p-6"
+          className="animate-fade-in-up surface-panel min-w-0 rounded-[28px] p-3.5 sm:p-6"
           style={{ animationDelay: "80ms" }}
         >
           <div className="flex items-start justify-between gap-3">
@@ -466,9 +529,9 @@ export function DashboardStats() {
           </div>
 
           {summary.topHabit ? (
-            <div className="mt-6 rounded-[24px] border border-black/[0.06] bg-white p-5 shadow-[var(--shadow-card)]">
-              <div className="flex items-start justify-between gap-4">
-                <div>
+            <div className="mt-4 rounded-[24px] border border-black/[0.06] bg-white p-4 shadow-[var(--shadow-card)] sm:mt-6 sm:p-5">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                <div className="min-w-0 flex-1">
                   <p className="text-[28px]">
                     <HabitIcon
                       name={summary.topHabit.habit.icon}
@@ -479,19 +542,21 @@ export function DashboardStats() {
                   <h3 className="mt-3 text-[20px] font-semibold text-ink-950">
                     {summary.topHabit.habit.name}
                   </h3>
-                  <p className="mt-2 text-[14px] leading-6 text-ink-700">
-                    {summary.topHabit.habit.description}
-                  </p>
+                  {summary.topHabit.habit.description ? (
+                    <p className="mt-2 text-[14px] leading-6 text-ink-700">
+                      {summary.topHabit.habit.description}
+                    </p>
+                  ) : null}
                 </div>
                 <span
-                  className={`rounded-full px-3 py-1 text-[12px] font-semibold ${softFillClass(summary.topHabit.habit.tone)}`}
+                  className={`self-start rounded-full px-3 py-1 text-[12px] font-semibold ${softFillClass(summary.topHabit.habit.tone)}`}
                   style={softFillStyle(summary.topHabit.habit.tone)}
                 >
                   {summary.topHabit.habit.category}
                 </span>
               </div>
 
-              <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              <div className="mt-4 grid grid-cols-3 gap-2.5 sm:mt-5 sm:gap-3">
                 <MiniStat
                   label="Hit rate"
                   value={`${summary.topHabit.rate}%`}
@@ -508,7 +573,7 @@ export function DashboardStats() {
 
               <Link
                 href={`/dashboard/habits/${summary.topHabit.habit.slug}`}
-                className="pill-btn mt-5 inline-flex items-center rounded-lg bg-white px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)]"
+                className="pill-btn mt-4 inline-flex w-full items-center justify-center rounded-lg bg-white px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)] sm:mt-5 sm:w-auto"
               >
                 Open habit details
               </Link>
@@ -519,7 +584,7 @@ export function DashboardStats() {
 
       <section className="grid gap-4 xl:grid-cols-[0.92fr_1.08fr]">
         <div
-          className="animate-fade-in-up surface-panel min-w-0 rounded-[28px] p-5 sm:p-6"
+          className="animate-fade-in-up surface-panel min-w-0 rounded-[28px] p-3.5 sm:p-6"
           style={{ animationDelay: "120ms" }}
         >
           <div className="flex items-center justify-between">
@@ -533,7 +598,7 @@ export function DashboardStats() {
             </div>
           </div>
 
-          <div className="mt-6 space-y-4">
+          <div className="mt-4 space-y-3 sm:mt-6 sm:space-y-4">
             {summary.categories.map((category) => (
               <div key={category.category}>
                 <div className="mb-2 flex items-center justify-between gap-3 text-[13px] text-ink-700">
@@ -557,7 +622,7 @@ export function DashboardStats() {
         </div>
 
         <div
-          className="animate-fade-in-up surface-panel min-w-0 rounded-[28px] p-5 sm:p-6"
+          className="animate-fade-in-up surface-panel min-w-0 rounded-[28px] p-3.5 sm:p-6"
           style={{ animationDelay: "160ms" }}
         >
           <div className="flex items-center justify-between">
@@ -575,14 +640,14 @@ export function DashboardStats() {
             </span>
           </div>
 
-          <div className="mt-5 space-y-3">
+          <div className="mt-4 space-y-2.5 sm:mt-5 sm:space-y-3">
             {summary.sortedHabits.map((snapshot, index) => (
               <Link
                 key={snapshot.habit.id}
                 href={`/dashboard/habits/${snapshot.habit.slug}`}
-                className="group flex items-center gap-3 rounded-[22px] border border-black/[0.06] bg-white px-4 py-3 shadow-[var(--shadow-card)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)]"
+                className="group flex items-center gap-3 rounded-[22px] border border-black/[0.06] bg-white px-3.5 py-3 shadow-[var(--shadow-card)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)] sm:px-4"
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#6D28D9] text-[12px] font-semibold text-white">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#6D28D9] text-[12px] font-semibold text-white sm:h-9 sm:w-9">
                   {index + 1}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -606,7 +671,7 @@ export function DashboardStats() {
                     />
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="min-w-[62px] text-right">
                   <p className="text-[14px] font-semibold tabular-nums text-ink-950">
                     {snapshot.rate}%
                   </p>
@@ -621,7 +686,7 @@ export function DashboardStats() {
       </section>
 
       <section
-        className="animate-fade-in-up surface-panel rounded-[28px] p-5 sm:p-6"
+        className="animate-fade-in-up surface-panel rounded-[28px] p-3.5 sm:p-6"
         style={{ animationDelay: "220ms" }}
       >
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -633,13 +698,37 @@ export function DashboardStats() {
               Average slot completion rate across the selected range.
             </p>
           </div>
-          <p className="text-[13px] text-ink-700">
+          <p className="hidden text-[13px] text-ink-700 sm:block">
             Useful for spotting where your schedule actually supports
             consistency.
           </p>
         </div>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-7">
+        <div className="comparison-scroll mt-6 flex gap-3 overflow-x-auto pb-1 md:hidden">
+          {summary.weekdayBuckets.map((day) => (
+            <div
+              key={day.label}
+              className="w-28 shrink-0 rounded-[22px] border border-black/[0.06] bg-white p-4 shadow-[var(--shadow-card)]"
+            >
+              <div className="flex items-end justify-between gap-3">
+                <span className="text-[13px] font-semibold text-ink-950">
+                  {day.label}
+                </span>
+                <span className="font-display text-[24px] font-semibold tabular-nums text-ink-950">
+                  {day.rate}%
+                </span>
+              </div>
+              <div className="mt-3 h-[7px] overflow-hidden rounded-full bg-black/[0.05]">
+                <div
+                  className="h-[7px] rounded-full bg-[#6D28D9] transition-all duration-700 ease-out"
+                  style={{ width: `${day.rate}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 hidden gap-3 sm:grid-cols-2 xl:grid-cols-7 md:grid">
           {summary.weekdayBuckets.map((day) => (
             <div
               key={day.label}
@@ -679,6 +768,8 @@ function StatsHeader({
   onPresetChange,
   rangeLabel,
   selectedPreset,
+  mobileFiltersOpen,
+  onToggleMobileFilters,
 }: {
   archivedCount: number;
   category: string;
@@ -691,6 +782,8 @@ function StatsHeader({
   onPresetChange: (value: StatsPreset) => void;
   rangeLabel: string;
   selectedPreset: StatsPreset;
+  mobileFiltersOpen: boolean;
+  onToggleMobileFilters: () => void;
 }) {
   const presetOptions: Array<{ value: StatsPreset; label: string }> = [
     { value: "month", label: "Monthly" },
@@ -701,55 +794,75 @@ function StatsHeader({
   ];
 
   const controlButtonBase =
-    "pill-btn tap-target-compact rounded-lg px-3 py-2 text-[13px] font-medium transition";
+    "pill-btn tap-target-compact rounded-lg px-2.5 py-1.5 text-[12px] font-medium transition sm:px-3 sm:py-2 sm:text-[13px]";
 
   return (
-    <header className="animate-fade-in-up surface-panel rounded-[28px] px-5 py-5 sm:px-6">
-      <div className="flex flex-col gap-5">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+    <header className="animate-fade-in-up surface-panel rounded-[28px] px-4 py-4 sm:px-6 sm:py-5">
+      <div className="flex flex-col gap-4 sm:gap-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <span className="inline-flex rounded-full bg-ink-950/[0.05] px-3 py-1 text-[12px] font-semibold uppercase tracking-[0.2em] text-ink-700">
               Statistics
             </span>
-            <h1 className="mt-4 font-display text-[32px] font-semibold tracking-tight text-ink-950 sm:text-[40px]">
+            <h1 className="mt-3 font-display text-[28px] font-semibold tracking-tight text-ink-950 sm:mt-4 sm:text-[40px]">
               See what is compounding and what is slipping.
             </h1>
-            <p className="mt-3 max-w-2xl text-[15px] leading-7 text-ink-700">
+            <p className="mt-2 text-[14px] leading-6 text-ink-700 sm:hidden">
+              A quicker mobile read on pressure points, momentum, and drop-off.
+            </p>
+            <p className="mt-2 text-[12px] font-medium text-ink-600 md:hidden">
+              {rangeLabel} · {archivedCount} archived
+            </p>
+            <p className="mt-3 hidden max-w-2xl text-[15px] leading-7 text-ink-700 sm:block">
               This view rolls your active habits into one calm control room, now
               with range and category filters so you can isolate short-term
               pressure or wider trend drift.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-white px-3 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)]">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <span className="hidden rounded-full bg-white px-3 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] md:inline-flex">
               {rangeLabel}
             </span>
-            <span className="rounded-full bg-ink-950/[0.05] px-3 py-2 text-[13px] font-semibold text-ink-700">
+            <span className="hidden rounded-full bg-ink-950/[0.05] px-3 py-2 text-[13px] font-semibold text-ink-700 md:inline-flex">
               {archivedCount} archived
             </span>
+            <button
+              type="button"
+              onClick={onToggleMobileFilters}
+              className="pill-btn tap-target-compact inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] md:hidden"
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1.8} />
+              Filters
+              <ChevronDown
+                className={`h-3.5 w-3.5 transition-transform ${mobileFiltersOpen ? "rotate-180" : ""}`}
+                strokeWidth={1.8}
+              />
+            </button>
             <Link
               href="/dashboard/archive"
-              className="pill-btn tap-target-compact inline-flex items-center rounded-lg bg-white/80 px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm transition-all hover:bg-white hover:shadow-[var(--shadow-card-hover)]"
+              className="pill-btn tap-target-compact hidden items-center rounded-lg bg-white/80 px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm transition-all hover:bg-white hover:shadow-[var(--shadow-card-hover)] md:inline-flex"
             >
               Archive
             </Link>
             <Link
               href="/dashboard"
-              className="pill-btn tap-target-compact inline-flex items-center rounded-lg bg-white px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm transition-all hover:shadow-[var(--shadow-card-hover)]"
+              className="pill-btn tap-target-compact hidden items-center rounded-lg bg-white px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm transition-all hover:shadow-[var(--shadow-card-hover)] md:inline-flex"
             >
               Back to dashboard
             </Link>
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 rounded-[24px] border border-black/[0.06] bg-white px-4 py-4 shadow-[var(--shadow-card)]">
+        <div
+          className={`${mobileFiltersOpen ? "flex" : "hidden"} flex-col gap-4 rounded-[24px] border border-black/[0.06] bg-white px-3.5 py-3.5 shadow-[var(--shadow-card)] md:flex md:px-4 md:py-4`}
+        >
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
                 Time range
               </p>
-              <div className="mt-2 flex flex-wrap gap-1.5">
+              <div className="comparison-scroll -mx-1 mt-2 flex gap-1.5 overflow-x-auto px-1 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:pb-0">
                 {presetOptions.map((option) => (
                   <button
                     key={option.value}
@@ -768,7 +881,7 @@ function StatsHeader({
             </div>
 
             {selectedPreset === "custom" && (
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <DatePicker
                   label="From"
                   value={customFrom}
@@ -793,7 +906,7 @@ function StatsHeader({
             <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
               Category filter
             </p>
-            <div className="mt-2 flex flex-wrap gap-1.5">
+            <div className="comparison-scroll -mx-1 mt-2 flex gap-1.5 overflow-x-auto px-1 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:pb-0">
               <button
                 type="button"
                 onClick={() => onCategoryChange("all")}
@@ -837,21 +950,21 @@ function StatsCard({
   detail: string;
 }) {
   return (
-    <div className="rounded-[24px] border border-black/[0.06] bg-white p-4 shadow-[var(--shadow-card)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)]">
-      <p className="text-[13px] text-ink-700">{label}</p>
-      <p className="mt-2 font-display text-[28px] font-semibold tabular-nums text-ink-950">
+    <div className="rounded-[24px] border border-black/[0.06] bg-white p-3.5 shadow-[var(--shadow-card)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)] sm:p-4">
+      <p className="text-[12px] text-ink-700 sm:text-[13px]">{label}</p>
+      <p className="mt-1.5 font-display text-[22px] font-semibold tabular-nums text-ink-950 sm:mt-2 sm:text-[28px]">
         {value}
       </p>
-      <p className="mt-1 text-[12px] text-ink-600">{detail}</p>
+      <p className="mt-1 text-[12px] leading-5 text-ink-600">{detail}</p>
     </div>
   );
 }
 
 function MiniStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[18px] border border-black/[0.06] bg-paper-50 px-3.5 py-3">
+    <div className="rounded-[18px] border border-black/[0.06] bg-paper-50 px-3 py-3 sm:px-3.5">
       <p className="text-[12px] text-ink-600">{label}</p>
-      <p className="mt-1 font-display text-[22px] font-semibold text-ink-950">
+      <p className="mt-1 font-display text-[20px] font-semibold text-ink-950 sm:text-[22px]">
         {value}
       </p>
     </div>
