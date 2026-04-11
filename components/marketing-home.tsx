@@ -631,6 +631,18 @@ export function MarketingHome() {
             >
               Dashboard
             </Link>
+            <Link
+              href="/privacy"
+              className="transition-colors hover:text-ink-950"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              href="/terms"
+              className="transition-colors hover:text-ink-950"
+            >
+              Terms of Service
+            </Link>
           </div>
         </div>
       </footer>
