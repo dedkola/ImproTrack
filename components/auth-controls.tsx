@@ -5,7 +5,6 @@ import { useState } from "react";
 import { Settings } from "lucide-react";
 import { useFirebaseAuth } from "@/components/firebase-auth-provider";
 import { signInWithGoogle, signOutFromFirebase } from "@/lib/firebase/auth";
-import { ProfileSettingsModal } from "@/components/profile-settings-modal";
 
 type AuthControlsProps = {
   variant?: "landing" | "sidebar" | "panel";
@@ -34,7 +33,6 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
   const { user, isLoading } = useFirebaseAuth();
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const { initial, primary, secondary } = getUserSummary({
     displayName: user?.displayName ?? null,
@@ -69,89 +67,81 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
 
   if (variant === "sidebar") {
     return (
-      <>
-        {isProfileOpen && (
-          <ProfileSettingsModal onClose={() => setIsProfileOpen(false)} />
-        )}
-        <div className="rounded-2xl border border-black/[0.06] bg-white/88 px-3.5 py-3.5 shadow-[var(--shadow-card)] backdrop-blur-sm">
-          {isLoading ? (
-            <div className="space-y-2">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
-                Account
-              </p>
-              <p className="text-[13px] text-ink-700">Checking session...</p>
+      <div className="rounded-2xl border border-black/[0.06] bg-white/88 px-3.5 py-3.5 shadow-[var(--shadow-card)] backdrop-blur-sm">
+        {isLoading ? (
+          <div className="space-y-2">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
+              Account
+            </p>
+            <p className="text-[13px] text-ink-700">Checking session...</p>
+          </div>
+        ) : user ? (
+          <>
+            <div className="flex items-center gap-3">
+              {user.photoURL ? (
+                <img
+                  src={user.photoURL}
+                  alt="Profile"
+                  className="h-10 w-10 rounded-xl border border-black/[0.08] object-cover"
+                />
+              ) : (
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-[#6D28D9] to-[#C026D3] text-[14px] font-semibold text-white">
+                  {initial}
+                </span>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[13px] font-semibold text-ink-950">
+                  {primary}
+                </p>
+                <p className="truncate text-[12px] text-ink-600">{secondary}</p>
+              </div>
+              <Link
+                href="/dashboard/settings"
+                aria-label="Profile settings"
+                className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-ink-500 transition-colors hover:bg-black/[0.05] hover:text-ink-950"
+              >
+                <Settings className="h-3.5 w-3.5" strokeWidth={1.5} />
+              </Link>
             </div>
-          ) : user ? (
-            <>
-              <div className="flex items-center gap-3">
-                {user.photoURL ? (
-                  <img
-                    src={user.photoURL}
-                    alt="Profile"
-                    className="h-10 w-10 rounded-xl object-cover border border-black/[0.08]"
-                  />
-                ) : (
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-[#6D28D9] to-[#C026D3] text-[14px] font-semibold text-white">
-                    {initial}
-                  </span>
-                )}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13px] font-semibold text-ink-950">
-                    {primary}
-                  </p>
-                  <p className="truncate text-[12px] text-ink-600">
-                    {secondary}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsProfileOpen(true)}
-                  aria-label="Profile settings"
-                  className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-ink-500 hover:bg-black/[0.05] hover:text-ink-950 transition-colors"
-                >
-                  <Settings className="h-3.5 w-3.5" strokeWidth={1.5} />
-                </button>
-              </div>
-              <div className="mt-3 flex gap-2">
-                <Link
-                  href="/dashboard"
-                  className="pill-btn inline-flex min-h-10 flex-1 items-center justify-center rounded-lg bg-white px-3 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:bg-black/[0.02] hover:shadow-[var(--shadow-card-hover)]"
-                >
-                  Dashboard
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => void handleSignOut()}
-                  disabled={isPending}
-                  className="pill-btn min-h-10 rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isPending ? "Signing out..." : "Sign out"}
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
-                Account
-              </p>
-              <p className="mt-2 text-[13px] leading-6 text-ink-700">
-                Sign in to sync your habits and records across devices.
-              </p>
+            <div className="mt-3 flex gap-2">
+              <Link
+                href="/dashboard"
+                className="pill-btn inline-flex min-h-10 flex-1 items-center justify-center rounded-lg bg-white px-3 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:bg-black/[0.02] hover:shadow-[var(--shadow-card-hover)]"
+              >
+                Dashboard
+              </Link>
               <button
                 type="button"
-                onClick={() => void handleSignIn()}
+                onClick={() => void handleSignOut()}
                 disabled={isPending}
-                className="pill-btn mt-3 min-h-10 w-full rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="pill-btn min-h-10 rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isPending ? "Signing in..." : "Continue with Google"}
+                {isPending ? "Signing out..." : "Sign out"}
               </button>
-            </>
-          )}
-          {error ? (
-            <p className="mt-2 text-[12px] leading-5 text-red-700">{error}</p>
-          ) : null}
-        </div>
-      </>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
+              Account
+            </p>
+            <p className="mt-2 text-[13px] leading-6 text-ink-700">
+              Sign in to sync your habits and records across devices.
+            </p>
+            <button
+              type="button"
+              onClick={() => void handleSignIn()}
+              disabled={isPending}
+              className="pill-btn mt-3 min-h-10 w-full rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isPending ? "Signing in..." : "Continue with Google"}
+            </button>
+          </>
+        )}
+        {error ? (
+          <p className="mt-2 text-[12px] leading-5 text-red-700">{error}</p>
+        ) : null}
+      </div>
     );
   }
 

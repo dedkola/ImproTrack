@@ -6,6 +6,7 @@ import { useFirebaseAuth } from "@/components/firebase-auth-provider";
 import { Sidebar, SidebarToggle } from "@/components/sidebar";
 import { Footer } from "@/components/footer";
 import { HabitForm } from "@/components/habit-form";
+import { MobileTabBar } from "@/components/mobile-tab-bar";
 import { HabitStorageProvider, useHabits } from "@/lib/storage";
 import { HabitDefinition } from "@/lib/habits";
 
@@ -141,7 +142,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
         onAddHabit={handleAddHabit}
       />
 
-      <div className="flex flex-1 flex-col">
+      <div className="mobile-tab-shell flex flex-1 flex-col">
         {/* Mobile header bar with sidebar toggle */}
         <div className="header-bar sticky top-0 z-40 lg:hidden">
           <div className="page-shell flex h-14 items-center">
@@ -156,6 +157,8 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
 
         <Footer />
       </div>
+
+      <MobileTabBar />
 
       <HabitForm
         open={formOpen}

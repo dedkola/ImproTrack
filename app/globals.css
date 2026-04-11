@@ -130,6 +130,20 @@ textarea {
   -webkit-backdrop-filter: blur(24px);
 }
 
+.mobile-tab-shell {
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+}
+
+.mobile-tab-bar {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@media (min-width: 768px) {
+  .mobile-tab-shell {
+    padding-bottom: 0;
+  }
+}
+
 /* --- Subtle accent glow ------------------------------------------------ */
 
 .mesh-accent {
