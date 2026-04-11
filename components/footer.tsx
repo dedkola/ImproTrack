@@ -33,7 +33,7 @@ export function Footer() {
           </Link>
         </div>
         <p className="text-[12px] text-ink-600 sm:text-right">
-          &copy; {new Date().getFullYear()} ImproTrack. Built with Next.js
+          &copy; {new Date().getFullYear()} ImproTrack.
         </p>
       </div>
     </footer>
