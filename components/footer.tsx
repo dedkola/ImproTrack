@@ -1,8 +1,8 @@
 export function Footer() {
   return (
     <footer className="border-t border-black/[0.06] bg-white/80 backdrop-blur-2xl">
-      <div className="page-shell flex items-center justify-between py-3">
-        <div className="flex items-center gap-2">
+      <div className="page-shell flex flex-col gap-2.5 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
           <img
             src="/logo.svg"
             alt="ImproTrack"
@@ -13,7 +13,7 @@ export function Footer() {
           </span>
           <span className="text-[12px] text-ink-600">v0.2.0</span>
         </div>
-        <p className="text-[12px] text-ink-600">
+        <p className="text-[12px] leading-5 text-ink-600 sm:text-right">
           &copy; {new Date().getFullYear()} ImproTrack. Built with Next.js
         </p>
       </div>

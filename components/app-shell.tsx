@@ -48,8 +48,8 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex min-h-screen flex-col">
         <div className="header-bar sticky top-0 z-40">
-          <div className="page-shell flex h-14 items-center">
-            <span className="font-display text-[16px] font-semibold text-ink-950">
+          <div className="page-shell flex h-[3.25rem] items-center sm:h-14">
+            <span className="font-display text-[15px] font-semibold text-ink-950 sm:text-[16px]">
               ImproTrack
             </span>
           </div>
@@ -77,8 +77,8 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex min-h-screen flex-col">
         <div className="header-bar sticky top-0 z-40">
-          <div className="page-shell flex h-14 items-center">
-            <span className="font-display text-[16px] font-semibold text-ink-950">
+          <div className="page-shell flex h-[3.25rem] items-center sm:h-14">
+            <span className="font-display text-[15px] font-semibold text-ink-950 sm:text-[16px]">
               ImproTrack
             </span>
           </div>
@@ -107,8 +107,8 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex min-h-screen flex-col">
         <div className="header-bar sticky top-0 z-40">
-          <div className="page-shell flex h-14 items-center">
-            <span className="font-display text-[16px] font-semibold text-ink-950">
+          <div className="page-shell flex h-[3.25rem] items-center sm:h-14">
+            <span className="font-display text-[15px] font-semibold text-ink-950 sm:text-[16px]">
               ImproTrack
             </span>
           </div>
@@ -133,7 +133,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen min-w-0">
       <Sidebar
         habits={activeHabits}
         categories={categories}
@@ -142,18 +142,18 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
         onAddHabit={handleAddHabit}
       />
 
-      <div className="mobile-tab-shell flex flex-1 flex-col">
+      <div className="mobile-tab-shell flex min-w-0 flex-1 flex-col">
         {/* Mobile header bar with sidebar toggle */}
         <div className="header-bar sticky top-0 z-40 lg:hidden">
-          <div className="page-shell flex h-14 items-center">
+          <div className="page-shell flex h-[3.25rem] items-center sm:h-14">
             <SidebarToggle onToggle={() => setSidebarOpen(true)} />
-            <span className="ml-3 font-display text-[16px] font-semibold text-ink-950">
+            <span className="ml-2.5 font-display text-[15px] font-semibold text-ink-950 sm:ml-3 sm:text-[16px]">
               ImproTrack
             </span>
           </div>
         </div>
 
-        <main className="flex-1">{children}</main>
+        <main className="min-w-0 flex-1">{children}</main>
 
         <Footer />
       </div>

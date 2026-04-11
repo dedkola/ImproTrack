@@ -231,26 +231,42 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
             >
               {isPending ? "Signing out..." : "Sign out"}
             </button>
+            <Link
+              href="/dashboard"
+              className="pill-btn inline-flex items-center rounded-lg border border-black/[0.06] bg-white/78 px-4 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm hover:bg-white hover:shadow-[var(--shadow-card-hover)] sm:hidden"
+            >
+              Dashboard
+            </Link>
           </>
         ) : (
-          <button
-            type="button"
-            onClick={() => void handleSignIn()}
-            disabled={isPending}
-            className="pill-btn hidden rounded-lg border border-black/[0.06] bg-white/70 px-3 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] sm:inline-flex disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isPending ? "Signing in..." : "Sign in with Google"}
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={() => void handleSignIn()}
+              disabled={isPending}
+              className="pill-btn inline-flex rounded-lg border border-black/[0.06] bg-white/70 px-3 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] disabled:cursor-not-allowed disabled:opacity-60 sm:hidden"
+            >
+              {isPending ? "Signing in..." : "Sign in"}
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleSignIn()}
+              disabled={isPending}
+              className="pill-btn hidden rounded-lg border border-black/[0.06] bg-white/70 px-3 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] sm:inline-flex disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isPending ? "Signing in..." : "Sign in with Google"}
+            </button>
+          </>
         )}
         <Link
           href="/dashboard"
-          className="pill-btn inline-flex items-center rounded-lg border border-black/[0.06] bg-white/78 px-4 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm hover:bg-white hover:shadow-[var(--shadow-card-hover)]"
+          className="pill-btn hidden items-center rounded-lg border border-black/[0.06] bg-white/78 px-4 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm hover:bg-white hover:shadow-[var(--shadow-card-hover)] sm:inline-flex"
         >
           Dashboard
         </Link>
       </div>
       {error ? (
-        <p className="hidden text-right text-[12px] leading-5 text-red-700 sm:block">
+        <p className="max-w-[12rem] text-right text-[12px] leading-5 text-red-700 sm:max-w-none">
           {error}
         </p>
       ) : null}

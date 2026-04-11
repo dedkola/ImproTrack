@@ -176,11 +176,13 @@ export function ProfileSettingsCard({
     .trim()
     .charAt(0)
     .toUpperCase();
+  const actionButtonClassName =
+    "pill-btn inline-flex min-h-10 items-center justify-center rounded-xl border border-black/[0.06] bg-white px-3.5 py-2.5 text-[12px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]";
 
   const containerClassName =
     variant === "modal"
       ? "relative w-full max-w-sm rounded-2xl border border-black/[0.06] bg-white p-6 shadow-[0_8px_40px_rgba(0,0,0,0.14)]"
-      : "surface-panel rounded-[28px] p-5 sm:p-6";
+      : "surface-panel rounded-[28px] p-4 sm:p-6";
 
   return (
     <section className={containerClassName}>
@@ -205,70 +207,78 @@ export function ProfileSettingsCard({
         ) : null}
       </div>
 
-      <div className="mt-6 flex flex-col gap-6">
-        <div className="flex flex-col items-center gap-4 rounded-[24px] border border-black/[0.06] bg-white px-4 py-5 text-center shadow-[var(--shadow-card)]">
-          <div className="relative group">
-            {previewUrl ? (
-              <img
-                src={previewUrl}
-                alt="Profile avatar"
-                className="h-24 w-24 rounded-[24px] border border-black/[0.08] object-cover"
-              />
-            ) : (
-              <div className="flex h-24 w-24 select-none items-center justify-center rounded-[24px] bg-linear-to-br from-[#6D28D9] to-[#C026D3] text-[30px] font-semibold text-white">
-                {initial}
+      <div className="mt-5 flex flex-col gap-5 sm:mt-6 sm:gap-6">
+        <div className="rounded-[26px] border border-black/[0.06] bg-white px-3.5 py-3.5 shadow-[var(--shadow-card)] sm:px-5 sm:py-5">
+          <div className="flex flex-col gap-3.5 sm:flex-row sm:items-center sm:gap-5">
+            <div className="relative mx-auto group sm:mx-0">
+              {previewUrl ? (
+                <img
+                  src={previewUrl}
+                  alt="Profile avatar"
+                  className="h-20 w-20 rounded-[22px] border border-black/[0.08] object-cover sm:h-24 sm:w-24 sm:rounded-[24px]"
+                />
+              ) : (
+                <div className="flex h-20 w-20 select-none items-center justify-center rounded-[22px] bg-linear-to-br from-[#6D28D9] to-[#C026D3] text-[26px] font-semibold text-white sm:h-24 sm:w-24 sm:rounded-[24px] sm:text-[30px]">
+                  {initial}
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                aria-label="Upload avatar"
+                className="absolute inset-0 flex items-center justify-center rounded-[22px] bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 sm:rounded-[24px]"
+              >
+                <Upload className="h-5 w-5 text-white" strokeWidth={1.5} />
+              </button>
+            </div>
+
+            <div className="min-w-0 flex-1 text-center sm:text-left">
+              <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
+                <span className="rounded-full bg-ink-950/[0.05] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-700">
+                  Google account
+                </span>
+                <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-ink-950 shadow-[var(--shadow-card)]">
+                  Synced profile
+                </span>
               </div>
-            )}
+              <p className="mt-2.5 text-[15px] font-semibold text-ink-950 sm:mt-3 sm:text-[16px]">
+                {displayName.trim() || user?.displayName || "Your profile"}
+              </p>
+              <p className="mt-1 text-[13px] text-ink-600">
+                {user?.email ?? "Signed in account"}
+              </p>
+              <p className="mt-2 text-[12px] leading-5 text-ink-600">
+                Keep the same name and avatar across the drawer, settings page,
+                and future shared views.
+              </p>
+            </div>
+          </div>
+
+          <div className="comparison-scroll -mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:mt-4 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              aria-label="Upload avatar"
-              className="absolute inset-0 flex items-center justify-center rounded-[24px] bg-black/40 opacity-0 transition-opacity group-hover:opacity-100"
-            >
-              <Upload className="h-5 w-5 text-white" strokeWidth={1.5} />
-            </button>
-          </div>
-
-          <div>
-            <p className="text-[14px] font-semibold text-ink-950">
-              {displayName.trim() || user?.displayName || "Your profile"}
-            </p>
-            <p className="mt-1 text-[12px] text-ink-600">
-              {user?.email ?? "Signed in account"}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="text-[12px] font-medium text-[#6D28D9] hover:underline"
+              className={`${actionButtonClassName} shrink-0 text-[#6D28D9]`}
             >
               Upload photo
             </button>
             {googlePhotoUrl && previewUrl !== googlePhotoUrl ? (
-              <>
-                <span className="text-[12px] text-ink-400">·</span>
-                <button
-                  type="button"
-                  onClick={handleUseGooglePhoto}
-                  className="text-[12px] font-medium text-ink-500 hover:text-ink-950 hover:underline"
-                >
-                  Use Google photo
-                </button>
-              </>
+              <button
+                type="button"
+                onClick={handleUseGooglePhoto}
+                className={`${actionButtonClassName} shrink-0`}
+              >
+                Use Google photo
+              </button>
             ) : null}
             {previewUrl ? (
-              <>
-                <span className="text-[12px] text-ink-400">·</span>
-                <button
-                  type="button"
-                  onClick={handleRemoveAvatar}
-                  className="text-[12px] font-medium text-ink-500 hover:text-red-600 hover:underline"
-                >
-                  Remove
-                </button>
-              </>
+              <button
+                type="button"
+                onClick={handleRemoveAvatar}
+                className={`${actionButtonClassName} shrink-0 text-red-700`}
+              >
+                Remove photo
+              </button>
             ) : null}
           </div>
 
@@ -282,7 +292,7 @@ export function ProfileSettingsCard({
           />
         </div>
 
-        <div>
+        <div className="rounded-[24px] border border-black/[0.06] bg-white px-3.5 py-3.5 shadow-[var(--shadow-card)] sm:px-4 sm:py-4">
           <label
             htmlFor={`profile-display-name-${variant}`}
             className="mb-1.5 block text-[12px] font-semibold uppercase tracking-[0.16em] text-ink-600"
@@ -301,6 +311,9 @@ export function ProfileSettingsCard({
             maxLength={60}
             className="w-full rounded-xl border border-black/[0.1] bg-white px-3 py-3 text-[14px] text-ink-950 outline-none transition-shadow placeholder:text-ink-400 focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/20"
           />
+          <p className="mt-2 text-[12px] leading-5 text-ink-600">
+            Saved changes sync to this account immediately after you confirm.
+          </p>
         </div>
 
         {error ? (
@@ -310,7 +323,7 @@ export function ProfileSettingsCard({
           <p className="text-[12px] leading-5 text-emerald-700">{success}</p>
         ) : null}
 
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           {onClose ? (
             <button
               type="button"
@@ -324,7 +337,7 @@ export function ProfileSettingsCard({
             type="button"
             onClick={() => void handleSave()}
             disabled={isSaving || !user}
-            className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-xl bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)] transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-xl bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-4 py-3 text-[13px] font-semibold text-white shadow-[0_8px_24px_rgba(109,40,217,0.32)] transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSaving ? (
               <>

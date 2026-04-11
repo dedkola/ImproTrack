@@ -95,14 +95,14 @@ export function MarketingHome() {
       <div className="landing-orb bottom-10 left-1/3 h-56 w-56 bg-amber-100/80" />
 
       <header className="header-bar sticky top-0 z-40">
-        <div className="page-shell mx-auto flex max-w-7xl items-center justify-between gap-6 py-3.5">
-          <Link href="/" className="flex items-center gap-2.5">
+        <div className="page-shell mx-auto flex max-w-7xl items-center justify-between gap-4 py-3 sm:gap-6 sm:py-3.5">
+          <Link href="/" className="flex items-center gap-2 sm:gap-2.5">
             <img
               src="/logo.svg"
               alt="ImproTrack"
-              className="h-9 w-9 drop-shadow-[0_2px_10px_rgba(109,40,217,0.45)]"
+              className="h-8 w-8 drop-shadow-[0_2px_10px_rgba(109,40,217,0.45)] sm:h-9 sm:w-9"
             />
-            <span className="font-display text-[18px] font-semibold text-ink-950">
+            <span className="font-display text-[17px] font-semibold text-ink-950 sm:text-[18px]">
               ImproTrack
             </span>
           </Link>
@@ -130,22 +130,22 @@ export function MarketingHome() {
       </header>
 
       <main>
-        <section className="page-shell mx-auto max-w-7xl py-14 sm:py-18 lg:py-24">
-          <div className="grid items-center gap-8 lg:grid-cols-[1.02fr_0.98fr] lg:gap-10">
+        <section className="page-shell mx-auto max-w-7xl py-10 sm:py-18 lg:py-24">
+          <div className="grid items-center gap-6 sm:gap-8 lg:grid-cols-[1.02fr_0.98fr] lg:gap-10">
             <div className="relative z-10">
               <span className="inline-flex rounded-full border border-black/[0.06] bg-white/90 px-3 py-1 text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-700 shadow-[var(--shadow-card)]">
                 Homepage for guests, dashboard for work
               </span>
-              <h1 className="mt-6 max-w-3xl font-display text-[42px] font-semibold leading-[0.96] tracking-tight text-ink-950 sm:text-[56px] lg:text-[72px]">
+              <h1 className="mt-5 max-w-3xl font-display text-[38px] font-semibold leading-[0.96] tracking-tight text-ink-950 sm:mt-6 sm:text-[56px] lg:text-[72px]">
                 Habit tracking that feels clear the moment you land.
               </h1>
-              <p className="mt-6 max-w-2xl text-[17px] leading-8 text-ink-700 sm:text-[18px]">
+              <p className="mt-5 max-w-2xl text-[16px] leading-7 text-ink-700 sm:mt-6 sm:text-[18px] sm:leading-8">
                 ImproTrack gives you a focused homepage, a dashboard for active
                 routines, an archive for habits you have retired, and a
                 statistics area that makes progress impossible to ignore.
               </p>
 
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row">
                 <Link
                   href="/dashboard"
                   className="pill-btn inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 text-[15px] font-semibold text-[#6D28D9] shadow-[0_8px_24px_rgba(10,22,40,0.16)]"
@@ -160,16 +160,15 @@ export function MarketingHome() {
                 </a>
               </div>
 
-              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              <div className="mt-7 grid gap-3 sm:mt-8 sm:grid-cols-3">
                 {heroBlocks.map((block) => (
                   <div
                     key={block.title}
-                    className="feature-panel rounded-[24px] px-4 py-4"
+                    className="feature-panel rounded-[24px] px-4 py-3.5 sm:py-4"
                   >
                     <p className="text-[12px] uppercase tracking-[0.18em] text-ink-600">
                       {block.title}
                     </p>
-                    <p className="mt-2 font-display text-[22px] font-semibold text-ink-950 sm:text-[24px]"></p>
                     <p className="mt-2 text-[13px] leading-6 text-ink-700">
                       {block.body}
                     </p>
@@ -181,7 +180,7 @@ export function MarketingHome() {
             <div className="relative lg:pl-6">
               <div className="landing-grid absolute inset-x-12 inset-y-8 rounded-[40px] border border-white/50 opacity-60" />
               <div className="relative grid gap-4 sm:grid-cols-[1.1fr_0.9fr]">
-                <div className="mockup-frame animate-fade-in-up relative overflow-hidden rounded-[32px] p-5">
+                <div className="mockup-frame animate-fade-in-up relative overflow-hidden rounded-[32px] p-4 sm:p-5">
                   <div className="absolute inset-x-10 top-0 h-24 rounded-full bg-sky-100/90 blur-3xl" />
                   <div className="relative z-10">
                     <div className="flex items-center justify-between">
@@ -213,7 +212,7 @@ export function MarketingHome() {
                       ))}
                     </div>
 
-                    <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                    <div className="mt-4 grid gap-3 sm:mt-5 sm:grid-cols-2">
                       <div className="rounded-[20px] border border-black/[0.06] bg-white px-4 py-3">
                         <p className="text-[12px] text-ink-600">
                           Morning reset
@@ -232,9 +231,9 @@ export function MarketingHome() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-4">
+                <div className="grid gap-4 md:grid-cols-2 md:gap-3 lg:flex lg:flex-col lg:gap-4">
                   <div
-                    className="mockup-frame animate-fade-in-up rounded-[28px] p-5"
+                    className="mockup-frame animate-fade-in-up rounded-[28px] p-4 sm:p-5"
                     style={{ animationDelay: "80ms" }}
                   >
                     <p className="text-[12px] uppercase tracking-[0.18em] text-ink-600">
@@ -259,7 +258,7 @@ export function MarketingHome() {
                   </div>
 
                   <div
-                    className="mockup-frame animate-fade-in-up rounded-[28px] p-5"
+                    className="mockup-frame animate-fade-in-up rounded-[28px] p-4 sm:p-5"
                     style={{ animationDelay: "140ms" }}
                   >
                     <p className="text-[12px] uppercase tracking-[0.18em] text-ink-600">
@@ -311,7 +310,7 @@ export function MarketingHome() {
             </p>
           </div>
 
-          <div className="stagger-children mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="stagger-children mt-6 grid gap-4 md:mt-8 md:grid-cols-2 xl:grid-cols-4">
             {featureCards.map((feature) => (
               <article
                 key={feature.title}
@@ -333,7 +332,7 @@ export function MarketingHome() {
 
         <section
           id="project"
-          className="page-shell mx-auto max-w-7xl py-10 sm:py-14"
+          className="page-shell mx-auto max-w-7xl py-9 sm:py-14"
         >
           <div className="grid gap-5 lg:grid-cols-[0.92fr_1.08fr]">
             <div className="surface-panel rounded-[32px] px-6 py-7 sm:px-8 sm:py-8">
@@ -492,7 +491,7 @@ export function MarketingHome() {
 
         <section
           id="comparison"
-          className="page-shell mx-auto max-w-7xl py-10 sm:py-14"
+          className="page-shell mx-auto max-w-7xl py-9 sm:py-14"
         >
           <div className="surface-panel rounded-[32px] px-5 py-6 sm:px-6 sm:py-7">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -511,7 +510,7 @@ export function MarketingHome() {
               </p>
             </div>
 
-            <div className="comparison-scroll mt-7">
+            <div className="comparison-scroll mt-6 sm:mt-7">
               <table className="min-w-[760px] w-full border-separate border-spacing-0 overflow-hidden rounded-[24px] border border-black/[0.06] bg-white shadow-[var(--shadow-card)]">
                 <thead>
                   <tr className="bg-paper-50 text-left text-[12px] uppercase tracking-[0.14em] text-ink-600">
@@ -591,7 +590,7 @@ export function MarketingHome() {
       </main>
 
       <footer className="border-t border-black/[0.06] bg-white/80 backdrop-blur-2xl">
-        <div className="page-shell mx-auto flex max-w-7xl flex-col gap-5 py-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="page-shell mx-auto flex max-w-7xl flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:gap-5">
           <div>
             <div className="flex items-center gap-2">
               <img

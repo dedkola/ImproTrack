@@ -2,8 +2,15 @@
 
 import Link from "next/link";
 import { useState, useMemo } from "react";
-import { Check, GripVertical, Plus } from "lucide-react";
 import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  GripVertical,
+  Plus,
+} from "lucide-react";
+import {
+  addDays,
   eachDay,
   formatLongDate,
   formatMonthLabel,
@@ -189,6 +196,30 @@ function resolveMatrixTone(tone: { fill: string; hex?: string }) {
   return getMatrixTone(tone.fill);
 }
 
+function getMobileRangeLabel(range: { from: string; to: string }) {
+  const from = parseDateKey(range.from);
+  const to = parseDateKey(range.to);
+  const sameYear = from.getFullYear() === to.getFullYear();
+  const sameMonth = sameYear && from.getMonth() === to.getMonth();
+
+  if (sameMonth) {
+    return `${from.toLocaleString("en", { month: "short" })} ${from.getDate()}-${to.getDate()}`;
+  }
+
+  const fromLabel = from.toLocaleString("en", {
+    month: "short",
+    day: "numeric",
+    ...(sameYear ? {} : { year: "numeric" }),
+  });
+  const toLabel = to.toLocaleString("en", {
+    month: "short",
+    day: "numeric",
+    ...(sameYear ? {} : { year: "numeric" }),
+  });
+
+  return `${fromLabel} - ${toLabel}`;
+}
+
 function MobileMatrixDayCell({
   checked,
   isFuture,
@@ -250,11 +281,21 @@ export function HabitTrackerApp() {
     archiveHabit,
   } = useHabits();
   const { records, toggleHabitDay } = useHabitRecords(activeHabits);
+  const [mobileWeekOffset, setMobileWeekOffset] = useState(0);
 
   const desktopRange = getCurrentMonthRange(today);
   const desktopDays = eachDay(desktopRange);
-  const mobileRange = getRollingRange(MOBILE_DAY_WINDOW, today);
+  const mobileRange = getRollingRange(
+    MOBILE_DAY_WINDOW,
+    addDays(today, -(mobileWeekOffset * MOBILE_DAY_WINDOW)),
+  );
   const mobileDays = eachDay(mobileRange);
+  const mobileRangeLabel = getMobileRangeLabel(mobileRange);
+  const mobileWindowLabel =
+    mobileWeekOffset === 0
+      ? "Current window"
+      : `${mobileWeekOffset} week${mobileWeekOffset === 1 ? "" : "s"} back`;
+  const isLatestMobileWeek = mobileWeekOffset === 0;
 
   // CRUD modals
   const [formOpen, setFormOpen] = useState(false);
@@ -403,7 +444,7 @@ export function HabitTrackerApp() {
   return (
     <div className="flex min-h-full w-full flex-col">
       {/* Header */}
-      <header className="header-bar sticky top-0 z-30 w-full py-3 sm:py-3.5 lg:top-0">
+      <header className="header-bar w-full py-3 sm:py-3.5 lg:sticky lg:top-0 lg:z-30">
         <div className="page-shell flex flex-col gap-2.5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-5">
@@ -435,7 +476,7 @@ export function HabitTrackerApp() {
 
             <div className="flex items-center gap-3">
               <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-semibold text-ink-950 shadow-[var(--shadow-card)] md:hidden">
-                Last {MOBILE_DAY_WINDOW} days
+                {mobileRangeLabel}
               </span>
               <span className="hidden font-display text-[14px] font-medium text-ink-950 md:inline">
                 {formatMonthLabel(desktopRange)}
@@ -464,7 +505,7 @@ export function HabitTrackerApp() {
         </div>
       </header>
 
-      <div className="page-shell flex flex-col gap-4 py-5">
+      <div className="page-shell flex flex-col gap-3.5 py-4 sm:gap-4 sm:py-5">
         {activeHabits.length === 0 ? (
           <div className="surface-panel flex flex-col items-center justify-center gap-3 rounded-2xl px-8 py-16 text-center">
             <span className="text-[32px]">🎯</span>
@@ -489,20 +530,51 @@ export function HabitTrackerApp() {
           <div className="flex flex-col gap-4">
             {/* Mobile matrix */}
             <section className="animate-scale-in surface-panel rounded-[28px] p-3.5 md:hidden">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h2 className="text-[15px] font-semibold text-ink-950">
-                    Last {MOBILE_DAY_WINDOW} days
-                  </h2>
-                  <p className="mt-1 text-[13px] leading-6 text-ink-700">
-                    The recent window stays visible on small phones, with each
-                    habit stacked above its boxes instead of squeezed into the
-                    month table.
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-[15px] font-semibold text-ink-950">
+                  Habit matrix
+                </h2>
+                {isLatestMobileWeek ? null : (
+                  <button
+                    type="button"
+                    onClick={() => setMobileWeekOffset(0)}
+                    className="pill-btn tap-target-compact inline-flex items-center rounded-lg bg-white px-3 py-2 text-[12px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]"
+                  >
+                    Latest
+                  </button>
+                )}
+              </div>
+
+              <div className="mt-2.5 flex items-center gap-1.5 rounded-[22px] border border-black/[0.06] bg-white px-1.5 py-1.5 shadow-[var(--shadow-card)] sm:mt-3 sm:gap-2 sm:px-2 sm:py-2">
+                <button
+                  type="button"
+                  onClick={() => setMobileWeekOffset((current) => current + 1)}
+                  aria-label="Show previous 7-day window"
+                  className="tap-target-compact flex items-center justify-center rounded-xl border border-black/[0.06] bg-white text-ink-700 transition-colors hover:bg-black/[0.03] hover:text-ink-950"
+                >
+                  <ChevronLeft className="h-4 w-4" strokeWidth={1.9} />
+                </button>
+
+                <div className="min-w-0 flex-1 text-center">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-600">
+                    {mobileWindowLabel}
+                  </p>
+                  <p className="mt-0.5 text-[13px] font-semibold text-ink-950">
+                    {mobileRangeLabel}
                   </p>
                 </div>
-                <span className="rounded-full bg-ink-950/[0.05] px-3 py-1 text-[12px] font-semibold text-ink-700">
-                  Tap to toggle
-                </span>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setMobileWeekOffset((current) => Math.max(0, current - 1))
+                  }
+                  disabled={isLatestMobileWeek}
+                  aria-label="Show next 7-day window"
+                  className="tap-target-compact flex items-center justify-center rounded-xl border border-black/[0.06] bg-white text-ink-700 transition-colors hover:bg-black/[0.03] hover:text-ink-950 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ChevronRight className="h-4 w-4" strokeWidth={1.9} />
+                </button>
               </div>
 
               <div className="mt-4 grid grid-cols-7 gap-1.5 px-0.5 text-center">
@@ -533,7 +605,7 @@ export function HabitTrackerApp() {
                 })}
               </div>
 
-              <div className="mt-3 space-y-3">
+              <div className="mt-3 space-y-2.5">
                 {orderedActiveHabits.map((habit, habitIndex) => {
                   const matrixTone = resolveMatrixTone(habit.tone);
                   const mobileRate = completionRate(
@@ -562,10 +634,10 @@ export function HabitTrackerApp() {
                   return (
                     <article
                       key={habit.id}
-                      className="animate-fade-in-up rounded-[24px] border border-black/[0.06] bg-white p-3.5 shadow-[var(--shadow-card)]"
+                      className="animate-fade-in-up rounded-[24px] border border-black/[0.06] bg-white px-3.5 py-3.5 shadow-[var(--shadow-card)] sm:px-4 sm:py-4"
                     >
                       <div className="flex items-start gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-ink-950/[0.05] text-ink-950">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-ink-950/[0.05] text-ink-950 sm:h-10 sm:w-10">
                           <HabitIcon
                             name={habit.icon}
                             size={18}
@@ -576,10 +648,10 @@ export function HabitTrackerApp() {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-start gap-2">
                             <div className="min-w-0 flex-1">
-                              <h3 className="text-[15px] font-semibold leading-5 text-ink-950">
+                              <h3 className="text-[14px] font-semibold leading-5 text-ink-950 sm:text-[15px]">
                                 {habit.name}
                               </h3>
-                              <p className="mt-1 text-[12px] text-ink-600">
+                              <p className="mt-0.5 text-[12px] leading-5 text-ink-600">
                                 {isMultiSlot
                                   ? `${todayCompletedCount}/${habit.timeSlots.length} slots done today`
                                   : `${recentCompleted}/${mobileDays.length} days completed`}
@@ -587,7 +659,7 @@ export function HabitTrackerApp() {
                             </div>
 
                             <span
-                              className={`rounded-md px-2 py-1 text-[12px] font-semibold ${softFillClass(habit.tone)} ${badgeClass(habit.tone)}`}
+                              className={`rounded-md px-1.5 py-1 text-[11px] font-semibold ${softFillClass(habit.tone)} ${badgeClass(habit.tone)}`}
                               style={{
                                 ...softFillStyle(habit.tone),
                                 ...badgeStyle(habit.tone),
@@ -607,101 +679,110 @@ export function HabitTrackerApp() {
                             />
                           </div>
 
-                          <p className="mt-1 text-[12px] leading-5 text-ink-600">
-                            {habit.category}
-                          </p>
+                          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                            <span className="rounded-full bg-ink-950/[0.05] px-2 py-1 text-[10px] font-medium text-ink-700 sm:text-[11px]">
+                              {habit.category}
+                            </span>
+                            {isMultiSlot ? (
+                              <span className="text-[10px] text-ink-500 sm:text-[11px]">
+                                {habit.timeSlots.length} slots
+                              </span>
+                            ) : null}
+                          </div>
                         </div>
                       </div>
 
-                      {isMultiSlot ? (
-                        <div className="mt-3 space-y-3">
-                          {habit.timeSlots.map((slotName) => {
-                            const slotCompletedCount = mobileDays.filter(
-                              (dateKey) =>
-                                isSlotCompleted(
-                                  records[habit.id]?.[dateKey],
-                                  slotName,
-                                ),
-                            ).length;
+                      <div className="mt-2.5 border-t border-black/[0.05] pt-2.5">
+                        {isMultiSlot ? (
+                          <div className="space-y-2.5">
+                            {habit.timeSlots.map((slotName) => {
+                              const slotCompletedCount = mobileDays.filter(
+                                (dateKey) =>
+                                  isSlotCompleted(
+                                    records[habit.id]?.[dateKey],
+                                    slotName,
+                                  ),
+                              ).length;
 
-                            return (
-                              <div key={slotName} className="space-y-2">
-                                <div className="flex items-center justify-between gap-3 text-[12px]">
-                                  <span className="font-medium text-ink-700">
-                                    {slotName}
-                                  </span>
-                                  <span className="text-ink-600">
-                                    {slotCompletedCount}/{mobileDays.length}
-                                  </span>
+                              return (
+                                <div key={slotName} className="space-y-1.5">
+                                  <div className="flex items-center justify-between gap-3 text-[11px] sm:text-[12px]">
+                                    <span className="font-medium text-ink-700">
+                                      {slotName}
+                                    </span>
+                                    <span className="text-ink-600">
+                                      {slotCompletedCount}/{mobileDays.length}
+                                    </span>
+                                  </div>
+
+                                  <div className="grid grid-cols-7 gap-1.5">
+                                    {mobileDays.map((dateKey) => {
+                                      const isFuture = dateKey > todayKey;
+                                      const isToday = dateKey === todayKey;
+                                      const checked = isSlotCompleted(
+                                        records[habit.id]?.[dateKey],
+                                        slotName,
+                                      );
+
+                                      return (
+                                        <MobileMatrixDayCell
+                                          key={`${habit.id}-${slotName}-${dateKey}`}
+                                          checked={checked}
+                                          isFuture={isFuture}
+                                          isToday={isToday}
+                                          matrixTone={matrixTone}
+                                          ariaLabel={`${habit.name} ${slotName} ${checked ? "completed" : "not completed"} on ${formatLongDate(dateKey)}`}
+                                          onClick={() => {
+                                            if (!isFuture) {
+                                              toggleHabitDay(
+                                                habit.id,
+                                                dateKey,
+                                                slotName,
+                                              );
+                                            }
+                                          }}
+                                        />
+                                      );
+                                    })}
+                                  </div>
                                 </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-7 gap-1.5">
+                            {mobileDays.map((dateKey) => {
+                              const isFuture = dateKey > todayKey;
+                              const isToday = dateKey === todayKey;
+                              const checked = isSlotCompleted(
+                                records[habit.id]?.[dateKey],
+                                habit.timeSlots[0] ?? "default",
+                                { fallbackToAny: true },
+                              );
 
-                                <div className="grid grid-cols-7 gap-1.5">
-                                  {mobileDays.map((dateKey) => {
-                                    const isFuture = dateKey > todayKey;
-                                    const isToday = dateKey === todayKey;
-                                    const checked = isSlotCompleted(
-                                      records[habit.id]?.[dateKey],
-                                      slotName,
-                                    );
-
-                                    return (
-                                      <MobileMatrixDayCell
-                                        key={`${habit.id}-${slotName}-${dateKey}`}
-                                        checked={checked}
-                                        isFuture={isFuture}
-                                        isToday={isToday}
-                                        matrixTone={matrixTone}
-                                        ariaLabel={`${habit.name} ${slotName} ${checked ? "completed" : "not completed"} on ${formatLongDate(dateKey)}`}
-                                        onClick={() => {
-                                          if (!isFuture) {
-                                            toggleHabitDay(
-                                              habit.id,
-                                              dateKey,
-                                              slotName,
-                                            );
-                                          }
-                                        }}
-                                      />
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <div className="mt-3 grid grid-cols-7 gap-1.5">
-                          {mobileDays.map((dateKey) => {
-                            const isFuture = dateKey > todayKey;
-                            const isToday = dateKey === todayKey;
-                            const checked = isSlotCompleted(
-                              records[habit.id]?.[dateKey],
-                              habit.timeSlots[0] ?? "default",
-                              { fallbackToAny: true },
-                            );
-
-                            return (
-                              <MobileMatrixDayCell
-                                key={`${habit.id}-${dateKey}`}
-                                checked={checked}
-                                isFuture={isFuture}
-                                isToday={isToday}
-                                matrixTone={matrixTone}
-                                ariaLabel={`${habit.name} ${checked ? "completed" : "not completed"} on ${formatLongDate(dateKey)}`}
-                                onClick={() => {
-                                  if (!isFuture) {
-                                    toggleHabitDay(
-                                      habit.id,
-                                      dateKey,
-                                      habit.timeSlots[0] ?? "default",
-                                    );
-                                  }
-                                }}
-                              />
-                            );
-                          })}
-                        </div>
-                      )}
+                              return (
+                                <MobileMatrixDayCell
+                                  key={`${habit.id}-${dateKey}`}
+                                  checked={checked}
+                                  isFuture={isFuture}
+                                  isToday={isToday}
+                                  matrixTone={matrixTone}
+                                  ariaLabel={`${habit.name} ${checked ? "completed" : "not completed"} on ${formatLongDate(dateKey)}`}
+                                  onClick={() => {
+                                    if (!isFuture) {
+                                      toggleHabitDay(
+                                        habit.id,
+                                        dateKey,
+                                        habit.timeSlots[0] ?? "default",
+                                      );
+                                    }
+                                  }}
+                                />
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                     </article>
                   );
                 })}
@@ -1055,7 +1136,7 @@ export function HabitTrackerApp() {
             </section>
 
             {/* Habit cards */}
-            <section className="stagger-children grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+            <section className="stagger-children grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
               {habitSummaries.map(({ habit, completed, rate }) => {
                 const cardGradient = getAppleCardGradientStyle(habit.tone);
                 return (
@@ -1085,9 +1166,11 @@ export function HabitTrackerApp() {
                           {rate}%
                         </span>
                       </div>
-                      <p className="text-[14px] leading-5 text-ink-700">
-                        {habit.description}
-                      </p>
+                      {habit.description ? (
+                        <p className="text-[14px] leading-5 text-ink-700">
+                          {habit.description}
+                        </p>
+                      ) : null}
                       {habit.frequencyPerDay > 1 && (
                         <div className="flex flex-wrap gap-1">
                           {habit.timeSlots.map((slot) => (

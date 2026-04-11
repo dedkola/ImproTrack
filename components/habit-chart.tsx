@@ -635,17 +635,17 @@ export function HabitChart({
   ];
 
   const CONTROL_BTN_BASE =
-    "pill-btn h-6 rounded-md px-2 text-[11px] font-medium leading-none transition";
+    "pill-btn h-8 shrink-0 rounded-full px-3 text-[12px] font-semibold leading-none transition";
 
   return (
-    <section className="animate-fade-in-up surface-panel rounded-2xl p-5 sm:p-6">
+    <section className="animate-fade-in-up surface-panel rounded-[28px] p-4 sm:p-6">
       {/* Controls row */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-[13px] font-semibold text-ink-950">Chart</h2>
 
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-col gap-2 sm:items-end">
           {/* Chart type */}
-          <div className="flex flex-wrap gap-1">
+          <div className="comparison-scroll -mx-1 flex gap-1 overflow-x-auto px-1 pb-1 sm:mx-0 sm:flex-wrap sm:justify-end sm:overflow-visible sm:px-0 sm:pb-0">
             {VIEW_OPTIONS.map(({ value, label }) => (
               <button
                 key={value}
@@ -662,7 +662,7 @@ export function HabitChart({
               </button>
             ))}
           </div>
-          <div className="flex gap-1">
+          <div className="comparison-scroll -mx-1 flex gap-1 overflow-x-auto px-1 pb-1 sm:mx-0 sm:flex-wrap sm:justify-end sm:overflow-visible sm:px-0 sm:pb-0">
             {PRESET_OPTIONS.map(({ value, label }) => (
               <button
                 key={value}
@@ -684,7 +684,7 @@ export function HabitChart({
 
       {/* Custom date range inputs */}
       {preset === "custom" && (
-        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+        <div className="mt-3 grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-1.5">
           <DatePicker
             label="From"
             value={customFrom}
@@ -705,7 +705,7 @@ export function HabitChart({
       )}
 
       {/* Chart area */}
-      <div className="mt-4 min-h-[100px]">
+      <div className="mt-3.5 min-h-[100px]">
         <div className="w-full">
           {view === "bar" && (
             <BarChartViz
@@ -733,7 +733,7 @@ export function HabitChart({
       </div>
 
       {/* Summary */}
-      <p className="mt-3 text-[12px] text-ink-700">
+      <p className="mt-3 text-[12px] leading-5 text-ink-700">
         {doneCount} / {points.length} days completed &middot; {rate}% completion
         rate
         {view === "line" && " \u00b7 7-day rolling average"}
