@@ -15,6 +15,7 @@ import {
   listenToUserHabits,
   listenToUserRecords,
   saveUserHabit,
+  saveUserHabitOrder,
   saveUserRecordSlots,
 } from "@/lib/firebase/habit-store";
 import {
@@ -138,6 +139,7 @@ type HabitStorageContextValue = {
   deleteHabit: (id: string) => Promise<void>;
   archiveHabit: (id: string) => Promise<void>;
   restoreHabit: (id: string) => Promise<void>;
+  reorderHabits: (orderedHabitIds: string[]) => Promise<void>;
   toggleHabitDay: (
     habitId: string,
     dateKey: string,
@@ -197,8 +199,52 @@ function normalizeHabits(habits: HabitDefinition[]): HabitDefinition[] {
       getNormalizedFrequency(habit.frequencyPerDay, habit.timeSlots),
       habit.timeSlots,
     ),
+    ...(Number.isFinite(habit.sortOrder)
+      ? { sortOrder: habit.sortOrder }
+      : {}),
     tone: normalizeTone(habit.tone),
   }));
+}
+
+function sortHabits(habits: HabitDefinition[]) {
+  return [...habits].sort((left, right) => {
+    const leftSortOrder =
+      typeof left.sortOrder === "number" && Number.isFinite(left.sortOrder)
+        ? left.sortOrder
+        : null;
+    const rightSortOrder =
+      typeof right.sortOrder === "number" && Number.isFinite(right.sortOrder)
+        ? right.sortOrder
+        : null;
+
+    if (leftSortOrder !== null && rightSortOrder !== null) {
+      if (leftSortOrder !== rightSortOrder) {
+        return leftSortOrder - rightSortOrder;
+      }
+    } else if (leftSortOrder !== null) {
+      return -1;
+    } else if (rightSortOrder !== null) {
+      return 1;
+    }
+
+    if (left.createdAt !== right.createdAt) {
+      return left.createdAt.localeCompare(right.createdAt);
+    }
+
+    return left.id.localeCompare(right.id);
+  });
+}
+
+function getNextSortOrder(habits: HabitDefinition[]) {
+  const maxSortOrder = habits.reduce<number>(
+    (maxValue, habit) =>
+      typeof habit.sortOrder === "number" && Number.isFinite(habit.sortOrder)
+        ? Math.max(maxValue, habit.sortOrder)
+        : maxValue,
+    -1,
+  );
+
+  return maxSortOrder + 1;
 }
 
 function toErrorMessage(error: unknown, fallback: string) {
@@ -268,7 +314,7 @@ export function HabitStorageProvider({
     const unsubscribeHabits = listenToUserHabits(
       user.uid,
       (nextHabits) => {
-        setHabits(normalizeHabits(nextHabits));
+        setHabits(sortHabits(normalizeHabits(nextHabits)));
         setIsLoadingHabits(false);
       },
       (nextError) => {
@@ -345,6 +391,7 @@ export function HabitStorageProvider({
         timeSlots: normalizeTimeSlots(normalizedFrequency, habit.timeSlots),
         archived: false,
         createdAt: new Date().toISOString(),
+        sortOrder: getNextSortOrder(habits),
         tone: normalizeTone(habit.tone),
       };
 
@@ -444,10 +491,63 @@ export function HabitStorageProvider({
 
       setError(null);
 
+      const nextHabit =
+        typeof currentHabit.sortOrder === "number"
+          ? { ...currentHabit, archived: false }
+          : {
+              ...currentHabit,
+              archived: false,
+              sortOrder: getNextSortOrder(habits),
+            };
+
       try {
-        await saveUserHabit(user.uid, { ...currentHabit, archived: false });
+        await saveUserHabit(user.uid, nextHabit);
       } catch (nextError) {
         setError(toErrorMessage(nextError, "Unable to restore habit."));
+      }
+    },
+    [habits, user],
+  );
+
+  const reorderHabits = useCallback(
+    async (orderedHabitIds: string[]) => {
+      if (!user) return;
+
+      const sanitizedIds = orderedHabitIds.filter((habitId, index) => {
+        if (orderedHabitIds.indexOf(habitId) !== index) {
+          return false;
+        }
+
+        return habits.some((habit) => habit.id === habitId);
+      });
+
+      if (sanitizedIds.length === 0) {
+        return;
+      }
+
+      const previousHabits = habits;
+      const nextSortOrderById = new Map(
+        sanitizedIds.map((habitId, index) => [habitId, index]),
+      );
+      const nextHabits = sortHabits(
+        habits.map((habit) =>
+          nextSortOrderById.has(habit.id)
+            ? {
+                ...habit,
+                sortOrder: nextSortOrderById.get(habit.id),
+              }
+            : habit,
+        ),
+      );
+
+      setHabits(nextHabits);
+      setError(null);
+
+      try {
+        await saveUserHabitOrder(user.uid, sanitizedIds);
+      } catch (nextError) {
+        setHabits(previousHabits);
+        setError(toErrorMessage(nextError, "Unable to reorder habits."));
       }
     },
     [habits, user],
@@ -486,7 +586,9 @@ export function HabitStorageProvider({
       setError(null);
 
       try {
-        await saveUserRecordSlots(user.uid, dateKey, habitId, nextSlots);
+        await saveUserRecordSlots(user.uid, dateKey, habitId, nextSlots, {
+          useLegacyBoolean: allowSingleSlotFallback,
+        });
       } catch (nextError) {
         setPendingRecordPatches((current) => {
           const nextPatches = { ...current };
@@ -539,6 +641,7 @@ export function HabitStorageProvider({
       deleteHabit,
       archiveHabit,
       restoreHabit,
+      reorderHabits,
       toggleHabitDay,
       getHabitBySlug,
     }),
@@ -555,6 +658,7 @@ export function HabitStorageProvider({
       deleteHabit,
       archiveHabit,
       restoreHabit,
+      reorderHabits,
       toggleHabitDay,
       getHabitBySlug,
     ],
@@ -576,6 +680,7 @@ export function useHabits() {
     deleteHabit,
     archiveHabit,
     restoreHabit,
+    reorderHabits,
     getHabitBySlug,
   } = useHabitStorageContext();
 
@@ -591,6 +696,7 @@ export function useHabits() {
     deleteHabit,
     archiveHabit,
     restoreHabit,
+    reorderHabits,
     getHabitBySlug,
   };
 }

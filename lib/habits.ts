@@ -52,6 +52,7 @@ export type HabitDefinition = {
   timeSlots: string[];
   archived: boolean;
   createdAt: string;
+  sortOrder?: number;
   tone: HabitTone;
 };
 

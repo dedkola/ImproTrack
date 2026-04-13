@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Check,
   ChevronLeft,
@@ -277,6 +277,7 @@ export function HabitTrackerApp() {
     updateHabit,
     deleteHabit,
     archiveHabit,
+    reorderHabits: persistHabitOrder,
   } = useHabits();
   const { records, toggleHabitDay } = useHabitRecords(activeHabits);
   const [mobileWeekOffset, setMobileWeekOffset] = useState(0);
@@ -323,34 +324,66 @@ export function HabitTrackerApp() {
   const [dragOverPosition, setDragOverPosition] = useState<"above" | "below">(
     "below",
   );
-
-  // Persist habit order in localStorage
-  const [habitOrder, setHabitOrder] = useState<string[]>(() => {
+  const [legacyHabitOrder] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
+
     try {
-      const stored = localStorage.getItem("improtrack-habit-order");
+      const stored =
+        localStorage.getItem("improtrack-habit-order") ??
+        localStorage.getItem("momentum-habit-order");
       return stored ? (JSON.parse(stored) as string[]) : [];
     } catch {
       return [];
     }
   });
+  const [didMigrateLegacyOrder, setDidMigrateLegacyOrder] = useState(false);
 
-  // Merge activeHabits with the stored order
-  const orderedActiveHabits = useMemo(() => {
-    if (habitOrder.length === 0) return activeHabits;
-    const orderMap = new Map(habitOrder.map((id, i) => [id, i]));
-    return [...activeHabits].sort((a, b) => {
-      // Habits not in the stored order keep their original relative position
-      // after all ordered habits.
-      const ai =
-        orderMap.get(a.id) ?? habitOrder.length + activeHabits.indexOf(a);
-      const bi =
-        orderMap.get(b.id) ?? habitOrder.length + activeHabits.indexOf(b);
-      return ai - bi;
+  const orderedActiveHabits = activeHabits;
+
+  useEffect(() => {
+    if (didMigrateLegacyOrder) {
+      return;
+    }
+
+    if (orderedActiveHabits.length === 0) {
+      return;
+    }
+
+    const hasPersistedOrder = orderedActiveHabits.some(
+      (habit) => typeof habit.sortOrder === "number",
+    );
+
+    if (hasPersistedOrder || legacyHabitOrder.length === 0) {
+      setDidMigrateLegacyOrder(true);
+      return;
+    }
+
+    const knownIds = new Set(orderedActiveHabits.map((habit) => habit.id));
+    const migratedIds = legacyHabitOrder.filter(
+      (habitId, index) =>
+        legacyHabitOrder.indexOf(habitId) === index && knownIds.has(habitId),
+    );
+
+    if (migratedIds.length === 0) {
+      setDidMigrateLegacyOrder(true);
+      return;
+    }
+
+    const remainingIds = orderedActiveHabits
+      .map((habit) => habit.id)
+      .filter((habitId) => !migratedIds.includes(habitId));
+
+    void persistHabitOrder([...migratedIds, ...remainingIds]).finally(() => {
+      setDidMigrateLegacyOrder(true);
     });
-  }, [activeHabits, habitOrder]);
+  }, [
+    didMigrateLegacyOrder,
+    legacyHabitOrder,
+    orderedActiveHabits,
+    persistHabitOrder,
+  ]);
 
-  const reorderHabits = (
+  const handleReorderHabits = (
     fromId: string,
     toId: string,
     position: "above" | "below",
@@ -364,12 +397,7 @@ export function HabitTrackerApp() {
     if (newToIndex === -1) return;
     const insertAt = position === "above" ? newToIndex : newToIndex + 1;
     newIds.splice(insertAt, 0, fromId);
-    setHabitOrder(newIds);
-    try {
-      localStorage.setItem("improtrack-habit-order", JSON.stringify(newIds));
-    } catch {
-      // localStorage unavailable
-    }
+    void persistHabitOrder(newIds);
   };
 
   // Build row data: single-slot habits → 1 row; multi-slot → 1 total summary row + N slot rows
@@ -967,7 +995,7 @@ export function HabitTrackerApp() {
                             onDrop={(e) => {
                               e.preventDefault();
                               if (dragHabitId && dragHabitId !== habit.id) {
-                                reorderHabits(
+                                handleReorderHabits(
                                   dragHabitId,
                                   habit.id,
                                   dragOverPosition,
