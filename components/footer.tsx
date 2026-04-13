@@ -8,7 +8,7 @@ export function Footer() {
           <img
             src="/logo.svg"
             alt="ImproTrack"
-            className="h-6 w-6 drop-shadow-[0_1px_4px_rgba(109,40,217,0.4)]"
+            className="h-6 w-6"
           />
           <span className="text-[13px] font-medium text-ink-700">
             ImproTrack

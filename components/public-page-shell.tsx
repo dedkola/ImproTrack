@@ -48,7 +48,7 @@ export function PublicPageShell({
             <img
               src="/logo.svg"
               alt="ImproTrack"
-              className="h-8 w-8 drop-shadow-[0_2px_8px_rgba(10,22,40,0.08)] sm:h-9 sm:w-9"
+              className="h-8 w-8 sm:h-9 sm:w-9"
             />
             <span className="font-display text-[17px] font-semibold text-ink-950 sm:text-[18px]">
               ImproTrack

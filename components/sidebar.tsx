@@ -69,7 +69,7 @@ export function Sidebar({
             <img
               src="/logo.svg"
               alt="ImproTrack"
-              className="h-8 w-8 drop-shadow-[0_2px_8px_rgba(109,40,217,0.45)]"
+              className="h-8 w-8"
             />
             <span className="font-display text-[16px] font-semibold text-ink-950">
               ImproTrack
