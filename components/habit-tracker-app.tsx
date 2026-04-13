@@ -28,8 +28,6 @@ import {
   softFillStyle,
   accentClass,
   accentStyle,
-  fillClass,
-  fillStyle,
   badgeClass,
   badgeStyle,
 } from "@/lib/tone-utils";
@@ -282,20 +280,33 @@ export function HabitTrackerApp() {
   } = useHabits();
   const { records, toggleHabitDay } = useHabitRecords(activeHabits);
   const [mobileWeekOffset, setMobileWeekOffset] = useState(0);
+  const [desktopMonthOffset, setDesktopMonthOffset] = useState(0);
 
-  const desktopRange = getCurrentMonthRange(today);
-  const desktopDays = eachDay(desktopRange);
+  const desktopRange = useMemo(
+    () =>
+      getCurrentMonthRange(
+        new Date(today.getFullYear(), today.getMonth() - desktopMonthOffset, 1),
+      ),
+    [desktopMonthOffset],
+  );
+  const desktopDays = useMemo(() => eachDay(desktopRange), [desktopRange]);
   const mobileRange = getRollingRange(
     MOBILE_DAY_WINDOW,
     addDays(today, -(mobileWeekOffset * MOBILE_DAY_WINDOW)),
   );
   const mobileDays = eachDay(mobileRange);
   const mobileRangeLabel = getMobileRangeLabel(mobileRange);
+  const desktopRangeLabel = formatMonthLabel(desktopRange);
   const mobileWindowLabel =
     mobileWeekOffset === 0
       ? "Current window"
       : `${mobileWeekOffset} week${mobileWeekOffset === 1 ? "" : "s"} back`;
+  const desktopWindowLabel =
+    desktopMonthOffset === 0
+      ? "Current month"
+      : `${desktopMonthOffset} month${desktopMonthOffset === 1 ? "" : "s"} back`;
   const isLatestMobileWeek = mobileWeekOffset === 0;
+  const isLatestDesktopMonth = desktopMonthOffset === 0;
 
   // CRUD modals
   const [formOpen, setFormOpen] = useState(false);
@@ -407,23 +418,27 @@ export function HabitTrackerApp() {
     }
   });
 
-  const habitSummaries = orderedActiveHabits.map((habit) => {
-    const completed = countCompleted(
-      records,
-      habit.id,
-      desktopRange,
-      todayKey,
-      habit.timeSlots,
-    );
-    const rate = completionRate(
-      records,
-      habit.id,
-      desktopRange,
-      todayKey,
-      habit.timeSlots,
-    );
-    return { habit, completed, rate };
-  });
+  const habitSummaries = useMemo(
+    () =>
+      orderedActiveHabits.map((habit) => {
+        const completed = countCompleted(
+          records,
+          habit.id,
+          desktopRange,
+          todayKey,
+          habit.timeSlots,
+        );
+        const rate = completionRate(
+          records,
+          habit.id,
+          desktopRange,
+          todayKey,
+          habit.timeSlots,
+        );
+        return { habit, completed, rate };
+      }),
+    [desktopRange, orderedActiveHabits, records],
+  );
 
   const averageRate = getOverallRate(habitSummaries.map((s) => s.rate));
   const totalCompleted = habitSummaries.reduce(
@@ -479,7 +494,7 @@ export function HabitTrackerApp() {
                 {mobileRangeLabel}
               </span>
               <span className="hidden font-display text-[14px] font-medium text-ink-950 md:inline">
-                {formatMonthLabel(desktopRange)}
+                {desktopRangeLabel}
               </span>
               <Link
                 href="/dashboard/stats"
@@ -791,13 +806,61 @@ export function HabitTrackerApp() {
 
             {/* Matrix */}
             <section className="animate-scale-in surface-panel relative hidden overflow-visible rounded-2xl md:block">
-              <div className="flex items-center justify-between border-b border-black/[0.04] px-5 py-3 sm:px-6">
-                <h2 className="text-[14px] font-semibold text-ink-950">
-                  Habit matrix
-                </h2>
-                <p className="hidden text-[13px] text-ink-700 md:block">
-                  Tap a cell to toggle completion
-                </p>
+              <div className="flex items-center justify-between gap-4 border-b border-black/[0.04] px-5 py-3 sm:px-6">
+                <div>
+                  <h2 className="text-[14px] font-semibold text-ink-950">
+                    Habit matrix
+                  </h2>
+                  <p className="mt-0.5 text-[13px] text-ink-700">
+                    Tap a cell to toggle completion
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  {isLatestDesktopMonth ? null : (
+                    <button
+                      type="button"
+                      onClick={() => setDesktopMonthOffset(0)}
+                      className="pill-btn inline-flex h-8 items-center rounded-md bg-white px-2.5 text-[11px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]"
+                    >
+                      Latest
+                    </button>
+                  )}
+
+                  <div className="flex items-center gap-1 rounded-[14px] border border-black/[0.06] bg-white px-1 py-1 shadow-[var(--shadow-card)]">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setDesktopMonthOffset((current) => current + 1)
+                      }
+                      aria-label="Show previous month"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.06] bg-white text-ink-700 transition-colors hover:bg-black/[0.03] hover:text-ink-950"
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5" strokeWidth={1.9} />
+                    </button>
+
+                    <div className="min-w-[108px] text-center">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-600">
+                        {desktopWindowLabel}
+                      </p>
+                      <p className="mt-0.5 text-[12px] font-semibold text-ink-950">
+                        {desktopRangeLabel}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setDesktopMonthOffset((current) => Math.max(0, current - 1))
+                      }
+                      disabled={isLatestDesktopMonth}
+                      aria-label="Show next month"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.06] bg-white text-ink-700 transition-colors hover:bg-black/[0.03] hover:text-ink-950 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <ChevronRight className="h-3.5 w-3.5" strokeWidth={1.9} />
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div className="overflow-x-auto">
