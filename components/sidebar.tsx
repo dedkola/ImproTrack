@@ -71,7 +71,7 @@ export function Sidebar({
               alt="ImproTrack"
               className="h-11 w-11"
             />
-            <span className="font-display text-[16px] font-semibold text-ink-950">
+            <span className="font-display text-[24px] font-semibold text-ink-950">
               ImproTrack
             </span>
           </Link>
