@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   Check,
@@ -218,6 +219,19 @@ function getMobileRangeLabel(range: { from: string; to: string }) {
   return `${fromLabel} - ${toLabel}`;
 }
 
+function isInteractiveTarget(
+  target: EventTarget | null,
+  currentTarget?: HTMLElement,
+) {
+  if (!(target instanceof HTMLElement)) return false;
+
+  const interactiveAncestor = target.closest(
+    "button, a, input, select, textarea, summary, [role='button'], [role='link']",
+  );
+
+  return interactiveAncestor !== null && interactiveAncestor !== currentTarget;
+}
+
 function MobileMatrixDayCell({
   checked,
   isFuture,
@@ -270,6 +284,7 @@ function MobileMatrixDayCell({
 }
 
 export function HabitTrackerApp() {
+  const router = useRouter();
   const {
     activeHabits,
     categories,
@@ -308,6 +323,28 @@ export function HabitTrackerApp() {
       : `${desktopMonthOffset} month${desktopMonthOffset === 1 ? "" : "s"} back`;
   const isLatestMobileWeek = mobileWeekOffset === 0;
   const isLatestDesktopMonth = desktopMonthOffset === 0;
+
+  const openHabitStats = (slug: string) => {
+    router.push(`/dashboard/habits/${slug}`);
+  };
+
+  const handleMobileHabitCardClick = (
+    event: React.MouseEvent<HTMLElement>,
+    slug: string,
+  ) => {
+    if (isInteractiveTarget(event.target, event.currentTarget)) return;
+    openHabitStats(slug);
+  };
+
+  const handleMobileHabitCardKeyDown = (
+    event: React.KeyboardEvent<HTMLElement>,
+    slug: string,
+  ) => {
+    if (isInteractiveTarget(event.target, event.currentTarget)) return;
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    openHabitStats(slug);
+  };
 
   // CRUD modals
   const [formOpen, setFormOpen] = useState(false);
@@ -677,7 +714,16 @@ export function HabitTrackerApp() {
                   return (
                     <article
                       key={habit.id}
-                      className="animate-fade-in-up rounded-[24px] border border-black/[0.06] bg-white px-3.5 py-3.5 shadow-[var(--shadow-card)] sm:px-4 sm:py-4"
+                      role="link"
+                      tabIndex={0}
+                      aria-label={`Open ${habit.name} statistics`}
+                      onClick={(event) =>
+                        handleMobileHabitCardClick(event, habit.slug)
+                      }
+                      onKeyDown={(event) =>
+                        handleMobileHabitCardKeyDown(event, habit.slug)
+                      }
+                      className="animate-fade-in-up cursor-pointer rounded-[24px] border border-black/[0.06] bg-white px-3.5 py-3.5 shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6D28D9]/35 sm:px-4 sm:py-4"
                     >
                       <div className="flex items-start gap-3">
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-ink-950/[0.05] text-ink-950 sm:h-10 sm:w-10">
@@ -1074,9 +1120,12 @@ export function HabitTrackerApp() {
                                     onDelete={() => setDeleteTarget(habit)}
                                   />
                                 </div>
-                                <p className="truncate text-[13px] font-semibold leading-tight text-ink-950">
+                                <Link
+                                  href={`/dashboard/habits/${habit.slug}`}
+                                  className="block truncate text-[13px] font-semibold leading-tight text-ink-950 transition-colors hover:text-[#6D28D9] focus-visible:outline-none focus-visible:text-[#6D28D9]"
+                                >
                                   {habit.name}
-                                </p>
+                                </Link>
                               </div>
                             ) : (
                               <p className="pl-5 text-[12px] text-ink-700">
