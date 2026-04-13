@@ -9,7 +9,6 @@ import {
   Menu,
   Plus,
   Settings,
-  X,
 } from "lucide-react";
 import { AuthControls } from "@/components/auth-controls";
 import { HabitIcon } from "@/components/habit-icon";
@@ -81,7 +80,19 @@ export function Sidebar({
             aria-label="Close sidebar"
             className="tap-target-compact flex items-center justify-center rounded-md text-ink-700 hover:bg-black/[0.04] lg:hidden"
           >
-            <X className="h-4 w-4" strokeWidth={1.5} />
+            <svg
+              viewBox="0 0 18 18"
+              aria-hidden="true"
+              className="h-4 w-4"
+              fill="none"
+            >
+              <path
+                d="M4 4L14 14M14 4L4 14"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+              />
+            </svg>
           </button>
         </div>
 

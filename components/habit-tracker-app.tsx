@@ -444,7 +444,7 @@ export function HabitTrackerApp() {
   return (
     <div className="flex min-h-full w-full flex-col">
       {/* Header */}
-      <header className="header-bar w-full py-3 sm:py-3.5 lg:sticky lg:top-0 lg:z-30">
+      <header className="header-bar w-full py-3 sm:py-3.5 lg:sticky lg:top-0 lg:z-30 lg:py-2">
         <div className="page-shell flex flex-col gap-2.5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-5">
