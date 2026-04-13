@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   Check,
@@ -219,19 +218,6 @@ function getMobileRangeLabel(range: { from: string; to: string }) {
   return `${fromLabel} - ${toLabel}`;
 }
 
-function isInteractiveTarget(
-  target: EventTarget | null,
-  currentTarget?: HTMLElement,
-) {
-  if (!(target instanceof HTMLElement)) return false;
-
-  const interactiveAncestor = target.closest(
-    "button, a, input, select, textarea, summary, [role='button'], [role='link']",
-  );
-
-  return interactiveAncestor !== null && interactiveAncestor !== currentTarget;
-}
-
 function MobileMatrixDayCell({
   checked,
   isFuture,
@@ -284,7 +270,6 @@ function MobileMatrixDayCell({
 }
 
 export function HabitTrackerApp() {
-  const router = useRouter();
   const {
     activeHabits,
     categories,
@@ -323,28 +308,6 @@ export function HabitTrackerApp() {
       : `${desktopMonthOffset} month${desktopMonthOffset === 1 ? "" : "s"} back`;
   const isLatestMobileWeek = mobileWeekOffset === 0;
   const isLatestDesktopMonth = desktopMonthOffset === 0;
-
-  const openHabitStats = (slug: string) => {
-    router.push(`/dashboard/habits/${slug}`);
-  };
-
-  const handleMobileHabitCardClick = (
-    event: React.MouseEvent<HTMLElement>,
-    slug: string,
-  ) => {
-    if (isInteractiveTarget(event.target, event.currentTarget)) return;
-    openHabitStats(slug);
-  };
-
-  const handleMobileHabitCardKeyDown = (
-    event: React.KeyboardEvent<HTMLElement>,
-    slug: string,
-  ) => {
-    if (isInteractiveTarget(event.target, event.currentTarget)) return;
-    if (event.key !== "Enter" && event.key !== " ") return;
-    event.preventDefault();
-    openHabitStats(slug);
-  };
 
   // CRUD modals
   const [formOpen, setFormOpen] = useState(false);
@@ -714,71 +677,68 @@ export function HabitTrackerApp() {
                   return (
                     <article
                       key={habit.id}
-                      role="link"
-                      tabIndex={0}
-                      aria-label={`Open ${habit.name} statistics`}
-                      onClick={(event) =>
-                        handleMobileHabitCardClick(event, habit.slug)
-                      }
-                      onKeyDown={(event) =>
-                        handleMobileHabitCardKeyDown(event, habit.slug)
-                      }
-                      className="animate-fade-in-up cursor-pointer rounded-[24px] border border-black/[0.06] bg-white px-3.5 py-3.5 shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-card-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6D28D9]/35 sm:px-4 sm:py-4"
+                      className="animate-fade-in-up rounded-[24px] border border-black/[0.06] bg-white px-3.5 py-3.5 shadow-[var(--shadow-card)] sm:px-4 sm:py-4"
                     >
                       <div className="flex items-start gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-ink-950/[0.05] text-ink-950 sm:h-10 sm:w-10">
-                          <HabitIcon
-                            name={habit.icon}
-                            size={18}
-                            className="text-ink-700"
-                          />
-                        </div>
-
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-start gap-2">
-                            <div className="min-w-0 flex-1">
-                              <h3 className="text-[14px] font-semibold leading-5 text-ink-950 sm:text-[15px]">
-                                {habit.name}
-                              </h3>
-                              <p className="mt-0.5 text-[12px] leading-5 text-ink-600">
-                                {isMultiSlot
-                                  ? `${todayCompletedCount}/${habit.timeSlots.length} slots done today`
-                                  : `${recentCompleted}/${mobileDays.length} days completed`}
-                              </p>
-                            </div>
-
-                            <span
-                              className={`rounded-md px-1.5 py-1 text-[11px] font-semibold ${softFillClass(habit.tone)} ${badgeClass(habit.tone)}`}
-                              style={{
-                                ...softFillStyle(habit.tone),
-                                ...badgeStyle(habit.tone),
-                              }}
-                            >
-                              {mobileRate}%
-                            </span>
-
-                            <HabitMenu
-                              tone={habit.tone}
-                              onEdit={() => {
-                                setEditingHabit(habit);
-                                setFormOpen(true);
-                              }}
-                              onArchive={() => archiveHabit(habit.id)}
-                              onDelete={() => setDeleteTarget(habit)}
+                        <Link
+                          href={`/dashboard/habits/${habit.slug}`}
+                          aria-label={`Open ${habit.name} statistics`}
+                          className="flex min-w-0 flex-1 items-start gap-3 rounded-[18px] transition-colors hover:bg-black/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6D28D9]/35"
+                        >
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-ink-950/[0.05] text-ink-950 sm:h-10 sm:w-10">
+                            <HabitIcon
+                              name={habit.icon}
+                              size={18}
+                              className="text-ink-700"
                             />
                           </div>
 
-                          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                            <span className="rounded-full bg-ink-950/[0.05] px-2 py-1 text-[10px] font-medium text-ink-700 sm:text-[11px]">
-                              {habit.category}
-                            </span>
-                            {isMultiSlot ? (
-                              <span className="text-[10px] text-ink-500 sm:text-[11px]">
-                                {habit.timeSlots.length} slots
+                          <div className="min-w-0 flex-1 pr-1">
+                            <div className="flex items-start gap-2">
+                              <div className="min-w-0 flex-1">
+                                <h3 className="text-[14px] font-semibold leading-5 text-ink-950 transition-colors hover:text-[#6D28D9] sm:text-[15px]">
+                                  {habit.name}
+                                </h3>
+                                <p className="mt-0.5 text-[12px] leading-5 text-ink-600">
+                                  {isMultiSlot
+                                    ? `${todayCompletedCount}/${habit.timeSlots.length} slots done today`
+                                    : `${recentCompleted}/${mobileDays.length} days completed`}
+                                </p>
+                              </div>
+
+                              <span
+                                className={`rounded-md px-1.5 py-1 text-[11px] font-semibold ${softFillClass(habit.tone)} ${badgeClass(habit.tone)}`}
+                                style={{
+                                  ...softFillStyle(habit.tone),
+                                  ...badgeStyle(habit.tone),
+                                }}
+                              >
+                                {mobileRate}%
                               </span>
-                            ) : null}
+                            </div>
+
+                            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                              <span className="rounded-full bg-ink-950/[0.05] px-2 py-1 text-[10px] font-medium text-ink-700 sm:text-[11px]">
+                                {habit.category}
+                              </span>
+                              {isMultiSlot ? (
+                                <span className="text-[10px] text-ink-500 sm:text-[11px]">
+                                  {habit.timeSlots.length} slots
+                                </span>
+                              ) : null}
+                            </div>
                           </div>
-                        </div>
+                        </Link>
+
+                        <HabitMenu
+                          tone={habit.tone}
+                          onEdit={() => {
+                            setEditingHabit(habit);
+                            setFormOpen(true);
+                          }}
+                          onArchive={() => archiveHabit(habit.id)}
+                          onDelete={() => setDeleteTarget(habit)}
+                        />
                       </div>
 
                       <div className="mt-2.5 border-t border-black/[0.05] pt-2.5">
