@@ -620,7 +620,7 @@ export function HabitTrackerApp() {
                 </button>
               </div>
 
-              <div className="mt-4 grid grid-cols-7 gap-1.5 px-0.5 text-center">
+              <div className="mobile-matrix-date-row mt-4 grid grid-cols-7 gap-1.5 px-0.5 py-1.5 text-center">
                 {mobileDays.map((dateKey) => {
                   const isToday = dateKey === todayKey;
                   const weekday = new Intl.DateTimeFormat("en", {
