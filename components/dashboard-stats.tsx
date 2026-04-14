@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import {
   clampDateKey,
@@ -94,12 +94,16 @@ function getAverage(values: number[]) {
 
 export function DashboardStats() {
   const { habits, activeHabits, archivedHabits } = useHabits();
-  const { records } = useHabitRecords(habits);
+  const { records, loadFullHistory } = useHabitRecords(habits);
   const [selectedPreset, setSelectedPreset] = useState<StatsPreset>("month");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [customFrom, setCustomFrom] = useState(getRollingRange(30, today).from);
   const [customTo, setCustomTo] = useState(todayKey);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+
+  useEffect(() => {
+    loadFullHistory();
+  }, [loadFullHistory]);
 
   const categories = useMemo(
     () => [...new Set(activeHabits.map((habit) => habit.category))].sort(),

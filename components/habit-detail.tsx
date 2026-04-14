@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   formatMonthLabel,
   getCurrentMonthRange,
@@ -46,8 +46,12 @@ export function HabitDetail({ slug }: { slug: string }) {
     archiveHabit,
     habits: allHabits,
   } = useHabits();
-  const { records } = useHabitRecords(allHabits);
+  const { records, loadFullHistory } = useHabitRecords(allHabits);
   const habit = getHabitBySlug(slug);
+
+  useEffect(() => {
+    loadFullHistory();
+  }, [loadFullHistory]);
 
   const [formOpen, setFormOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);

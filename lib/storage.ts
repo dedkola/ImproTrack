@@ -7,13 +7,16 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { useFirebaseAuth } from "@/components/firebase-auth-provider";
 import {
   deleteUserHabit,
+  fetchAllRecords,
+  fetchRecordsInRange,
   listenToUserHabits,
-  listenToUserRecords,
+  listenToUserRecordsInRange,
   saveUserHabit,
   saveUserHabitOrder,
   saveUserRecordSlots,
@@ -26,6 +29,13 @@ import {
   TONE_PRESETS,
   slugify,
 } from "@/lib/habits";
+import {
+  endOfMonth,
+  startOfMonth,
+  toDateKey,
+  toYearMonth,
+  yearMonthFromDateKey,
+} from "@/lib/date";
 
 export type SlotRecords = Record<string, boolean>;
 export type DayRecords = Record<string, SlotRecords>;
@@ -118,6 +128,21 @@ function upsertDaySlots(
   };
 }
 
+function mergeRecordLayers(
+  base: HabitRecords,
+  ...layers: HabitRecords[]
+): HabitRecords {
+  const merged = { ...base };
+
+  for (const layer of layers) {
+    for (const [habitId, dayRecords] of Object.entries(layer)) {
+      merged[habitId] = { ...(merged[habitId] ?? {}), ...dayRecords };
+    }
+  }
+
+  return merged;
+}
+
 type HabitMutationInput = Omit<
   HabitDefinition,
   "id" | "slug" | "createdAt" | "archived"
@@ -146,6 +171,9 @@ type HabitStorageContextValue = {
     slotName?: string,
   ) => Promise<void>;
   getHabitBySlug: (slug: string) => HabitDefinition | undefined;
+  loadMonth: (yearMonth: string) => Promise<void>;
+  loadFullHistory: () => Promise<void>;
+  hasFullHistory: boolean;
 };
 
 const HabitStorageContext = createContext<HabitStorageContextValue | undefined>(
@@ -199,9 +227,7 @@ function normalizeHabits(habits: HabitDefinition[]): HabitDefinition[] {
       getNormalizedFrequency(habit.frequencyPerDay, habit.timeSlots),
       habit.timeSlots,
     ),
-    ...(Number.isFinite(habit.sortOrder)
-      ? { sortOrder: habit.sortOrder }
-      : {}),
+    ...(Number.isFinite(habit.sortOrder) ? { sortOrder: habit.sortOrder } : {}),
     tone: normalizeTone(habit.tone),
   }));
 }
@@ -284,11 +310,15 @@ export function HabitStorageProvider({
   const { user, isLoading: isAuthLoading } = useFirebaseAuth();
   const [habits, setHabits] = useState<HabitDefinition[]>([]);
   const [serverRecords, setServerRecords] = useState<HabitRecords>({});
+  const [cachedRecords, setCachedRecords] = useState<HabitRecords>({});
   const [pendingRecordPatches, setPendingRecordPatches] =
     useState<PendingRecordPatches>({});
   const [isLoadingHabits, setIsLoadingHabits] = useState(true);
   const [isLoadingRecords, setIsLoadingRecords] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const loadedMonthsRef = useRef<Set<string>>(new Set());
+  const [hasFullHistory, setHasFullHistory] = useState(false);
+  const fullHistoryLoadedRef = useRef(false);
 
   useEffect(() => {
     if (isAuthLoading) {
@@ -300,16 +330,26 @@ export function HabitStorageProvider({
     if (!user) {
       setHabits([]);
       setServerRecords({});
+      setCachedRecords({});
       setPendingRecordPatches({});
       setError(null);
       setIsLoadingHabits(false);
       setIsLoadingRecords(false);
+      loadedMonthsRef.current = new Set();
+      setHasFullHistory(false);
+      fullHistoryLoadedRef.current = false;
       return;
     }
 
     setError(null);
     setIsLoadingHabits(true);
     setIsLoadingRecords(true);
+
+    const now = new Date();
+    const fromKey = toDateKey(startOfMonth(now));
+    const toKey = toDateKey(endOfMonth(now));
+    const currentYearMonth = toYearMonth(now);
+    loadedMonthsRef.current = new Set([currentYearMonth]);
 
     const unsubscribeHabits = listenToUserHabits(
       user.uid,
@@ -324,8 +364,10 @@ export function HabitStorageProvider({
       },
     );
 
-    const unsubscribeRecords = listenToUserRecords(
+    const unsubscribeRecords = listenToUserRecordsInRange(
       user.uid,
+      fromKey,
+      toKey,
       (nextRecords) => {
         setServerRecords(nextRecords);
         setIsLoadingRecords(false);
@@ -362,6 +404,60 @@ export function HabitStorageProvider({
       return hasChanges ? nextPatches : current;
     });
   }, [serverRecords]);
+
+  const mergedRecords = useMemo(
+    () =>
+      mergePendingRecordPatches(
+        mergeRecordLayers(cachedRecords, serverRecords),
+        pendingRecordPatches,
+      ),
+    [cachedRecords, serverRecords, pendingRecordPatches],
+  );
+
+  const loadMonth = useCallback(
+    async (yearMonth: string) => {
+      if (
+        !user ||
+        loadedMonthsRef.current.has(yearMonth) ||
+        fullHistoryLoadedRef.current
+      )
+        return;
+
+      loadedMonthsRef.current = new Set([
+        ...loadedMonthsRef.current,
+        yearMonth,
+      ]);
+
+      const [yearStr, monthStr] = yearMonth.split("-").map(Number);
+      const monthDate = new Date(yearStr, monthStr - 1, 1);
+      const fromKey = toDateKey(startOfMonth(monthDate));
+      const toKey = toDateKey(endOfMonth(monthDate));
+
+      try {
+        const fetched = await fetchRecordsInRange(user.uid, fromKey, toKey);
+        setCachedRecords((current) => mergeRecordLayers(current, fetched));
+      } catch {
+        loadedMonthsRef.current = new Set(
+          [...loadedMonthsRef.current].filter((m) => m !== yearMonth),
+        );
+      }
+    },
+    [user],
+  );
+
+  const loadFullHistory = useCallback(async () => {
+    if (!user || fullHistoryLoadedRef.current) return;
+
+    fullHistoryLoadedRef.current = true;
+
+    try {
+      const fetched = await fetchAllRecords(user.uid);
+      setCachedRecords((current) => mergeRecordLayers(current, fetched));
+      setHasFullHistory(true);
+    } catch {
+      fullHistoryLoadedRef.current = false;
+    }
+  }, [user]);
 
   const addHabit = useCallback(
     async (habit: HabitMutationInput) => {
@@ -459,13 +555,19 @@ export function HabitStorageProvider({
 
       setError(null);
 
+      const knownDateKeys = Object.keys(mergedRecords[id] ?? {});
+
       try {
-        await deleteUserHabit(user.uid, id);
+        await deleteUserHabit(
+          user.uid,
+          id,
+          knownDateKeys.length > 0 ? knownDateKeys : undefined,
+        );
       } catch (nextError) {
         setError(toErrorMessage(nextError, "Unable to delete habit."));
       }
     },
-    [user],
+    [user, mergedRecords],
   );
 
   const archiveHabit = useCallback(
@@ -551,11 +653,6 @@ export function HabitStorageProvider({
       }
     },
     [habits, user],
-  );
-
-  const mergedRecords = useMemo(
-    () => mergePendingRecordPatches(serverRecords, pendingRecordPatches),
-    [serverRecords, pendingRecordPatches],
   );
 
   const toggleHabitDay = useCallback(
@@ -644,6 +741,9 @@ export function HabitStorageProvider({
       reorderHabits,
       toggleHabitDay,
       getHabitBySlug,
+      loadMonth,
+      loadFullHistory,
+      hasFullHistory,
     }),
     [
       habits,
@@ -661,6 +761,9 @@ export function HabitStorageProvider({
       reorderHabits,
       toggleHabitDay,
       getHabitBySlug,
+      loadMonth,
+      loadFullHistory,
+      hasFullHistory,
     ],
   );
 
@@ -702,8 +805,23 @@ export function useHabits() {
 }
 
 export function useHabitRecords(_habits: HabitDefinition[]) {
-  const { records, toggleHabitDay, isLoading, error } =
-    useHabitStorageContext();
+  const {
+    records,
+    toggleHabitDay,
+    isLoading,
+    error,
+    loadMonth,
+    loadFullHistory,
+    hasFullHistory,
+  } = useHabitStorageContext();
 
-  return { records, toggleHabitDay, isLoading, error };
+  return {
+    records,
+    toggleHabitDay,
+    isLoading,
+    error,
+    loadMonth,
+    loadFullHistory,
+    hasFullHistory,
+  };
 }

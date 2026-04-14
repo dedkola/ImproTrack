@@ -6,11 +6,14 @@ import {
   collection,
   deleteField,
   doc,
+  documentId,
   getDocs,
   onSnapshot,
+  query,
   serverTimestamp,
   setDoc,
   updateDoc,
+  where,
   writeBatch,
   type FirestoreError,
   type Unsubscribe,
@@ -64,9 +67,9 @@ function normalizeRecordSlots(value: unknown): SlotRecordsMap | null {
     return null;
   }
 
-  const slots = Object.entries(value as Record<string, unknown>).reduce<
-    SlotRecordsMap
-  >((nextSlots, [slotName, slotValue]) => {
+  const slots = Object.entries(
+    value as Record<string, unknown>,
+  ).reduce<SlotRecordsMap>((nextSlots, [slotName, slotValue]) => {
     if (typeof slotValue === "boolean") {
       nextSlots[slotName] = slotValue;
     }
@@ -102,36 +105,81 @@ export function listenToUserHabits(
   );
 }
 
+export type ParsedRecords = Record<string, Record<string, SlotRecordsMap>>;
+
+function parseRecordDocs(
+  docs: { id: string; data: () => unknown }[],
+): ParsedRecords {
+  const nextRecords: ParsedRecords = {};
+
+  docs.forEach((entry) => {
+    const data = entry.data() as RecordsDocument;
+    const entries = data.entries ?? {};
+
+    Object.entries(entries).forEach(([habitId, slots]) => {
+      const normalizedSlots = normalizeRecordSlots(slots);
+
+      if (!normalizedSlots) {
+        return;
+      }
+
+      nextRecords[habitId] ??= {};
+      nextRecords[habitId][entry.id] = normalizedSlots;
+    });
+  });
+
+  return nextRecords;
+}
+
 export function listenToUserRecords(
   userId: string,
-  onChange: (records: Record<string, Record<string, SlotRecordsMap>>) => void,
+  onChange: (records: ParsedRecords) => void,
   onError?: (error: FirestoreError) => void,
 ): Unsubscribe {
   return onSnapshot(
     recordsCollection(userId),
-    (snapshot) => {
-      const nextRecords: Record<string, Record<string, SlotRecordsMap>> = {};
-
-      snapshot.docs.forEach((entry) => {
-        const data = entry.data() as RecordsDocument;
-        const entries = data.entries ?? {};
-
-        Object.entries(entries).forEach(([habitId, slots]) => {
-          const normalizedSlots = normalizeRecordSlots(slots);
-
-          if (!normalizedSlots) {
-            return;
-          }
-
-          nextRecords[habitId] ??= {};
-          nextRecords[habitId][entry.id] = normalizedSlots;
-        });
-      });
-
-      onChange(nextRecords);
-    },
+    (snapshot) => onChange(parseRecordDocs(snapshot.docs)),
     onError,
   );
+}
+
+export function listenToUserRecordsInRange(
+  userId: string,
+  fromDateKey: string,
+  toDateKey: string,
+  onChange: (records: ParsedRecords) => void,
+  onError?: (error: FirestoreError) => void,
+): Unsubscribe {
+  const rangeQuery = query(
+    recordsCollection(userId),
+    where(documentId(), ">=", fromDateKey),
+    where(documentId(), "<=", toDateKey),
+  );
+
+  return onSnapshot(
+    rangeQuery,
+    (snapshot) => onChange(parseRecordDocs(snapshot.docs)),
+    onError,
+  );
+}
+
+export async function fetchRecordsInRange(
+  userId: string,
+  fromDateKey: string,
+  toDateKey: string,
+): Promise<ParsedRecords> {
+  const rangeQuery = query(
+    recordsCollection(userId),
+    where(documentId(), ">=", fromDateKey),
+    where(documentId(), "<=", toDateKey),
+  );
+  const snapshot = await getDocs(rangeQuery);
+  return parseRecordDocs(snapshot.docs);
+}
+
+export async function fetchAllRecords(userId: string): Promise<ParsedRecords> {
+  const snapshot = await getDocs(recordsCollection(userId));
+  return parseRecordDocs(snapshot.docs);
 }
 
 export async function saveUserHabit(userId: string, habit: HabitDefinition) {
@@ -162,19 +210,32 @@ export async function saveUserHabitOrder(
   await batch.commit();
 }
 
-export async function deleteUserHabit(userId: string, habitId: string) {
+export async function deleteUserHabit(
+  userId: string,
+  habitId: string,
+  knownDateKeys?: string[],
+) {
   const firestore = getFirebaseFirestore();
   const batch = writeBatch(firestore);
-  const recordDocs = await getDocs(recordsCollection(userId));
 
   batch.delete(doc(firestore, "users", userId, "habits", habitId));
 
-  recordDocs.docs.forEach((recordDoc) => {
-    batch.update(recordDoc.ref, {
-      [`entries.${habitId}`]: deleteField(),
-      _updatedAt: serverTimestamp(),
+  if (knownDateKeys && knownDateKeys.length > 0) {
+    knownDateKeys.forEach((dateKey) => {
+      batch.update(doc(firestore, "users", userId, "records", dateKey), {
+        [`entries.${habitId}`]: deleteField(),
+        _updatedAt: serverTimestamp(),
+      });
     });
-  });
+  } else {
+    const recordDocs = await getDocs(recordsCollection(userId));
+    recordDocs.docs.forEach((recordDoc) => {
+      batch.update(recordDoc.ref, {
+        [`entries.${habitId}`]: deleteField(),
+        _updatedAt: serverTimestamp(),
+      });
+    });
+  }
 
   await batch.commit();
 }

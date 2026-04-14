@@ -19,6 +19,8 @@ import {
   parseDateKey,
   startOfDay,
   toDateKey,
+  toYearMonth,
+  yearMonthFromDateKey,
 } from "@/lib/date";
 import { HabitDefinition } from "@/lib/habits";
 import {
@@ -245,9 +247,11 @@ function MobileMatrixDayCell({
       onClick={onClick}
       disabled={isFuture}
       aria-label={ariaLabel}
-      style={{
-        "--matrix-hover-bg": matrixTone.cellTint,
-      } as React.CSSProperties}
+      style={
+        {
+          "--matrix-hover-bg": matrixTone.cellTint,
+        } as React.CSSProperties
+      }
       className={`matrix-day-btn relative flex aspect-square min-w-0 items-center justify-center rounded-[14px] border border-black/[0.05] bg-white ${isFuture ? "opacity-35" : ""}`}
     >
       <span
@@ -278,7 +282,7 @@ export function HabitTrackerApp() {
     archiveHabit,
     reorderHabits: persistHabitOrder,
   } = useHabits();
-  const { records, toggleHabitDay } = useHabitRecords(activeHabits);
+  const { records, toggleHabitDay, loadMonth } = useHabitRecords(activeHabits);
   const [mobileWeekOffset, setMobileWeekOffset] = useState(0);
   const [desktopMonthOffset, setDesktopMonthOffset] = useState(0);
 
@@ -295,6 +299,26 @@ export function HabitTrackerApp() {
     addDays(today, -(mobileWeekOffset * MOBILE_DAY_WINDOW)),
   );
   const mobileDays = eachDay(mobileRange);
+
+  // Load records for the desktop month when navigating backward
+  useEffect(() => {
+    if (desktopMonthOffset === 0) return;
+    const targetDate = new Date(
+      today.getFullYear(),
+      today.getMonth() - desktopMonthOffset,
+      1,
+    );
+    loadMonth(toYearMonth(targetDate));
+  }, [desktopMonthOffset, loadMonth]);
+
+  // Load records for the mobile week's containing month(s)
+  useEffect(() => {
+    if (mobileWeekOffset === 0) return;
+    const fromMonth = yearMonthFromDateKey(mobileRange.from);
+    const toMonth = yearMonthFromDateKey(mobileRange.to);
+    loadMonth(fromMonth);
+    if (toMonth !== fromMonth) loadMonth(toMonth);
+  }, [mobileWeekOffset, mobileRange.from, mobileRange.to, loadMonth]);
   const mobileRangeLabel = getMobileRangeLabel(mobileRange);
   const desktopRangeLabel = formatMonthLabel(desktopRange);
   const mobileWindowLabel =
@@ -881,7 +905,9 @@ export function HabitTrackerApp() {
                     <button
                       type="button"
                       onClick={() =>
-                        setDesktopMonthOffset((current) => Math.max(0, current - 1))
+                        setDesktopMonthOffset((current) =>
+                          Math.max(0, current - 1),
+                        )
                       }
                       disabled={isLatestDesktopMonth}
                       aria-label="Show next month"
@@ -1117,9 +1143,7 @@ export function HabitTrackerApp() {
                                     colIndex === desktopDays.length - 1
                                       ? "rounded-br-[11px]"
                                       : ""
-                                  } ${
-                                    isFuture ? "opacity-40" : ""
-                                  }`}
+                                  } ${isFuture ? "opacity-40" : ""}`}
                                 >
                                   <span
                                     className={`matrix-check relative flex h-[26px] w-[26px] items-center justify-center overflow-hidden rounded-lg ${
@@ -1187,9 +1211,11 @@ export function HabitTrackerApp() {
                                 }}
                                 disabled={isFuture}
                                 aria-label={`${habit.name}${displaySlotName ? ` ${displaySlotName}` : ""} ${slotChecked ? "completed" : "not completed"} on ${formatLongDate(dateKey)}`}
-                                style={{
-                                  "--matrix-hover-bg": matrixTone.cellTint,
-                                } as React.CSSProperties}
+                                style={
+                                  {
+                                    "--matrix-hover-bg": matrixTone.cellTint,
+                                  } as React.CSSProperties
+                                }
                                 className={`matrix-day-btn relative flex h-full min-h-[44px] items-center justify-center ${
                                   isLastRow &&
                                   colIndex === desktopDays.length - 1

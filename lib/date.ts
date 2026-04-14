@@ -36,8 +36,19 @@ export function toDateKey(date: Date) {
   return [
     date.getFullYear(),
     String(date.getMonth() + 1).padStart(2, "0"),
-    String(date.getDate()).padStart(2, "0")
+    String(date.getDate()).padStart(2, "0"),
   ].join("-");
+}
+
+export function toYearMonth(date: Date) {
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+  ].join("-");
+}
+
+export function yearMonthFromDateKey(dateKey: string) {
+  return dateKey.slice(0, 7);
 }
 
 export function eachDay(range: DateRange) {
@@ -45,7 +56,11 @@ export function eachDay(range: DateRange) {
   const end = parseDateKey(range.to);
   const days: string[] = [];
 
-  for (let cursor = startOfDay(start); cursor <= end; cursor = addDays(cursor, 1)) {
+  for (
+    let cursor = startOfDay(start);
+    cursor <= end;
+    cursor = addDays(cursor, 1)
+  ) {
     days.push(toDateKey(cursor));
   }
 
@@ -68,7 +83,7 @@ export function formatLongDate(value: string) {
   return new Intl.DateTimeFormat("en", {
     month: "long",
     day: "numeric",
-    year: "numeric"
+    year: "numeric",
   }).format(parseDateKey(value));
 }
 
@@ -76,33 +91,39 @@ export function formatMonthLabel(range: DateRange) {
   const start = parseDateKey(range.from);
   const end = parseDateKey(range.to);
   const sameMonth =
-    start.getFullYear() === end.getFullYear() && start.getMonth() === end.getMonth();
+    start.getFullYear() === end.getFullYear() &&
+    start.getMonth() === end.getMonth();
 
   if (sameMonth) {
     return new Intl.DateTimeFormat("en", {
       month: "long",
-      year: "numeric"
+      year: "numeric",
     }).format(start);
   }
 
   const formatter = new Intl.DateTimeFormat("en", {
     month: "short",
-    day: "numeric"
+    day: "numeric",
   });
 
   return `${formatter.format(start)} - ${formatter.format(end)}`;
 }
 
-export function getCurrentMonthRange(today = startOfDay(new Date())): DateRange {
+export function getCurrentMonthRange(
+  today = startOfDay(new Date()),
+): DateRange {
   return {
     from: toDateKey(startOfMonth(today)),
-    to: toDateKey(endOfMonth(today))
+    to: toDateKey(endOfMonth(today)),
   };
 }
 
-export function getRollingRange(days: number, today = startOfDay(new Date())): DateRange {
+export function getRollingRange(
+  days: number,
+  today = startOfDay(new Date()),
+): DateRange {
   return {
     from: toDateKey(subtractDays(today, days - 1)),
-    to: toDateKey(today)
+    to: toDateKey(today),
   };
 }
