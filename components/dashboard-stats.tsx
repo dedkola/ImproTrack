@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import {
   clampDateKey,
@@ -17,11 +17,7 @@ import {
 import { DatePicker } from "@/components/date-picker";
 import { HabitIcon } from "@/components/habit-icon";
 import type { HabitDefinition } from "@/lib/habits";
-import {
-  RECORDS_RECENT_WINDOW_DAYS,
-  useHabits,
-  useHabitRecords,
-} from "@/lib/storage";
+import { useHabits, useHabitRecords } from "@/lib/storage";
 import {
   accentClass,
   accentStyle,
@@ -98,7 +94,7 @@ function getAverage(values: number[]) {
 
 export function DashboardStats() {
   const { habits, activeHabits, archivedHabits } = useHabits();
-  const { records, loadRecordsRange } = useHabitRecords(habits);
+  const { records } = useHabitRecords(habits);
   const [selectedPreset, setSelectedPreset] = useState<StatsPreset>("month");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [customFrom, setCustomFrom] = useState(getRollingRange(30, today).from);
@@ -130,26 +126,6 @@ export function DashboardStats() {
       to: clampDateKey(orderedRange.to, RANGE_MIN, RANGE_MAX),
     };
   }, [customFrom, customTo, selectedPreset]);
-
-  const liveWindowFrom = useMemo(
-    () => getRollingRange(RECORDS_RECENT_WINDOW_DAYS, today).from,
-    [],
-  );
-
-  useEffect(() => {
-    if (selectedPreset !== "custom") {
-      return;
-    }
-
-    if (range.from >= liveWindowFrom) {
-      return;
-    }
-
-    void loadRecordsRange({
-      fromDateKey: range.from,
-      toDateKey: range.to,
-    });
-  }, [liveWindowFrom, loadRecordsRange, range, selectedPreset]);
 
   const filteredHabits = useMemo(() => {
     if (activeCategory === "all") {
