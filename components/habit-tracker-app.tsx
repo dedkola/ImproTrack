@@ -221,17 +221,15 @@ function getMobileRangeLabel(range: { from: string; to: string }) {
 function MobileMatrixDayCell({
   checked,
   isFuture,
-  isToday,
   onClick,
   ariaLabel,
   matrixTone,
 }: {
   checked: boolean;
   isFuture: boolean;
-  isToday: boolean;
   onClick: () => void;
   ariaLabel: string;
-  matrixTone: { fill: string; glow: string };
+  matrixTone: { cellTint: string; fill: string; glow: string };
 }) {
   const checkStyle = checked
     ? {
@@ -247,9 +245,10 @@ function MobileMatrixDayCell({
       onClick={onClick}
       disabled={isFuture}
       aria-label={ariaLabel}
-      className={`matrix-day-btn relative flex aspect-square min-w-0 items-center justify-center rounded-[14px] border border-black/[0.05] ${
-        isToday && !checked ? "bg-[#6D28D9]/[0.05]" : "bg-white"
-      } ${isFuture ? "opacity-35" : ""}`}
+      style={{
+        "--matrix-hover-bg": matrixTone.cellTint,
+      } as React.CSSProperties}
+      className={`matrix-day-btn relative flex aspect-square min-w-0 items-center justify-center rounded-[14px] border border-black/[0.05] bg-white ${isFuture ? "opacity-35" : ""}`}
     >
       <span
         style={checkStyle}
@@ -768,7 +767,6 @@ export function HabitTrackerApp() {
                                   <div className="grid grid-cols-7 gap-1.5">
                                     {mobileDays.map((dateKey) => {
                                       const isFuture = dateKey > todayKey;
-                                      const isToday = dateKey === todayKey;
                                       const checked = isSlotCompleted(
                                         records[habit.id]?.[dateKey],
                                         slotName,
@@ -779,7 +777,6 @@ export function HabitTrackerApp() {
                                           key={`${habit.id}-${slotName}-${dateKey}`}
                                           checked={checked}
                                           isFuture={isFuture}
-                                          isToday={isToday}
                                           matrixTone={matrixTone}
                                           ariaLabel={`${habit.name} ${slotName} ${checked ? "completed" : "not completed"} on ${formatLongDate(dateKey)}`}
                                           onClick={() => {
@@ -803,7 +800,6 @@ export function HabitTrackerApp() {
                           <div className="grid grid-cols-7 gap-1.5">
                             {mobileDays.map((dateKey) => {
                               const isFuture = dateKey > todayKey;
-                              const isToday = dateKey === todayKey;
                               const checked = isSlotCompleted(
                                 records[habit.id]?.[dateKey],
                                 habit.timeSlots[0] ?? "default",
@@ -815,7 +811,6 @@ export function HabitTrackerApp() {
                                   key={`${habit.id}-${dateKey}`}
                                   checked={checked}
                                   isFuture={isFuture}
-                                  isToday={isToday}
                                   matrixTone={matrixTone}
                                   ariaLabel={`${habit.name} ${checked ? "completed" : "not completed"} on ${formatLongDate(dateKey)}`}
                                   onClick={() => {
@@ -1099,7 +1094,6 @@ export function HabitTrackerApp() {
                           {/* Day cells */}
                           {desktopDays.map((dateKey, colIndex) => {
                             const isFuture = dateKey > todayKey;
-                            const isToday = dateKey === todayKey;
 
                             if (rowType === "total") {
                               const completedCount = completedSlotsInDay(
@@ -1123,7 +1117,7 @@ export function HabitTrackerApp() {
                                     colIndex === desktopDays.length - 1
                                       ? "rounded-br-[11px]"
                                       : ""
-                                  } ${isToday ? "rounded-[10px] bg-[#6D28D9]/[0.05]" : ""} ${
+                                  } ${
                                     isFuture ? "opacity-40" : ""
                                   }`}
                                 >
@@ -1193,12 +1187,15 @@ export function HabitTrackerApp() {
                                 }}
                                 disabled={isFuture}
                                 aria-label={`${habit.name}${displaySlotName ? ` ${displaySlotName}` : ""} ${slotChecked ? "completed" : "not completed"} on ${formatLongDate(dateKey)}`}
+                                style={{
+                                  "--matrix-hover-bg": matrixTone.cellTint,
+                                } as React.CSSProperties}
                                 className={`matrix-day-btn relative flex h-full min-h-[44px] items-center justify-center ${
                                   isLastRow &&
                                   colIndex === desktopDays.length - 1
                                     ? "rounded-br-[11px]"
                                     : ""
-                                } ${isToday && !checked ? "rounded-[10px] bg-[#6D28D9]/[0.05]" : ""} ${
+                                } ${
                                   isLastSlot && !isLastRow
                                     ? "border-b border-black/[0.07]"
                                     : ""

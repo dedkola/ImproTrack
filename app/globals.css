@@ -466,19 +466,44 @@ textarea {
 /* --- Matrix-specific controls ----------------------------------------- */
 
 .matrix-day-btn {
+  position: relative;
   background: #ffffff;
   transition:
     background-color 0.15s ease,
     transform 0.1s ease;
 }
 
+.matrix-day-btn::before {
+  content: "";
+  position: absolute;
+  inset: 2px 2px;
+  border-radius: 9px;
+  background: transparent;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    background-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
 .matrix-day-btn:not(:disabled):hover {
-  background: #f8fbff;
+  background: #ffffff;
+}
+
+.matrix-day-btn:not(:disabled):hover::before {
+  background: var(--matrix-hover-bg, #f3f7ff);
+  opacity: 1;
 }
 
 .matrix-day-btn:not(:disabled):active {
-  background: #eef4fb;
+  background: #ffffff;
 }
+
+.matrix-day-btn:not(:disabled):active::before {
+  background: var(--matrix-hover-bg, #e9f0fb);
+  opacity: 1;
+}
+
 
 .matrix-day-btn:disabled {
   cursor: not-allowed;
