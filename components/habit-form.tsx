@@ -14,7 +14,6 @@ import {
 import {
   buildToneFromHex,
   isValidHex,
-  clampHex,
   randomHabitColor,
 } from "@/lib/tone-utils";
 import { HabitIcon } from "@/components/habit-icon";
@@ -320,9 +319,9 @@ export function HabitForm({
                     type="color"
                     value={customHex}
                     onChange={(e) => {
-                      const clamped = clampHex(e.target.value);
-                      setCustomHex(clamped);
-                      setHexInput(clamped);
+                      const nextHex = e.target.value.toLowerCase();
+                      setCustomHex(nextHex);
+                      setHexInput(nextHex);
                     }}
                     className="absolute inset-0 cursor-pointer opacity-0"
                     tabIndex={-1}
@@ -336,7 +335,7 @@ export function HabitForm({
                     if (v && !v.startsWith("#")) v = "#" + v;
                     setHexInput(v);
                     if (isValidHex(v)) {
-                      setCustomHex(clampHex(v));
+                      setCustomHex(v.toLowerCase());
                     }
                   }}
                   onBlur={() => {

@@ -111,14 +111,14 @@ export function clampHex(hex: string): string {
 const WHITE_SURFACE = "from-white via-white to-white";
 
 export function buildToneFromHex(hex: string): HabitTone {
-  const clamped = clampHex(hex);
+  const normalized = hex.toLowerCase();
   return {
     surface: WHITE_SURFACE,
     accent: "",
     fill: "",
     softFill: "",
     badge: "",
-    hex: clamped,
+    hex: normalized,
   };
 }
 
