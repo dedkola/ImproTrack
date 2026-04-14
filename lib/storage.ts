@@ -7,11 +7,13 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { useFirebaseAuth } from "@/components/firebase-auth-provider";
 import {
   deleteUserHabit,
+  fetchUserRecordsRange,
   listenToUserHabits,
   listenToUserRecords,
   saveUserHabit,
@@ -26,11 +28,14 @@ import {
   TONE_PRESETS,
   slugify,
 } from "@/lib/habits";
+import { startOfDay, subtractDays, toDateKey } from "@/lib/date";
 
 export type SlotRecords = Record<string, boolean>;
 export type DayRecords = Record<string, SlotRecords>;
 export type HabitRecords = Record<string, DayRecords>;
 type PendingRecordPatches = Record<string, SlotRecords>;
+
+export const RECORDS_RECENT_WINDOW_DAYS = 120;
 
 function normalizeSlotKey(slotName: string) {
   return slotName.trim().toLowerCase();
@@ -101,6 +106,19 @@ function mergePendingRecordPatches(
   }, records);
 }
 
+function mergeRecordMaps(current: HabitRecords, incoming: HabitRecords): HabitRecords {
+  const nextRecords = { ...current };
+
+  Object.entries(incoming).forEach(([habitId, dayMap]) => {
+    nextRecords[habitId] = {
+      ...(nextRecords[habitId] ?? {}),
+      ...dayMap,
+    };
+  });
+
+  return nextRecords;
+}
+
 function upsertDaySlots(
   current: HabitRecords,
   habitId: string,
@@ -140,6 +158,7 @@ type HabitStorageContextValue = {
   archiveHabit: (id: string) => Promise<void>;
   restoreHabit: (id: string) => Promise<void>;
   reorderHabits: (orderedHabitIds: string[]) => Promise<void>;
+  loadRecordsRange: (range: { fromDateKey: string; toDateKey: string }) => Promise<void>;
   toggleHabitDay: (
     habitId: string,
     dateKey: string,
@@ -284,11 +303,24 @@ export function HabitStorageProvider({
   const { user, isLoading: isAuthLoading } = useFirebaseAuth();
   const [habits, setHabits] = useState<HabitDefinition[]>([]);
   const [serverRecords, setServerRecords] = useState<HabitRecords>({});
+  const [historicalRecords, setHistoricalRecords] = useState<HabitRecords>({});
   const [pendingRecordPatches, setPendingRecordPatches] =
     useState<PendingRecordPatches>({});
   const [isLoadingHabits, setIsLoadingHabits] = useState(true);
   const [isLoadingRecords, setIsLoadingRecords] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const loadedRangeKeysRef = useRef<Set<string>>(new Set());
+
+  const recordsRange = useMemo(() => {
+    const todayKey = toDateKey(startOfDay(new Date()));
+
+    return {
+      fromDateKey: toDateKey(
+        subtractDays(startOfDay(new Date()), RECORDS_RECENT_WINDOW_DAYS - 1),
+      ),
+      toDateKey: todayKey,
+    };
+  }, []);
 
   useEffect(() => {
     if (isAuthLoading) {
@@ -300,7 +332,9 @@ export function HabitStorageProvider({
     if (!user) {
       setHabits([]);
       setServerRecords({});
+      setHistoricalRecords({});
       setPendingRecordPatches({});
+      loadedRangeKeysRef.current.clear();
       setError(null);
       setIsLoadingHabits(false);
       setIsLoadingRecords(false);
@@ -336,13 +370,50 @@ export function HabitStorageProvider({
         setPendingRecordPatches({});
         setIsLoadingRecords(false);
       },
+      recordsRange,
     );
 
     return () => {
       unsubscribeHabits();
       unsubscribeRecords();
     };
-  }, [isAuthLoading, user]);
+  }, [isAuthLoading, recordsRange, user]);
+
+  const loadRecordsRange = useCallback(
+    async (range: { fromDateKey: string; toDateKey: string }) => {
+      if (!user) return;
+
+      const fromDateKey =
+        range.fromDateKey <= range.toDateKey ? range.fromDateKey : range.toDateKey;
+      const toDateKey =
+        range.fromDateKey <= range.toDateKey ? range.toDateKey : range.fromDateKey;
+      const rangeKey = `${fromDateKey}::${toDateKey}`;
+
+      if (loadedRangeKeysRef.current.has(rangeKey)) {
+        return;
+      }
+
+      try {
+        const fetchedRecords = await fetchUserRecordsRange(user.uid, {
+          fromDateKey,
+          toDateKey,
+        });
+
+        loadedRangeKeysRef.current.add(rangeKey);
+        setHistoricalRecords((current) => mergeRecordMaps(current, fetchedRecords));
+      } catch (nextError) {
+        setError(
+          toErrorMessage(nextError, "Unable to load historical records."),
+        );
+      }
+    },
+    [user],
+  );
+
+  const combinedRecords = useMemo(
+    () => mergeRecordMaps(historicalRecords, serverRecords),
+    [historicalRecords, serverRecords],
+  );
 
   useEffect(() => {
     setPendingRecordPatches((current) => {
@@ -351,7 +422,7 @@ export function HabitStorageProvider({
 
       Object.entries(current).forEach(([patchKey, slots]) => {
         const { habitId, dateKey } = parsePendingPatchKey(patchKey);
-        const persistedSlots = serverRecords[habitId]?.[dateKey];
+        const persistedSlots = combinedRecords[habitId]?.[dateKey];
 
         if (areSlotRecordsEqual(persistedSlots, slots)) {
           delete nextPatches[patchKey];
@@ -361,7 +432,7 @@ export function HabitStorageProvider({
 
       return hasChanges ? nextPatches : current;
     });
-  }, [serverRecords]);
+  }, [combinedRecords]);
 
   const addHabit = useCallback(
     async (habit: HabitMutationInput) => {
@@ -554,8 +625,8 @@ export function HabitStorageProvider({
   );
 
   const mergedRecords = useMemo(
-    () => mergePendingRecordPatches(serverRecords, pendingRecordPatches),
-    [serverRecords, pendingRecordPatches],
+    () => mergePendingRecordPatches(combinedRecords, pendingRecordPatches),
+    [combinedRecords, pendingRecordPatches],
   );
 
   const toggleHabitDay = useCallback(
@@ -642,6 +713,7 @@ export function HabitStorageProvider({
       archiveHabit,
       restoreHabit,
       reorderHabits,
+      loadRecordsRange,
       toggleHabitDay,
       getHabitBySlug,
     }),
@@ -659,6 +731,7 @@ export function HabitStorageProvider({
       archiveHabit,
       restoreHabit,
       reorderHabits,
+      loadRecordsRange,
       toggleHabitDay,
       getHabitBySlug,
     ],
@@ -702,8 +775,8 @@ export function useHabits() {
 }
 
 export function useHabitRecords(_habits: HabitDefinition[]) {
-  const { records, toggleHabitDay, isLoading, error } =
+  const { records, toggleHabitDay, loadRecordsRange, isLoading, error } =
     useHabitStorageContext();
 
-  return { records, toggleHabitDay, isLoading, error };
+  return { records, toggleHabitDay, loadRecordsRange, isLoading, error };
 }
