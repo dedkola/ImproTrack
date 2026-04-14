@@ -39,7 +39,6 @@ function smoothPath(pts: { x: number; y: number }[]): string {
 
 // ---- Types -----------------------------------------------------------------
 
-type ChartView = "bar" | "histogram" | "line";
 type TimePreset = "7" | "30" | "custom";
 type DayPoint = { dateKey: string; ratio: number };
 
@@ -83,252 +82,6 @@ function buildPoints(
   });
 }
 
-// ---- Bar Chart (one bar per day) -------------------------------------------
-
-function BarChartViz({
-  points,
-  fillClass,
-  inlineColor,
-}: {
-  points: DayPoint[];
-  fillClass: string;
-  inlineColor?: string;
-}) {
-  if (points.length === 0) return <ChartEmpty />;
-
-  const VW = 800;
-  const VH = 200;
-  const P = { t: 16, r: 6, b: 36, l: 6 };
-  const PW = VW - P.l - P.r;
-  const PH = VH - P.t - P.b;
-
-  const n = points.length;
-  const step = PW / n;
-  const barW = Math.max(5, Math.min(24, step * 0.7));
-  const labelEvery = n <= 7 ? 1 : n <= 14 ? 2 : 7;
-
-  return (
-    <svg
-      viewBox={`0 0 ${VW} ${VH}`}
-      width="100%"
-      aria-label="Daily completion bar chart"
-    >
-      {/* Background track per bar */}
-      {points.map((p, i) => {
-        const x = P.l + i * step + step / 2 - barW / 2;
-        return (
-          <rect
-            key={`track-${p.dateKey}`}
-            x={x}
-            y={P.t}
-            width={barW}
-            height={PH}
-            rx={Math.min(4, barW / 4)}
-            className={inlineColor ? undefined : fillClass}
-            fill={inlineColor}
-            fillOpacity={0.07}
-          />
-        );
-      })}
-
-      {/* Bars */}
-      {points.map((p, i) => {
-        const barH = p.ratio > 0 ? Math.max(4, PH * p.ratio) : 4;
-        const x = P.l + i * step + step / 2 - barW / 2;
-        const y = P.t + PH - barH;
-        const pctLabel = Math.round(p.ratio * 100);
-        return (
-          <rect
-            key={p.dateKey}
-            x={x}
-            y={y}
-            width={barW}
-            height={barH}
-            rx={Math.min(4, barW / 4)}
-            className={inlineColor ? undefined : fillClass}
-            fill={inlineColor}
-            fillOpacity={p.ratio === 1 ? 0.9 : p.ratio > 0 ? 0.55 : 0.15}
-          >
-            <title>
-              {p.dateKey}:{" "}
-              {p.ratio === 1
-                ? "Done ✓"
-                : p.ratio > 0
-                  ? `${pctLabel}%`
-                  : "Missed"}
-            </title>
-          </rect>
-        );
-      })}
-
-      {/* X-axis labels */}
-      {points
-        .filter((_, i) => i % labelEvery === 0)
-        .map((p) => {
-          const i = points.indexOf(p);
-          const x = P.l + i * step + step / 2;
-          const d = parseDateKey(p.dateKey);
-          return (
-            <text
-              key={p.dateKey}
-              x={x}
-              y={VH - 10}
-              fontSize={9}
-              fill="#8090a5"
-              textAnchor="middle"
-            >
-              {d.toLocaleString("en", { month: "short", day: "numeric" })}
-            </text>
-          );
-        })}
-    </svg>
-  );
-}
-
-// ---- Histogram (weekly buckets) --------------------------------------------
-
-function HistogramChart({
-  points,
-  fillClass,
-  inlineColor,
-}: {
-  points: DayPoint[];
-  fillClass: string;
-  inlineColor?: string;
-}) {
-  if (points.length === 0) return <ChartEmpty />;
-
-  // Group into Monday-based weeks
-  const weekMap = new Map<string, { completed: number; total: number }>();
-  points.forEach((p) => {
-    const d = parseDateKey(p.dateKey);
-    const offset = (d.getDay() + 6) % 7;
-    const mon = new Date(d);
-    mon.setDate(d.getDate() - offset);
-    const key = toDateKey(mon);
-    const prev = weekMap.get(key) ?? { completed: 0, total: 0 };
-    weekMap.set(key, {
-      completed: prev.completed + p.ratio,
-      total: prev.total + 1,
-    });
-  });
-  const weeks = Array.from(weekMap.entries()).map(([key, v]) => ({
-    key,
-    ...v,
-  }));
-
-  const VW = 800;
-  const VH = 200;
-  const P = { t: 18, r: 6, b: 36, l: 28 };
-  const PW = VW - P.l - P.r;
-  const PH = VH - P.t - P.b;
-  const Y_MAX = 7;
-  const step = PW / weeks.length;
-  const barW = Math.min(60, step * 0.65);
-
-  return (
-    <svg
-      viewBox={`0 0 ${VW} ${VH}`}
-      width="100%"
-      aria-label="Weekly completion histogram"
-    >
-      {/* Gridlines at 0, 3, 7 */}
-      {[0, 3, 7].map((v) => {
-        const y = P.t + PH * (1 - v / Y_MAX);
-        return (
-          <g key={v}>
-            <line
-              x1={P.l}
-              y1={y}
-              x2={P.l + PW}
-              y2={y}
-              stroke="rgba(0,0,0,0.07)"
-              strokeWidth={1}
-              strokeDasharray={v === 0 ? "none" : "3 3"}
-            />
-            <text
-              x={P.l - 6}
-              y={y + 3}
-              fontSize={8}
-              fill="#8090a5"
-              textAnchor="end"
-            >
-              {v}d
-            </text>
-          </g>
-        );
-      })}
-
-      {/* Background track per week */}
-      {weeks.map(({ key }, i) => {
-        const x = P.l + i * step + step / 2 - barW / 2;
-        return (
-          <rect
-            key={`track-${key}`}
-            x={x}
-            y={P.t}
-            width={barW}
-            height={PH}
-            rx={Math.min(5, barW / 5)}
-            className={inlineColor ? undefined : fillClass}
-            fill={inlineColor}
-            fillOpacity={0.06}
-          />
-        );
-      })}
-
-      {/* Bars */}
-      {weeks.map(({ key, completed, total }, i) => {
-        const barH = Math.max(4, (completed / Y_MAX) * PH);
-        const x = P.l + i * step + step / 2 - barW / 2;
-        const y = P.t + PH - barH;
-        const d = parseDateKey(key);
-        const pct = Math.round((completed / Math.max(total, 1)) * 100);
-        return (
-          <g key={key}>
-            <rect
-              x={x}
-              y={y}
-              width={barW}
-              height={barH}
-              rx={Math.min(5, barW / 5)}
-              className={inlineColor ? undefined : fillClass}
-              fill={inlineColor}
-              fillOpacity={completed === 0 ? 0.2 : 0.9}
-            >
-              <title>
-                Week of {key}: {Math.round(completed * 10) / 10}/{total} days (
-                {pct}%)
-              </title>
-            </rect>
-            {/* Day count label inside tall bars */}
-            {completed >= 3 && (
-              <text
-                x={x + barW / 2}
-                y={y + 14}
-                fontSize={10}
-                fill="white"
-                textAnchor="middle"
-                fontWeight="600"
-              >
-                {Math.round(completed)}
-              </text>
-            )}
-            <text
-              x={x + barW / 2}
-              y={VH - 10}
-              fontSize={9}
-              fill="#8090a5"
-              textAnchor="middle"
-            >
-              {d.toLocaleString("en", { month: "short", day: "numeric" })}
-            </text>
-          </g>
-        );
-      })}
-    </svg>
-  );
-}
 
 // ---- Line Chart (rolling 7-day completion rate) ----------------------------
 
@@ -594,7 +347,6 @@ export function HabitChart({
   timeSlots: string[];
   tone: HabitTone;
 }) {
-  const [view, setView] = useState<ChartView>("line");
   const [preset, setPreset] = useState<TimePreset>("30");
   const [customFrom, setCustomFrom] = useState(
     toDateKey(subtractDays(today, 29)),
@@ -622,12 +374,6 @@ export function HabitChart({
     ? Math.round((doneCount / points.length) * 100)
     : 0;
 
-  const VIEW_OPTIONS: { value: ChartView; label: string }[] = [
-    { value: "line", label: "Line" },
-    { value: "bar", label: "Bar" },
-    { value: "histogram", label: "Histogram" },
-  ];
-
   const PRESET_OPTIONS: { value: TimePreset; label: string }[] = [
     { value: "7", label: "7d" },
     { value: "30", label: "30d" },
@@ -643,42 +389,22 @@ export function HabitChart({
       <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-[13px] font-semibold text-ink-950">Chart</h2>
 
-        <div className="flex flex-col gap-2 sm:items-end">
-          {/* Chart type */}
-          <div className="comparison-scroll -mx-1 flex gap-1 overflow-x-auto px-1 pb-1 sm:mx-0 sm:flex-wrap sm:justify-end sm:overflow-visible sm:px-0 sm:pb-0">
-            {VIEW_OPTIONS.map(({ value, label }) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setView(value)}
-                aria-pressed={view === value}
-                className={`${CONTROL_BTN_BASE} ${
-                  view === value
-                    ? "bg-[#6D28D9] text-white shadow-[0_1px_3px_rgba(109,40,217,0.35)]"
-                    : "bg-ink-950/[0.04] text-ink-700 hover:bg-ink-950/[0.08]"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          <div className="comparison-scroll -mx-1 flex gap-1 overflow-x-auto px-1 pb-1 sm:mx-0 sm:flex-wrap sm:justify-end sm:overflow-visible sm:px-0 sm:pb-0">
-            {PRESET_OPTIONS.map(({ value, label }) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setPreset(value)}
-                aria-pressed={preset === value}
-                className={`${CONTROL_BTN_BASE} ${
-                  preset === value
-                    ? "bg-[#6D28D9] text-white shadow-[0_1px_3px_rgba(109,40,217,0.35)]"
-                    : "bg-ink-950/[0.04] text-ink-700 hover:bg-ink-950/[0.08]"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+        <div className="comparison-scroll -mx-1 flex gap-1 overflow-x-auto px-1 pb-1 sm:mx-0 sm:flex-wrap sm:justify-end sm:overflow-visible sm:px-0 sm:pb-0">
+          {PRESET_OPTIONS.map(({ value, label }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setPreset(value)}
+              aria-pressed={preset === value}
+              className={`${CONTROL_BTN_BASE} ${
+                preset === value
+                  ? "bg-[#6D28D9] text-white shadow-[0_1px_3px_rgba(109,40,217,0.35)]"
+                  : "bg-ink-950/[0.04] text-ink-700 hover:bg-ink-950/[0.08]"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -707,37 +433,19 @@ export function HabitChart({
       {/* Chart area */}
       <div className="mt-3.5 min-h-[100px]">
         <div className="w-full">
-          {view === "bar" && (
-            <BarChartViz
-              points={points}
-              fillClass={svgTone.fill}
-              inlineColor={hexColors?.fill}
-            />
-          )}
-          {view === "histogram" && (
-            <HistogramChart
-              points={points}
-              fillClass={svgTone.fill}
-              inlineColor={hexColors?.fill}
-            />
-          )}
-          {view === "line" && (
-            <LineChartViz
-              points={points}
-              fillClass={svgTone.fill}
-              strokeClass={svgTone.stroke}
-              inlineColor={hexColors?.fill}
-            />
-          )}
+          <LineChartViz
+            points={points}
+            fillClass={svgTone.fill}
+            strokeClass={svgTone.stroke}
+            inlineColor={hexColors?.fill}
+          />
         </div>
       </div>
 
       {/* Summary */}
       <p className="mt-3 text-[12px] leading-5 text-ink-700">
         {doneCount} / {points.length} days completed &middot; {rate}% completion
-        rate
-        {view === "line" && " \u00b7 7-day rolling average"}
-        {view === "histogram" && " \u00b7 grouped by week"}
+        rate · 7-day rolling average
       </p>
     </section>
   );
