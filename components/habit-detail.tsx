@@ -25,6 +25,8 @@ import { HabitForm, HabitMenu, ConfirmDialog } from "@/components/habit-form";
 import { HabitIcon } from "@/components/habit-icon";
 import { HabitChart } from "@/components/habit-chart";
 import {
+  accentClass,
+  accentStyle,
   softFillClass,
   softFillStyle,
   fillClass,
@@ -148,7 +150,8 @@ export function HabitDetail({ slug }: { slug: string }) {
               <HabitIcon
                 name={habit.icon}
                 size={20}
-                className="text-ink-700 shrink-0"
+                className={`shrink-0 ${accentClass(habit.tone)}`}
+                style={accentStyle(habit.tone)}
               />
             </div>
 

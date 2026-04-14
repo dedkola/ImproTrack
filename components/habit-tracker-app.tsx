@@ -689,7 +689,8 @@ export function HabitTrackerApp() {
                             <HabitIcon
                               name={habit.icon}
                               size={18}
-                              className="text-ink-700"
+                              className={accentClass(habit.tone)}
+                              style={accentStyle(habit.tone)}
                             />
                           </div>
 
@@ -1051,7 +1052,8 @@ export function HabitTrackerApp() {
                                   <HabitIcon
                                     name={habit.icon}
                                     size={14}
-                                    className="shrink-0 text-ink-700/70"
+                                    className={`shrink-0 ${accentClass(habit.tone)}`}
+                                    style={accentStyle(habit.tone)}
                                   />
                                   <div className="flex-1" />
                                   <span
@@ -1253,7 +1255,8 @@ export function HabitTrackerApp() {
                           <HabitIcon
                             name={habit.icon}
                             size={18}
-                            className="text-ink-700 shrink-0"
+                            className={`shrink-0 ${accentClass(habit.tone)}`}
+                            style={accentStyle(habit.tone)}
                           />
                           <h3 className="text-[16px] font-semibold text-ink-950">
                             {habit.name}

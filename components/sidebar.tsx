@@ -13,7 +13,7 @@ import {
 import { AuthControls } from "@/components/auth-controls";
 import { HabitIcon } from "@/components/habit-icon";
 import { HabitDefinition } from "@/lib/habits";
-import { fillClass, fillStyle } from "@/lib/tone-utils";
+import { accentClass, accentStyle, fillClass, fillStyle } from "@/lib/tone-utils";
 
 type SidebarProps = {
   habits: HabitDefinition[];
@@ -159,7 +159,8 @@ export function Sidebar({
                     <HabitIcon
                       name={habit.icon}
                       size={14}
-                      className="text-ink-700"
+                      className={accentClass(habit.tone)}
+                      style={accentStyle(habit.tone)}
                     />
                   }
                   active={pathname === `/dashboard/habits/${habit.slug}`}

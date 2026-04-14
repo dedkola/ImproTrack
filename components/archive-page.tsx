@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ConfirmDialog } from "@/components/habit-form";
 import { HabitIcon } from "@/components/habit-icon";
 import { useHabits } from "@/lib/storage";
+import { accentClass, accentStyle } from "@/lib/tone-utils";
 
 export function ArchivePage() {
   const { archivedHabits, restoreHabit, deleteHabit } = useHabits();
@@ -43,7 +44,8 @@ export function ArchivePage() {
                 <HabitIcon
                   name={habit.icon}
                   size={22}
-                  className="text-ink-700 shrink-0"
+                  className={`shrink-0 ${accentClass(habit.tone)}`}
+                  style={accentStyle(habit.tone)}
                 />
                 <div className="min-w-0">
                   <p className="text-[16px] font-semibold text-ink-950">

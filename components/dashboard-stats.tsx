@@ -19,6 +19,8 @@ import { HabitIcon } from "@/components/habit-icon";
 import type { HabitDefinition } from "@/lib/habits";
 import { useHabits, useHabitRecords } from "@/lib/storage";
 import {
+  accentClass,
+  accentStyle,
   softFillClass,
   softFillStyle,
   fillClass,
@@ -536,7 +538,8 @@ export function DashboardStats() {
                     <HabitIcon
                       name={summary.topHabit.habit.icon}
                       size={28}
-                      className="text-ink-700"
+                      className={accentClass(summary.topHabit.habit.tone)}
+                      style={accentStyle(summary.topHabit.habit.tone)}
                     />
                   </p>
                   <h3 className="mt-3 text-[20px] font-semibold text-ink-950">
@@ -655,7 +658,8 @@ export function DashboardStats() {
                     <HabitIcon
                       name={snapshot.habit.icon}
                       size={18}
-                      className="text-ink-700 shrink-0"
+                      className={`shrink-0 ${accentClass(snapshot.habit.tone)}`}
+                      style={accentStyle(snapshot.habit.tone)}
                     />
                     <p className="truncate text-[14px] font-semibold text-ink-950">
                       {snapshot.habit.name}
