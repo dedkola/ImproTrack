@@ -189,7 +189,6 @@ export async function saveUserHabit(userId: string, habit: HabitDefinition) {
       ...habit,
       _updatedAt: serverTimestamp(),
     },
-    { merge: true },
   );
 }
 

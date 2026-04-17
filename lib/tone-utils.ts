@@ -139,10 +139,16 @@ export function getMatrixToneFromHex(hex: string): {
 }
 
 export function getCardGradientStyleFromHex(hex: string): React.CSSProperties {
-  const light = lightenHex(hex, 0.35);
-  const lighter = lightenHex(hex, 0.42);
+  const { r, g, b } = hexToRgb(hex);
+  const { l } = rgbToHsl(r, g, b);
+  const lead = l > 0.7 ? darkenHex(hex, 0.12) : lightenHex(hex, 0.18);
+  const middle = l > 0.7 ? hex : lightenHex(hex, 0.28);
+  const leadAlpha = l > 0.7 ? 0.32 : 0.26;
+  const middleAlpha = l > 0.7 ? 0.18 : 0.16;
+
   return {
-    backgroundImage: `linear-gradient(to bottom right, ${withAlpha(light, 0.85)}, ${withAlpha(lighter, 0.85)}, white)`,
+    backgroundColor: withAlpha(hex, l > 0.7 ? 0.08 : 0.05),
+    backgroundImage: `linear-gradient(to bottom right, ${withAlpha(lead, leadAlpha)}, ${withAlpha(middle, middleAlpha)}, rgba(255, 255, 255, 0.98))`,
   };
 }
 
