@@ -27,7 +27,7 @@ const sectionNotes = [
     body: "Completion rate, weekday rhythm, streaks, and slot-by-slot progress turn raw checkmarks into patterns you can actually use.",
     image: "/brand/stats-shot.png",
     imageAlt:
-      "ImproTrack statistics screen showing trend lines and category summaries",
+      "ImproTrack statistics screen showing trend lines and streak summaries",
     imagePriority: false,
   },
   {

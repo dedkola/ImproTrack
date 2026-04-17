@@ -152,7 +152,6 @@ type HabitStorageContextValue = {
   habits: HabitDefinition[];
   activeHabits: HabitDefinition[];
   archivedHabits: HabitDefinition[];
-  categories: string[];
   records: HabitRecords;
   isLoading: boolean;
   error: string | null;
@@ -717,10 +716,6 @@ export function HabitStorageProvider({
     () => habits.filter((habit) => habit.archived),
     [habits],
   );
-  const categories = useMemo(
-    () => [...new Set(activeHabits.map((habit) => habit.category))].sort(),
-    [activeHabits],
-  );
   const isLoading =
     isAuthLoading || (!!user && (isLoadingHabits || isLoadingRecords));
 
@@ -729,7 +724,6 @@ export function HabitStorageProvider({
       habits,
       activeHabits,
       archivedHabits,
-      categories,
       records: mergedRecords,
       isLoading,
       error,
@@ -749,7 +743,6 @@ export function HabitStorageProvider({
       habits,
       activeHabits,
       archivedHabits,
-      categories,
       mergedRecords,
       isLoading,
       error,
@@ -775,7 +768,6 @@ export function useHabits() {
     habits,
     activeHabits,
     archivedHabits,
-    categories,
     isLoading,
     error,
     addHabit,
@@ -791,7 +783,6 @@ export function useHabits() {
     habits,
     activeHabits,
     archivedHabits,
-    categories,
     isLoading,
     error,
     addHabit,

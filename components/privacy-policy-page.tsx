@@ -31,7 +31,7 @@ const sections: LegalSection[] = [
     title: "Information we collect",
     paragraphs: [
       "If you sign in with Google, we may receive basic account details provided by Google, such as your name, email address, and profile image.",
-      "When you use the app, we store the habits, categories, schedules, archive state, completion records, and profile settings you choose to save so the product can function across sessions and devices.",
+      "When you use the app, we store the habits, schedules, archive state, completion records, and profile settings you choose to save so the product can function across sessions and devices.",
       "We may also receive limited technical and usage information, such as browser or device details, page views, and performance diagnostics, from the infrastructure and analytics services used to keep ImproTrack reliable.",
     ],
   },

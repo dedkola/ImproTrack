@@ -20,8 +20,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
 function AppShellContent({ children }: { children: React.ReactNode }) {
   const { user, isLoading: isAuthLoading } = useFirebaseAuth();
-  const { activeHabits, categories, addHabit, updateHabit, isLoading, error } =
-    useHabits();
+  const { activeHabits, addHabit, updateHabit, isLoading, error } = useHabits();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
@@ -136,7 +135,6 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen min-w-0">
       <Sidebar
         habits={activeHabits}
-        categories={categories}
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen(!sidebarOpen)}
         onAddHabit={handleAddHabit}
@@ -168,7 +166,6 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
         }}
         onSave={handleSave}
         initial={editingHabit}
-        existingCategories={categories}
       />
     </div>
   );

@@ -52,10 +52,9 @@ export function ArchivePage() {
                     {habit.name}
                   </p>
                   <p className="mt-0.5 text-[13px] leading-5 text-ink-700">
-                    {habit.category}
                     {habit.frequencyPerDay > 1
-                      ? ` · ${habit.frequencyPerDay}x/day`
-                      : ""}
+                      ? `${habit.frequencyPerDay}x/day`
+                      : "Single check-in"}
                   </p>
                 </div>
               </div>

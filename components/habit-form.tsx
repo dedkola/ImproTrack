@@ -25,29 +25,18 @@ type HabitFormProps = {
     data: Omit<HabitDefinition, "id" | "slug" | "createdAt" | "archived">,
   ) => void;
   initial?: HabitDefinition | null;
-  existingCategories: string[];
 };
 
-export function HabitForm({
-  open,
-  onClose,
-  onSave,
-  initial,
-  existingCategories,
-}: HabitFormProps) {
+export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [name, setName] = useState("");
   const [icon, setIcon] = useState("Target");
-  const [category, setCategory] = useState("");
-  const [newCategory, setNewCategory] = useState("");
   const [frequencyPerDay, setFrequencyPerDay] = useState(1);
   const [timeSlots, setTimeSlots] = useState<string[]>(["default"]);
   const [selectedToneIndex, setSelectedToneIndex] = useState(0);
   const [customHex, setCustomHex] = useState<string | null>(null);
   const [hexInput, setHexInput] = useState("");
   const nameId = "habit-name";
-  const categoryId = "habit-category";
-  const categoryNewId = "habit-new-category";
 
   // Sync dialog open/close
   useEffect(() => {
@@ -70,7 +59,6 @@ export function HabitForm({
       );
       setName(initial.name);
       setIcon(initial.icon);
-      setCategory(initial.category);
       setFrequencyPerDay(normalizedFrequency);
       setTimeSlots(normalizeTimeSlots(normalizedFrequency, initial.timeSlots));
       if (initial.tone.hex) {
@@ -93,8 +81,6 @@ export function HabitForm({
   function resetForm() {
     setName("");
     setIcon("Target");
-    setCategory(existingCategories[0] ?? "");
-    setNewCategory("");
     setFrequencyPerDay(1);
     setTimeSlots(["default"]);
     setSelectedToneIndex(0);
@@ -120,13 +106,10 @@ export function HabitForm({
     e.preventDefault();
     if (!name.trim()) return;
 
-    const finalCategory = newCategory.trim() || category || "General";
-
     onSave({
       name: name.trim(),
       description: "",
       icon,
-      category: finalCategory,
       unitLabel: "days",
       goalLabel: name.trim(),
       frequencyPerDay,
@@ -206,45 +189,6 @@ export function HabitForm({
               required
               className="w-full rounded-lg border border-black/[0.16] bg-white px-3 py-2.5 text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
             />
-          </div>
-
-          {/* Category */}
-          <div>
-            <label
-              htmlFor={categoryId}
-              className="mb-1.5 block text-[13px] font-medium text-ink-700"
-            >
-              Category
-            </label>
-            <div className="flex gap-2">
-              <select
-                id={categoryId}
-                value={category}
-                onChange={(e) => {
-                  setCategory(e.target.value);
-                  setNewCategory("");
-                }}
-                className="flex-1 rounded-lg border border-black/[0.16] bg-white px-3 py-2.5 text-[14px] text-ink-950 focus:border-ink-950/30"
-              >
-                <option value="">Select or type new</option>
-                {existingCategories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-              <input
-                id={categoryNewId}
-                type="text"
-                value={newCategory}
-                onChange={(e) => {
-                  setNewCategory(e.target.value);
-                  setCategory("");
-                }}
-                placeholder="New category"
-                className="w-36 rounded-lg border border-black/[0.16] bg-white px-3 py-2.5 text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
-              />
-            </div>
           </div>
 
           {/* Color theme */}

@@ -275,7 +275,6 @@ function MobileMatrixDayCell({
 export function HabitTrackerApp() {
   const {
     activeHabits,
-    categories,
     addHabit,
     updateHabit,
     deleteHabit,
@@ -742,9 +741,6 @@ export function HabitTrackerApp() {
                             </div>
 
                             <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                              <span className="rounded-full bg-ink-950/[0.05] px-2 py-1 text-[10px] font-medium text-ink-700 sm:text-[11px]">
-                                {habit.category}
-                              </span>
                               {isMultiSlot ? (
                                 <span className="text-[10px] text-ink-500 sm:text-[11px]">
                                   {habit.timeSlots.length} slots
@@ -1342,7 +1338,6 @@ export function HabitTrackerApp() {
         }}
         onSave={handleSave}
         initial={editingHabit}
-        existingCategories={categories}
       />
 
       <ConfirmDialog

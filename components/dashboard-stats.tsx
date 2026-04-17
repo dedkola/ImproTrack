@@ -49,12 +49,6 @@ type HabitSnapshot = {
   streak: number;
 };
 
-type CategorySnapshot = {
-  category: string;
-  rate: number;
-  habits: number;
-};
-
 const today = startOfDay(new Date());
 const todayKey = toDateKey(today);
 const RANGE_MIN = "2025-01-01";
@@ -99,21 +93,10 @@ export function DashboardStats() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [customFrom, setCustomFrom] = useState(getRollingRange(30, today).from);
   const [customTo, setCustomTo] = useState(todayKey);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   useEffect(() => {
     loadFullHistory();
   }, [loadFullHistory]);
-
-  const categories = useMemo(
-    () => [...new Set(activeHabits.map((habit) => habit.category))].sort(),
-    [activeHabits],
-  );
-
-  const activeCategory =
-    selectedCategory === "all" || categories.includes(selectedCategory)
-      ? selectedCategory
-      : "all";
 
   const range = useMemo(() => {
     if (selectedPreset !== "custom") {
@@ -131,13 +114,7 @@ export function DashboardStats() {
     };
   }, [customFrom, customTo, selectedPreset]);
 
-  const filteredHabits = useMemo(() => {
-    if (activeCategory === "all") {
-      return activeHabits;
-    }
-
-    return activeHabits.filter((habit) => habit.category === activeCategory);
-  }, [activeCategory, activeHabits]);
+  const filteredHabits = activeHabits;
 
   const summary = useMemo(() => {
     const habitSnapshots: HabitSnapshot[] = filteredHabits.map((habit) => ({
@@ -216,30 +193,6 @@ export function DashboardStats() {
       };
     });
 
-    const categoryMap = new Map<
-      string,
-      { totalRate: number; habits: number }
-    >();
-
-    habitSnapshots.forEach((snapshot) => {
-      const entry = categoryMap.get(snapshot.habit.category) ?? {
-        totalRate: 0,
-        habits: 0,
-      };
-      categoryMap.set(snapshot.habit.category, {
-        totalRate: entry.totalRate + snapshot.rate,
-        habits: entry.habits + 1,
-      });
-    });
-
-    const categories: CategorySnapshot[] = Array.from(categoryMap.entries())
-      .map(([category, value]) => ({
-        category,
-        habits: value.habits,
-        rate: Math.round(value.totalRate / value.habits),
-      }))
-      .sort((left, right) => right.rate - left.rate);
-
     const bestRate = trend.reduce((best, day) => Math.max(best, day.rate), 0);
     const trendAverage = getAverage(trend.map((day) => day.rate));
     const highestDay = trend.reduce<DailyAggregate | null>((best, day) => {
@@ -255,7 +208,6 @@ export function DashboardStats() {
       sortedHabits,
       trend,
       weekdayBuckets,
-      categories,
       averageRate: getAverage(habitSnapshots.map((snapshot) => snapshot.rate)),
       totalCompleted: habitSnapshots.reduce(
         (sum, snapshot) => sum + snapshot.completed,
@@ -311,7 +263,7 @@ export function DashboardStats() {
           </h1>
           <p className="max-w-md text-[15px] leading-7 text-ink-700">
             Add a habit on the dashboard and ImproTrack will start filling this
-            page with completion trends, category signals, and streak summaries.
+            page with completion trends and streak summaries.
           </p>
           <Link
             href="/dashboard"
@@ -324,50 +276,12 @@ export function DashboardStats() {
     );
   }
 
-  if (filteredHabits.length === 0) {
-    return (
-      <div className="page-shell flex flex-col gap-3.5 py-4 sm:gap-4 sm:py-5">
-        <StatsHeader
-          archivedCount={archivedHabits.length}
-          category={activeCategory}
-          categories={categories}
-          customFrom={customFrom}
-          customTo={customTo}
-          onCategoryChange={setSelectedCategory}
-          onCustomFromChange={setCustomFrom}
-          onCustomToChange={setCustomTo}
-          onPresetChange={handlePresetChange}
-          rangeLabel={rangeLabel}
-          selectedPreset={selectedPreset}
-          mobileFiltersOpen={mobileFiltersOpen}
-          onToggleMobileFilters={() =>
-            setMobileFiltersOpen((current) => !current)
-          }
-        />
-
-        <div className="surface-panel flex min-h-[40vh] flex-col items-center justify-center gap-3 rounded-[28px] px-6 py-10 text-center">
-          <span className="text-[32px]">🧭</span>
-          <h2 className="font-display text-[28px] font-semibold tracking-tight text-ink-950">
-            No habits match this filter yet.
-          </h2>
-          <p className="max-w-xl text-[15px] leading-7 text-ink-700">
-            Try a different category or widen the time range. The dashboard
-            statistics update only from habits inside the selected scope.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="page-shell flex flex-col gap-3.5 py-4 sm:gap-4 sm:py-5">
       <StatsHeader
         archivedCount={archivedHabits.length}
-        category={activeCategory}
-        categories={categories}
         customFrom={customFrom}
         customTo={customTo}
-        onCategoryChange={setSelectedCategory}
         onCustomFromChange={setCustomFrom}
         onCustomToChange={setCustomTo}
         onPresetChange={handlePresetChange}
@@ -383,11 +297,7 @@ export function DashboardStats() {
         <StatsCard
           label="Habits in scope"
           value={String(filteredHabits.length)}
-          detail={
-            activeCategory === "all"
-              ? `${archivedHabits.length} archived habits`
-              : `${activeCategory} routines only`
-          }
+          detail={`${archivedHabits.length} archived habits`}
         />
         <StatsCard
           label="Average hit rate"
@@ -559,7 +469,7 @@ export function DashboardStats() {
                   className={`self-start rounded-full px-3 py-1 text-[12px] font-semibold ${softFillClass(summary.topHabit.habit.tone)}`}
                   style={softFillStyle(summary.topHabit.habit.tone)}
                 >
-                  {summary.topHabit.habit.category}
+                  {summary.topHabit.completed} completed
                 </span>
               </div>
 
@@ -589,48 +499,10 @@ export function DashboardStats() {
         </div>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-[0.92fr_1.08fr]">
+      <section>
         <div
           className="animate-fade-in-up surface-panel min-w-0 rounded-[28px] p-3.5 sm:p-6"
           style={{ animationDelay: "120ms" }}
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-[14px] font-semibold text-ink-950">
-                Category spread
-              </h2>
-              <p className="mt-1 text-[13px] text-ink-700">
-                Average hit rate grouped by category in the selected range.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-4 space-y-3 sm:mt-6 sm:space-y-4">
-            {summary.categories.map((category) => (
-              <div key={category.category}>
-                <div className="mb-2 flex items-center justify-between gap-3 text-[13px] text-ink-700">
-                  <span className="font-medium text-ink-950">
-                    {category.category}
-                  </span>
-                  <span>
-                    {category.rate}% · {category.habits} habit
-                    {category.habits > 1 ? "s" : ""}
-                  </span>
-                </div>
-                <div className="h-[8px] overflow-hidden rounded-full bg-black/[0.05]">
-                  <div
-                    className="h-[8px] rounded-full bg-[#6D28D9] transition-all duration-700 ease-out"
-                    style={{ width: `${category.rate}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div
-          className="animate-fade-in-up surface-panel min-w-0 rounded-[28px] p-3.5 sm:p-6"
-          style={{ animationDelay: "160ms" }}
         >
           <div className="flex items-center justify-between">
             <div>
@@ -766,11 +638,8 @@ export function DashboardStats() {
 
 function StatsHeader({
   archivedCount,
-  category,
-  categories,
   customFrom,
   customTo,
-  onCategoryChange,
   onCustomFromChange,
   onCustomToChange,
   onPresetChange,
@@ -780,11 +649,8 @@ function StatsHeader({
   onToggleMobileFilters,
 }: {
   archivedCount: number;
-  category: string;
-  categories: string[];
   customFrom: string;
   customTo: string;
-  onCategoryChange: (value: string) => void;
   onCustomFromChange: (value: string) => void;
   onCustomToChange: (value: string) => void;
   onPresetChange: (value: StatsPreset) => void;
@@ -823,8 +689,8 @@ function StatsHeader({
             </p>
             <p className="mt-3 hidden max-w-2xl text-[15px] leading-7 text-ink-700 sm:block">
               This view rolls your active habits into one calm control room, now
-              with range and category filters so you can isolate short-term
-              pressure or wider trend drift.
+              with range filters so you can isolate short-term pressure or wider
+              trend drift.
             </p>
           </div>
 
@@ -908,39 +774,6 @@ function StatsHeader({
                 />
               </div>
             )}
-          </div>
-
-          <div>
-            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
-              Category filter
-            </p>
-            <div className="comparison-scroll -mx-1 mt-2 flex gap-1.5 overflow-x-auto px-1 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:pb-0">
-              <button
-                type="button"
-                onClick={() => onCategoryChange("all")}
-                className={`${controlButtonBase} ${
-                  category === "all"
-                    ? "bg-white text-ink-950 shadow-[0_0_0_1px_rgba(0,0,0,0.1),0_1px_3px_rgba(0,0,0,0.08)]"
-                    : "bg-transparent text-ink-700 hover:bg-black/[0.05]"
-                }`}
-              >
-                All categories
-              </button>
-              {categories.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => onCategoryChange(item)}
-                  className={`${controlButtonBase} ${
-                    category === item
-                      ? "bg-white text-ink-950 shadow-[0_0_0_1px_rgba(0,0,0,0.1),0_1px_3px_rgba(0,0,0,0.08)]"
-                      : "bg-transparent text-ink-700 hover:bg-black/[0.05]"
-                  }`}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
           </div>
         </div>
       </div>

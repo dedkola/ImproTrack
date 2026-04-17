@@ -13,11 +13,15 @@ import {
 import { AuthControls } from "@/components/auth-controls";
 import { HabitIcon } from "@/components/habit-icon";
 import { HabitDefinition } from "@/lib/habits";
-import { accentClass, accentStyle, fillClass, fillStyle } from "@/lib/tone-utils";
+import {
+  accentClass,
+  accentStyle,
+  fillClass,
+  fillStyle,
+} from "@/lib/tone-utils";
 
 type SidebarProps = {
   habits: HabitDefinition[];
-  categories: string[];
   isOpen: boolean;
   onToggle: () => void;
   onAddHabit: () => void;
@@ -25,7 +29,6 @@ type SidebarProps = {
 
 export function Sidebar({
   habits,
-  categories,
   isOpen,
   onToggle,
   onAddHabit,
@@ -65,11 +68,7 @@ export function Sidebar({
             onClick={closeOnMobile}
             className="flex items-center gap-2.5"
           >
-            <img
-              src="/logo.svg"
-              alt="ImproTrack"
-              className="h-11 w-11"
-            />
+            <img src="/logo.svg" alt="ImproTrack" className="h-11 w-11" />
             <span className="font-display text-[24px] font-semibold text-ink-950">
               ImproTrack
             </span>
@@ -175,31 +174,6 @@ export function Sidebar({
               ))}
             </div>
           </div>
-
-          {/* Categories */}
-          {categories.length > 0 && (
-            <div className="mt-5">
-              <span className="px-2 py-1 text-[12px] font-semibold uppercase tracking-wider text-ink-600">
-                Categories
-              </span>
-              <div className="mt-1 space-y-0.5">
-                {categories.map((cat) => (
-                  <div
-                    key={cat}
-                    className="flex min-h-10 items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[14px] text-ink-700"
-                  >
-                    <span className="flex h-4 w-4 items-center justify-center text-[11px]">
-                      #
-                    </span>
-                    <span>{cat}</span>
-                    <span className="ml-auto text-[12px] tabular-nums text-ink-600">
-                      {habits.filter((h) => h.category === cat).length}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Archive & Stats */}
           <div className="mt-5 hidden border-t border-black/[0.06] pt-3 lg:block">

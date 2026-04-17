@@ -39,7 +39,6 @@ const todayKey = toDateKey(today);
 export function HabitDetail({ slug }: { slug: string }) {
   const {
     activeHabits,
-    categories,
     getHabitBySlug,
     updateHabit,
     deleteHabit,
@@ -161,12 +160,6 @@ export function HabitDetail({ slug }: { slug: string }) {
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <span
-                  className={`rounded-md px-2 py-0.5 text-[12px] font-medium ${softFillClass(habit.tone)}`}
-                  style={softFillStyle(habit.tone)}
-                >
-                  {habit.category}
-                </span>
                 <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-ink-700 shadow-[var(--shadow-card)]">
                   {monthLabel}
                 </span>
@@ -426,7 +419,6 @@ export function HabitDetail({ slug }: { slug: string }) {
         onClose={() => setFormOpen(false)}
         onSave={handleSave}
         initial={habit}
-        existingCategories={categories}
       />
 
       <ConfirmDialog
