@@ -1,12 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="ImproTrack icon">
-  <defs>
-    <linearGradient id="brand-gradient" x1="0" y1="300" x2="600" y2="300" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#6D28D9" />
-      <stop offset="100%" stop-color="#C026D3" />
-    </linearGradient>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
   <path
-    fill="url(#brand-gradient)"
+    fill="#000000"
     d="M462 0H138C61.8 0 0 61.8 0 138v324c0 76.2 61.8 138 138 138h324c76.2 0 138-61.8 138-138V138C600 61.8 538.2 0 462 0zm28.7 348.6c11.4 0 20.6 9.2 20.6 20.6v46.2c0 11.4-9.2 20.6-20.6 20.6H299.9c-22.7 0-41.4-17.4-43.5-39.6h-.2v-82.9l-99.8 99.8c-8 8-21.1 8-29.1 0l-32.6-32.6c-8-8-8-21.1 0-29.1l100.2-100.2h-85.6c-11.4 0-20.6-9.2-20.6-20.6v-46.2c0-11.4 9.2-20.6 20.6-20.6h190.4c14.5 0 27.4 7.1 35.3 18 5 6.7 7.8 14.5 8.5 22.4h.2V287l100-100c8-8 21.1-8 29.1 0l32.6 32.6c8 8 8 21.1 0 29.1l-99.9 99.9h75.5z"
   />
 </svg>

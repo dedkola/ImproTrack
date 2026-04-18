@@ -21,6 +21,7 @@ const display = Space_Grotesk({
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
+  applicationName: "ImproTrack",
   title: {
     default: "ImproTrack",
     template: "%s | ImproTrack",
@@ -36,6 +37,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="mask-icon"
+          href="/safari-pinned-tab.svg"
+          color="#6D28D9"
+        />
+      </head>
       <body className={`${sans.variable} ${display.variable} antialiased`}>
         <FirebaseAnalytics />
         <FirebaseAuthProvider>{children}</FirebaseAuthProvider>
