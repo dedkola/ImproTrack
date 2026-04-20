@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -10,7 +17,26 @@ type BeforeInstallPromptEvent = Event & {
   }>;
 };
 
+type InstallMode = "browser" | "ios";
+
+type PwaInstallContextValue = {
+  hasMounted: boolean;
+  installMode: InstallMode | null;
+  isInstallAvailable: boolean;
+  isInstallCardVisible: boolean;
+  isInstalling: boolean;
+  dismissInstallCard: () => void;
+  requestInstall: () => Promise<void>;
+  showInstallCard: () => void;
+};
+
+type PwaControllerProps = {
+  children?: React.ReactNode;
+};
+
 const INSTALL_DISMISS_KEY = "improtrack-install-dismissed";
+
+const PwaInstallContext = createContext<PwaInstallContextValue | null>(null);
 
 function isStandaloneDisplayMode() {
   return (
@@ -35,16 +61,23 @@ function isIosSafariInstallable() {
   return isIosDevice && isSafari && !isOtherIosBrowser;
 }
 
-export function PwaController() {
+export function usePwaInstall() {
+  const context = useContext(PwaInstallContext);
+
+  if (!context) {
+    throw new Error("usePwaInstall must be used within PwaController");
+  }
+
+  return context;
+}
+
+export function PwaController({ children }: PwaControllerProps) {
   const [hasMounted, setHasMounted] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
   const [installPromptEvent, setInstallPromptEvent] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [installMode, setInstallMode] = useState<"browser" | "ios" | null>(
-    null,
-  );
   const [isInstalling, setIsInstalling] = useState(false);
 
   useEffect(() => {
@@ -59,21 +92,16 @@ export function PwaController() {
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
 
-      if (
-        window.localStorage.getItem(INSTALL_DISMISS_KEY) === "1" ||
-        isStandaloneDisplayMode()
-      ) {
+      if (isStandaloneDisplayMode()) {
         return;
       }
 
       setInstallPromptEvent(event as BeforeInstallPromptEvent);
-      setInstallMode("browser");
     };
 
     const handleAppInstalled = () => {
       window.localStorage.removeItem(INSTALL_DISMISS_KEY);
       setInstallPromptEvent(null);
-      setInstallMode(null);
       setIsDismissed(false);
       setIsInstalled(true);
       setIsInstalling(false);
@@ -109,33 +137,41 @@ export function PwaController() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!hasMounted || isInstalled || isDismissed) {
-      setInstallMode(null);
-      return;
+  const installMode = useMemo<InstallMode | null>(() => {
+    if (!hasMounted || isInstalled) {
+      return null;
     }
 
     if (installPromptEvent) {
-      setInstallMode("browser");
-      return;
+      return "browser";
     }
 
     if (isIosSafariInstallable()) {
-      setInstallMode("ios");
+      return "ios";
+    }
+
+    return null;
+  }, [hasMounted, installPromptEvent, isInstalled]);
+
+  const isInstallAvailable = installMode !== null;
+  const isInstallCardVisible = isInstallAvailable && !isInstalled && !isDismissed;
+
+  const dismissInstallCard = useCallback(() => {
+    window.localStorage.setItem(INSTALL_DISMISS_KEY, "1");
+    setIsDismissed(true);
+  }, []);
+
+  const showInstallCard = useCallback(() => {
+    window.localStorage.removeItem(INSTALL_DISMISS_KEY);
+    setIsDismissed(false);
+  }, []);
+
+  const requestInstall = useCallback(async () => {
+    if (installMode === "ios") {
+      showInstallCard();
       return;
     }
 
-    setInstallMode(null);
-  }, [hasMounted, installPromptEvent, isDismissed, isInstalled]);
-
-  const dismissInstallCard = () => {
-    window.localStorage.setItem(INSTALL_DISMISS_KEY, "1");
-    setIsDismissed(true);
-    setInstallPromptEvent(null);
-    setInstallMode(null);
-  };
-
-  const installFromPrompt = async () => {
     if (!installPromptEvent) {
       return;
     }
@@ -144,103 +180,119 @@ export function PwaController() {
 
     try {
       await installPromptEvent.prompt();
-      const { outcome } = await installPromptEvent.userChoice;
-
-      if (outcome !== "accepted") {
-        setIsInstalling(false);
-      }
+      await installPromptEvent.userChoice;
     } catch {
-      setIsInstalling(false);
+      return;
     } finally {
       setInstallPromptEvent(null);
+      setIsInstalling(false);
     }
-  };
+  }, [installMode, installPromptEvent, showInstallCard]);
 
-  if (!hasMounted) {
-    return null;
-  }
-
-  if (!isOnline) {
-    return (
-      <div className="pointer-events-none fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-sm sm:left-auto sm:right-6">
-        <div
-          aria-live="polite"
-          className="pointer-events-auto rounded-[24px] border border-black/[0.08] bg-white/95 px-4 py-4 shadow-[var(--shadow-panel)] backdrop-blur-xl"
-        >
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-600">
-            Offline mode
-          </p>
-          <p className="mt-2 text-[14px] leading-6 text-ink-950">
-            Cached pages stay available, but Google sign-in and live habit sync
-            need a network connection.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isInstalled || isDismissed || !installMode) {
-    return null;
-  }
+  const contextValue = useMemo<PwaInstallContextValue>(
+    () => ({
+      hasMounted,
+      installMode,
+      isInstallAvailable,
+      isInstallCardVisible,
+      isInstalling,
+      dismissInstallCard,
+      requestInstall,
+      showInstallCard,
+    }),
+    [
+      dismissInstallCard,
+      hasMounted,
+      installMode,
+      isInstallAvailable,
+      isInstallCardVisible,
+      isInstalling,
+      requestInstall,
+      showInstallCard,
+    ],
+  );
 
   return (
-    <div className="pointer-events-none fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-sm sm:left-auto sm:right-6">
-      <aside className="pointer-events-auto rounded-[24px] border border-black/[0.08] bg-white/95 px-4 py-4 shadow-[var(--shadow-panel)] backdrop-blur-xl">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
+    <PwaInstallContext.Provider value={contextValue}>
+      {children}
+
+      {hasMounted && !isOnline ? (
+        <div className="pointer-events-none fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-sm sm:left-auto sm:right-6">
+          <div
+            aria-live="polite"
+            className="pointer-events-auto rounded-[24px] border border-black/[0.08] bg-white/95 px-4 py-4 shadow-[var(--shadow-panel)] backdrop-blur-xl"
+          >
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-600">
-              Install ImproTrack
+              Offline mode
             </p>
-            <h2 className="mt-2 font-display text-[22px] font-semibold tracking-tight text-ink-950">
-              Keep your dashboard close at hand.
-            </h2>
-            <p className="mt-2 text-[14px] leading-6 text-ink-700">
-              {installMode === "browser"
-                ? "Install ImproTrack for a focused, app-like workspace with faster repeat visits and an offline fallback."
-                : "On iPhone or iPad, open Safari’s Share sheet and choose Add to Home Screen to install ImproTrack."}
+            <p className="mt-2 text-[14px] leading-6 text-ink-950">
+              Cached pages stay available, but Google sign-in and live habit sync
+              need a network connection.
             </p>
           </div>
-
-          <button
-            type="button"
-            onClick={dismissInstallCard}
-            aria-label="Dismiss install prompt"
-            className="tap-target-compact inline-flex flex-shrink-0 items-center justify-center rounded-full border border-black/[0.06] bg-white text-[18px] leading-none text-ink-500 shadow-[var(--shadow-card)] transition-colors hover:text-ink-950"
-          >
-            ×
-          </button>
         </div>
+      ) : null}
 
-        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-          {installMode === "browser" ? (
-            <>
-              <button
-                type="button"
-                onClick={() => void installFromPrompt()}
-                disabled={isInstalling}
-                className="pill-btn min-h-11 rounded-xl bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-4 py-3 text-[14px] font-semibold text-white shadow-[0_10px_24px_rgba(109,40,217,0.28)] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isInstalling ? "Opening prompt..." : "Install app"}
-              </button>
+      {hasMounted && isOnline && isInstallCardVisible ? (
+        <div className="pointer-events-none fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-sm sm:left-auto sm:right-6">
+          <aside className="pointer-events-auto rounded-[24px] border border-black/[0.08] bg-white/95 px-4 py-4 shadow-[var(--shadow-panel)] backdrop-blur-xl">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-600">
+                  Install ImproTrack
+                </p>
+                <h2 className="mt-2 font-display text-[22px] font-semibold tracking-tight text-ink-950">
+                  Keep your dashboard close at hand.
+                </h2>
+                <p className="mt-2 text-[14px] leading-6 text-ink-700">
+                  {installMode === "browser"
+                    ? "Install ImproTrack for a focused, app-like workspace with faster repeat visits and an offline fallback."
+                    : "On iPhone or iPad, open Safari’s Share sheet and choose Add to Home Screen to install ImproTrack."}
+                </p>
+              </div>
+
               <button
                 type="button"
                 onClick={dismissInstallCard}
-                className="pill-btn min-h-11 rounded-xl border border-black/[0.06] bg-white px-4 py-3 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)]"
+                aria-label="Dismiss install prompt"
+                className="tap-target-compact inline-flex flex-shrink-0 items-center justify-center rounded-full border border-black/[0.06] bg-white text-[18px] leading-none text-ink-500 shadow-[var(--shadow-card)] transition-colors hover:text-ink-950"
               >
-                Not now
+                ×
               </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              onClick={dismissInstallCard}
-              className="pill-btn min-h-11 rounded-xl border border-black/[0.06] bg-white px-4 py-3 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)]"
-            >
-              Hide tip
-            </button>
-          )}
+            </div>
+
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+              {installMode === "browser" ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => void requestInstall()}
+                    disabled={isInstalling}
+                    className="pill-btn min-h-11 rounded-xl bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-4 py-3 text-[14px] font-semibold text-white shadow-[0_10px_24px_rgba(109,40,217,0.28)] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isInstalling ? "Opening prompt..." : "Install app"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={dismissInstallCard}
+                    className="pill-btn min-h-11 rounded-xl border border-black/[0.06] bg-white px-4 py-3 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)]"
+                  >
+                    Not now
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={dismissInstallCard}
+                  className="pill-btn min-h-11 rounded-xl border border-black/[0.06] bg-white px-4 py-3 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)]"
+                >
+                  Hide tip
+                </button>
+              )}
+            </div>
+          </aside>
         </div>
-      </aside>
-    </div>
+      ) : null}
+    </PwaInstallContext.Provider>
   );
 }

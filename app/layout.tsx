@@ -110,8 +110,9 @@ export default function RootLayout({
       </head>
       <body className={`${sans.variable} ${display.variable} antialiased`}>
         <FirebaseAnalytics />
-        <FirebaseAuthProvider>{children}</FirebaseAuthProvider>
-        <PwaController />
+        <FirebaseAuthProvider>
+          <PwaController>{children}</PwaController>
+        </FirebaseAuthProvider>
         <Analytics />
         <SpeedInsights />
       </body>
