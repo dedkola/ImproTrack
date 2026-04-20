@@ -1,0 +1,24 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: improtrack-dev
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local
+    environment:
+      - NODE_ENV=development
+      - NEXT_ALLOWED_DEV_ORIGINS=${NEXT_ALLOWED_DEV_ORIGINS:-localhost,127.0.0.1}
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - improtrack-network
+    restart: unless-stopped
+
+networks:
+  improtrack-network:
+    driver: bridge
