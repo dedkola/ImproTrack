@@ -22,6 +22,7 @@ import {
 } from "@/lib/stats";
 import { useHabits, useHabitRecords } from "@/lib/storage";
 import { HabitForm, HabitMenu, ConfirmDialog } from "@/components/habit-form";
+import { ArchiveFeedback } from "@/components/archive-feedback";
 import { HabitIcon } from "@/components/habit-icon";
 import { HabitChart } from "@/components/habit-chart";
 import {
@@ -38,14 +39,14 @@ const todayKey = toDateKey(today);
 
 export function HabitDetail({ slug }: { slug: string }) {
   const {
-    activeHabits,
     getHabitBySlug,
     updateHabit,
     deleteHabit,
     archiveHabit,
+    restoreHabit,
     habits: allHabits,
   } = useHabits();
-  const { records, loadFullHistory } = useHabitRecords(allHabits);
+  const { records, loadFullHistory, fullHistoryState } = useHabitRecords(allHabits);
   const habit = getHabitBySlug(slug);
 
   useEffect(() => {
@@ -54,21 +55,33 @@ export function HabitDetail({ slug }: { slug: string }) {
 
   const [formOpen, setFormOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [archiveFeedbackOpen, setArchiveFeedbackOpen] = useState(false);
 
   if (!habit) {
     return (
       <div className="page-shell flex min-h-[60vh] items-center justify-center py-5">
-        <div className="animate-scale-in surface-panel rounded-2xl p-6 text-center">
+        <div className="animate-scale-in surface-panel max-w-lg rounded-2xl p-6 text-center">
           <p className="text-[14px] text-ink-700">Habit not found</p>
           <h1 className="mt-2 text-[20px] font-semibold text-ink-950">
             This habit does not exist.
           </h1>
-          <Link
-            href="/dashboard"
-            className="pill-btn tap-target mt-4 inline-flex rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)]"
-          >
-            Back to tracker
-          </Link>
+          <p className="mt-2 text-[14px] leading-6 text-ink-700">
+            It may have been deleted, archived, or opened from an old link.
+          </p>
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-center">
+            <Link
+              href="/dashboard"
+              className="pill-btn tap-target inline-flex items-center justify-center rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)]"
+            >
+              Back to tracker
+            </Link>
+            <Link
+              href="/dashboard/archive"
+              className="pill-btn tap-target inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]"
+            >
+              Open archive
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -121,10 +134,20 @@ export function HabitDetail({ slug }: { slug: string }) {
         : "Not done today";
   const monthLabel = formatMonthLabel(currentMonth);
 
-  const handleSave = (
+  const handleSave = async (
     data: Omit<HabitDefinition, "id" | "slug" | "createdAt" | "archived">,
   ) => {
-    updateHabit(habit.id, data);
+    await updateHabit(habit.id, data);
+  };
+
+  const handleArchiveHabit = async () => {
+    await archiveHabit(habit.id);
+    setArchiveFeedbackOpen(true);
+  };
+
+  const handleUndoArchive = async () => {
+    await restoreHabit(habit.id);
+    setArchiveFeedbackOpen(false);
   };
 
   return (
@@ -143,7 +166,9 @@ export function HabitDetail({ slug }: { slug: string }) {
             <HabitMenu
               tone={habit.tone}
               onEdit={() => setFormOpen(true)}
-              onArchive={() => archiveHabit(habit.id)}
+              onArchive={() => {
+                void handleArchiveHabit();
+              }}
               onDelete={() => setDeleteOpen(true)}
             />
           </div>
@@ -206,6 +231,48 @@ export function HabitDetail({ slug }: { slug: string }) {
           </div>
         </div>
       </header>
+
+      {fullHistoryState.status !== "ready" ? (
+        <section
+          className={`animate-fade-in-up rounded-[24px] border px-4 py-3 shadow-[var(--shadow-card)] sm:px-5 ${
+            fullHistoryState.status === "error"
+              ? "border-red-200 bg-red-50 text-red-950"
+              : "border-sky-200 bg-sky-50 text-sky-950"
+          }`}
+          style={{ animationDelay: "40ms" }}
+        >
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-[13px] font-semibold">
+                {fullHistoryState.status === "error"
+                  ? "Older history could not load"
+                  : "Loading older history"}
+              </p>
+              <p
+                className={`mt-1 text-[12px] leading-5 ${
+                  fullHistoryState.status === "error"
+                    ? "text-red-900/85"
+                    : "text-sky-900/85"
+                }`}
+              >
+                {fullHistoryState.status === "error"
+                  ? `${fullHistoryState.error} All-time totals, streaks, and weekday patterns may still be incomplete.`
+                  : "All-time totals, streaks, monthly trend, and weekday patterns will fill in as older months finish syncing."}
+              </p>
+            </div>
+
+            {fullHistoryState.status === "error" ? (
+              <button
+                type="button"
+                onClick={() => void loadFullHistory()}
+                className="pill-btn inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-4 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]"
+              >
+                Retry history load
+              </button>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
 
       {/* Slot breakdown (for multi-slot habits) */}
       {slotBreakdown && (
@@ -292,7 +359,11 @@ export function HabitDetail({ slug }: { slug: string }) {
           <StatCard
             label="All time"
             value={String(total)}
-            detail={habit.unitLabel}
+            detail={
+              fullHistoryState.status === "ready"
+                ? habit.unitLabel
+                : `${habit.unitLabel} · partial history`
+            }
           />
           <StatCard
             label="Current streak"
@@ -412,6 +483,15 @@ export function HabitDetail({ slug }: { slug: string }) {
           </div>
         </div>
       </section>
+
+      <ArchiveFeedback
+        open={archiveFeedbackOpen}
+        habitName={habit.name}
+        onUndo={() => {
+          void handleUndoArchive();
+        }}
+        onDismiss={() => setArchiveFeedbackOpen(false)}
+      />
 
       {/* Modals */}
       <HabitForm

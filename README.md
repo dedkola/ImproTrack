@@ -19,16 +19,23 @@ The app is split into a public marketing surface and an authenticated dashboard 
 
 ## Development
 
-Install dependencies and start the dev server:
+Use the pinned Node.js runtime first, then install dependencies and start the dev server:
 
 ```bash
+nvm use
 pnpm install
 pnpm dev
 ```
 
-Production commands:
+If you need to test the app from another device on your LAN, set
+`NEXT_ALLOWED_DEV_ORIGINS` to a comma-separated list of additional hostnames or
+IPs before starting Next.js.
+
+Validation and production commands:
 
 ```bash
+pnpm typecheck
+pnpm check
 pnpm build
 pnpm start
 ```
@@ -55,6 +62,7 @@ Recommended SEO variable:
 `NEXT_PUBLIC_SITE_URL` is used to generate:
 
 - `metadataBase`
+- canonical and social metadata URLs
 - `/sitemap.xml`
 - `/robots.txt`
 
@@ -75,6 +83,23 @@ Crawlers are blocked from these paths:
 - `/habits`
 
 Dashboard routes also emit `noindex` metadata at the layout level.
+
+## PWA and offline behavior
+
+- The app now ships with a lightweight service worker for production builds. It caches the public shell, core dashboard routes, and static assets so the app feels installable and has a basic offline fallback.
+- `pnpm dev` does **not** register the service worker. To test install/offline behavior locally, use `pnpm build && pnpm start`.
+- Google sign-in and fresh Firestore sync still require a live network connection. Cached screens can load offline, but auth refreshes and new data writes will wait for connectivity.
+- Chromium browsers can use the in-app install prompt. On iOS Safari, install via **Share → Add to Home Screen**.
+
+## Firebase auth setup for installed PWAs
+
+- Add every local and deployed origin you use (for example `localhost` and your production domain) to **Firebase Console → Authentication → Settings → Authorized domains**.
+- The installed PWA uses the same web origin as the browser tab, so Google sign-in will fail if that origin is missing from Firebase Auth authorized domains.
+- Keep the `NEXT_PUBLIC_SITE_URL` value aligned with your production origin so metadata, install links, and social previews all point at the same host.
+
+## CI
+
+- GitHub Actions runs `pnpm check` on every push and pull request.
 
 ## Project Notes
 

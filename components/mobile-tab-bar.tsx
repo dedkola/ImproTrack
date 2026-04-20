@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Archive, BarChart2, LayoutGrid, Settings } from "lucide-react";
+import { Archive, BarChart2, LayoutGrid, Plus, Settings } from "lucide-react";
 
 const mobileTabs = [
   {
@@ -27,17 +27,19 @@ const mobileTabs = [
   },
 ] as const;
 
+type MobileTabBarProps = {
+  onAddHabit: () => void;
+};
+
 function isTabActive(pathname: string, href: string) {
   if (href === "/dashboard") {
-    return (
-      pathname === "/dashboard" || pathname.startsWith("/dashboard/habits/")
-    );
+    return pathname === "/dashboard" || pathname.startsWith("/dashboard/habits/");
   }
 
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function MobileTabBar() {
+export function MobileTabBar({ onAddHabit }: MobileTabBarProps) {
   const pathname = usePathname();
 
   return (
@@ -45,8 +47,18 @@ export function MobileTabBar() {
       aria-label="Primary mobile navigation"
       className="mobile-tab-bar fixed inset-x-0 bottom-0 z-30 border-t border-black/[0.06] bg-white/92 backdrop-blur-2xl md:hidden"
     >
-      <div className="page-shell py-2">
-        <div className="grid grid-cols-4 gap-1 rounded-[24px] border border-black/[0.05] bg-white/80 p-1 shadow-[0_-8px_24px_rgba(10,22,40,0.08)]">
+      <div className="page-shell relative py-2">
+        <button
+          type="button"
+          onClick={onAddHabit}
+          aria-label="Add a new habit"
+          className="pill-btn absolute right-4 top-0 z-10 inline-flex min-h-12 -translate-y-1/2 items-center gap-2 rounded-full bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-4 py-2 text-[13px] font-semibold text-white shadow-[0_12px_32px_rgba(109,40,217,0.35)]"
+        >
+          <Plus className="h-4 w-4" strokeWidth={2.1} />
+          Add habit
+        </button>
+
+        <div className="grid grid-cols-4 gap-1 rounded-[24px] border border-black/[0.05] bg-white/80 p-1 shadow-[0_-8px_24px_rgba(10,22,40,0.08)] pt-5">
           {mobileTabs.map((tab) => {
             const active = isTabActive(pathname, tab.href);
             const Icon = tab.icon;

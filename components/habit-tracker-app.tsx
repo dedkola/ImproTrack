@@ -41,6 +41,7 @@ import {
 } from "@/lib/stats";
 import { useHabits, useHabitRecords } from "@/lib/storage";
 import { HabitForm, HabitMenu, ConfirmDialog } from "@/components/habit-form";
+import { ArchiveFeedback } from "@/components/archive-feedback";
 import { HabitIcon } from "@/components/habit-icon";
 
 const today = startOfDay(new Date());
@@ -275,10 +276,12 @@ function MobileMatrixDayCell({
 export function HabitTrackerApp() {
   const {
     activeHabits,
+    archivedHabits,
     addHabit,
     updateHabit,
     deleteHabit,
     archiveHabit,
+    restoreHabit,
     reorderHabits: persistHabitOrder,
   } = useHabits();
   const { records, toggleHabitDay, loadMonth } = useHabitRecords(activeHabits);
@@ -337,6 +340,9 @@ export function HabitTrackerApp() {
     null,
   );
   const [deleteTarget, setDeleteTarget] = useState<HabitDefinition | null>(
+    null,
+  );
+  const [archiveFeedback, setArchiveFeedback] = useState<HabitDefinition | null>(
     null,
   );
 
@@ -496,14 +502,26 @@ export function HabitTrackerApp() {
     0,
   );
 
-  const handleSave = (
+  const handleSave = async (
     data: Omit<HabitDefinition, "id" | "slug" | "createdAt" | "archived">,
   ) => {
     if (editingHabit) {
-      updateHabit(editingHabit.id, data);
-    } else {
-      addHabit(data);
+      await updateHabit(editingHabit.id, data);
+      return;
     }
+
+    await addHabit(data);
+  };
+
+  const handleArchiveHabit = async (habit: HabitDefinition) => {
+    await archiveHabit(habit.id);
+    setArchiveFeedback(habit);
+  };
+
+  const handleUndoArchive = async () => {
+    if (!archiveFeedback) return;
+    await restoreHabit(archiveFeedback.id);
+    setArchiveFeedback(null);
   };
 
   return (
@@ -580,16 +598,26 @@ export function HabitTrackerApp() {
             <p className="max-w-xs text-[14px] text-ink-700">
               Create your first habit to start tracking your progress.
             </p>
-            <button
-              type="button"
-              onClick={() => {
-                setEditingHabit(null);
-                setFormOpen(true);
-              }}
-              className="pill-btn tap-target mt-2 rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)]"
-            >
-              Create first habit
-            </button>
+            <div className="mt-2 flex w-full max-w-sm flex-col gap-2 sm:flex-row sm:justify-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingHabit(null);
+                  setFormOpen(true);
+                }}
+                className="pill-btn tap-target rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)]"
+              >
+                Create first habit
+              </button>
+              {archivedHabits.length > 0 ? (
+                <Link
+                  href="/dashboard/archive"
+                  className="pill-btn tap-target inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]"
+                >
+                  Open archive
+                </Link>
+              ) : null}
+            </div>
           </div>
         ) : (
           <div className="flex flex-col gap-4">
@@ -756,7 +784,9 @@ export function HabitTrackerApp() {
                             setEditingHabit(habit);
                             setFormOpen(true);
                           }}
-                          onArchive={() => archiveHabit(habit.id)}
+                          onArchive={() => {
+                            void handleArchiveHabit(habit);
+                          }}
                           onDelete={() => setDeleteTarget(habit)}
                         />
                       </div>
@@ -1095,7 +1125,9 @@ export function HabitTrackerApp() {
                                       setEditingHabit(habit);
                                       setFormOpen(true);
                                     }}
-                                    onArchive={() => archiveHabit(habit.id)}
+                                    onArchive={() => {
+                                      void handleArchiveHabit(habit);
+                                    }}
                                     onDelete={() => setDeleteTarget(habit)}
                                   />
                                 </div>
@@ -1328,6 +1360,15 @@ export function HabitTrackerApp() {
           </div>
         )}
       </div>
+
+      <ArchiveFeedback
+        open={!!archiveFeedback}
+        habitName={archiveFeedback?.name ?? null}
+        onUndo={() => {
+          void handleUndoArchive();
+        }}
+        onDismiss={() => setArchiveFeedback(null)}
+      />
 
       {/* Modals */}
       <HabitForm

@@ -259,6 +259,25 @@ textarea {
   }
 }
 
+/* --- Global utility interactions ---------------------------------------- */
+
+.pill-btn {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.pill-btn:hover {
+  transform: translateY(-1px);
+}
+
+.pill-btn:active {
+  transform: translateY(0);
+}
+
 .landing-backdrop {
   background:
     radial-gradient(

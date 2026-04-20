@@ -33,7 +33,33 @@ export function ArchivePage() {
         </Link>
       </header>
 
-      {archivedHabits.length > 0 && (
+      {archivedHabits.length === 0 ? (
+        <section className="animate-fade-in-up surface-panel flex flex-col items-center gap-4 rounded-[28px] px-6 py-12 text-center sm:px-8 sm:py-16">
+          <span className="text-[34px]">🗂️</span>
+          <div>
+            <h2 className="text-[20px] font-semibold text-ink-950">
+              Nothing is archived right now
+            </h2>
+            <p className="mt-2 max-w-md text-[14px] leading-6 text-ink-700">
+              Archived habits land here when you want to pause something without losing its history.
+            </p>
+          </div>
+          <div className="flex w-full max-w-sm flex-col gap-2 sm:flex-row sm:justify-center">
+            <Link
+              href="/dashboard"
+              className="pill-btn tap-target inline-flex items-center justify-center rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)]"
+            >
+              Back to dashboard
+            </Link>
+            <Link
+              href="/dashboard/stats"
+              className="pill-btn tap-target inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]"
+            >
+              View statistics
+            </Link>
+          </div>
+        </section>
+      ) : (
         <div className="stagger-children flex flex-col gap-2.5 sm:gap-3">
           {archivedHabits.map((habit) => (
             <div
@@ -48,13 +74,9 @@ export function ArchivePage() {
                   style={accentStyle(habit.tone)}
                 />
                 <div className="min-w-0">
-                  <p className="text-[16px] font-semibold text-ink-950">
-                    {habit.name}
-                  </p>
+                  <p className="text-[16px] font-semibold text-ink-950">{habit.name}</p>
                   <p className="mt-0.5 text-[13px] leading-5 text-ink-700">
-                    {habit.frequencyPerDay > 1
-                      ? `${habit.frequencyPerDay}x/day`
-                      : "Single check-in"}
+                    {habit.frequencyPerDay > 1 ? `${habit.frequencyPerDay}x/day` : "Single check-in"}
                   </p>
                 </div>
               </div>

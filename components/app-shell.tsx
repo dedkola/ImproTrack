@@ -7,7 +7,11 @@ import { Sidebar, SidebarToggle } from "@/components/sidebar";
 import { Footer } from "@/components/footer";
 import { HabitForm } from "@/components/habit-form";
 import { MobileTabBar } from "@/components/mobile-tab-bar";
-import { HabitStorageProvider, useHabits } from "@/lib/storage";
+import {
+  HabitStorageProvider,
+  type HabitStorageSyncState,
+  useHabits,
+} from "@/lib/storage";
 import { HabitDefinition } from "@/lib/habits";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -20,27 +24,34 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
 function AppShellContent({ children }: { children: React.ReactNode }) {
   const { user, isLoading: isAuthLoading } = useFirebaseAuth();
-  const { activeHabits, addHabit, updateHabit, isLoading, error } = useHabits();
+  const {
+    activeHabits,
+    addHabit,
+    updateHabit,
+    isLoading,
+    bootstrapError,
+    syncState,
+  } = useHabits();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
-  const [editingHabit, setEditingHabit] = useState<HabitDefinition | null>(
-    null,
-  );
+  const [editingHabit, setEditingHabit] = useState<HabitDefinition | null>(null);
 
   const handleAddHabit = () => {
     setEditingHabit(null);
+    setSidebarOpen(false);
     setFormOpen(true);
   };
 
-  const handleSave = (
+  const handleSave = async (
     data: Omit<HabitDefinition, "id" | "slug" | "createdAt" | "archived">,
   ) => {
     if (editingHabit) {
-      updateHabit(editingHabit.id, data);
-    } else {
-      addHabit(data);
+      await updateHabit(editingHabit.id, data);
+      return;
     }
+
+    await addHabit(data);
   };
 
   if (isAuthLoading || (user && isLoading)) {
@@ -61,9 +72,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
               <span className="loading-dot" />
               <span className="loading-dot" />
             </div>
-            <p className="text-[15px] text-ink-600">
-              Loading your dashboard&hellip;
-            </p>
+            <p className="text-[15px] text-ink-600">Loading your dashboard&hellip;</p>
           </div>
         </main>
 
@@ -90,8 +99,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
               Sign in to open your dashboard
             </h1>
             <p className="max-w-xl text-[15px] leading-7 text-ink-700">
-              ImproTrack now stores habits per account, so the dashboard unlocks
-              after you sign in with Google.
+              ImproTrack now stores habits per account, so the dashboard unlocks after you sign in with Google.
             </p>
             <AuthControls variant="panel" />
           </div>
@@ -102,7 +110,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (error) {
+  if (bootstrapError) {
     return (
       <div className="flex min-h-screen flex-col">
         <div className="header-bar sticky top-0 z-40">
@@ -120,7 +128,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
               Firestore is not ready yet
             </h1>
             <p className="max-w-xl text-[15px] leading-7 text-ink-700">
-              {error}
+              {bootstrapError.message}
             </p>
             <AuthControls variant="panel" />
           </div>
@@ -133,6 +141,13 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen min-w-0">
+      <a
+        href="#dashboard-main"
+        className="sr-only z-[120] rounded-xl bg-ink-950 px-4 py-2 text-[14px] font-semibold text-white shadow-lg focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+      >
+        Skip to dashboard content
+      </a>
+
       <Sidebar
         habits={activeHabits}
         isOpen={sidebarOpen}
@@ -141,7 +156,6 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
       />
 
       <div className="mobile-tab-shell flex min-w-0 flex-1 flex-col">
-        {/* Mobile header bar with sidebar toggle */}
         <div className="header-bar sticky top-0 z-40 lg:hidden">
           <div className="page-shell flex h-[3.25rem] items-center sm:h-14">
             <SidebarToggle onToggle={() => setSidebarOpen(true)} />
@@ -151,12 +165,20 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        <main className="min-w-0 flex-1">{children}</main>
+        {syncState.isSyncing || syncState.latestIssue ? (
+          <div className="page-shell pt-3 sm:pt-4">
+            <SyncStatusBanner syncState={syncState} />
+          </div>
+        ) : null}
+
+        <main id="dashboard-main" className="min-w-0 flex-1">
+          {children}
+        </main>
 
         <Footer />
       </div>
 
-      <MobileTabBar />
+      <MobileTabBar onAddHabit={handleAddHabit} />
 
       <HabitForm
         open={formOpen}
@@ -167,6 +189,54 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
         onSave={handleSave}
         initial={editingHabit}
       />
+    </div>
+  );
+}
+
+function SyncStatusBanner({
+  syncState,
+}: {
+  syncState: HabitStorageSyncState;
+}) {
+  const issueTitle =
+    syncState.latestIssue?.kind === "listener"
+      ? syncState.latestIssue.source === "records"
+        ? "Live record sync needs attention"
+        : "Live habit sync needs attention"
+      : "Last change did not sync";
+  const recordLabel =
+    syncState.pendingRecordCount === 1 ? "record update" : "record updates";
+  const mutationLabel =
+    syncState.pendingMutationCount === 1 ? "save request" : "save requests";
+
+  return (
+    <div className="grid gap-2">
+      {syncState.isSyncing ? (
+        <div
+          role="status"
+          aria-live="polite"
+          className="rounded-[22px] border border-sky-200 bg-sky-50 px-4 py-3 text-sky-950 shadow-[var(--shadow-card)]"
+        >
+          <p className="text-[13px] font-semibold">Saving your latest changes…</p>
+          <p className="mt-1 text-[12px] leading-5 text-sky-900/85">
+            {syncState.pendingRecordCount > 0
+              ? `${syncState.pendingRecordCount} ${recordLabel} still waiting for confirmation.`
+              : `${syncState.pendingMutationCount} ${mutationLabel} still heading to Firestore.`}
+          </p>
+        </div>
+      ) : null}
+
+      {syncState.latestIssue ? (
+        <div
+          role="alert"
+          className="rounded-[22px] border border-red-200 bg-red-50 px-4 py-3 text-red-950 shadow-[var(--shadow-card)]"
+        >
+          <p className="text-[13px] font-semibold">{issueTitle}</p>
+          <p className="mt-1 text-[12px] leading-5 text-red-900/85">
+            {syncState.latestIssue.message}
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 }
