@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { onIdTokenChanged, type User } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebase/auth";
+import { hasFirebaseClientConfig } from "@/lib/firebase/client";
 
 export type FirebaseAuthUser = Pick<
   User,
@@ -27,6 +28,11 @@ export function FirebaseAuthProvider({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!hasFirebaseClientConfig()) {
+      setIsLoading(false);
+      return;
+    }
+
     let isMounted = true;
 
     const unsubscribe = onIdTokenChanged(

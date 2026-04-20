@@ -55,6 +55,10 @@ Required Firebase variables:
 - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
 - `NEXT_PUBLIC_FIREBASE_APP_ID`
 
+Firebase config is resolved lazily so CI can prerender public routes without
+shipping Firebase secrets, but sign-in, Firestore, and Storage still require
+these values at runtime.
+
 Recommended SEO variable:
 
 - `NEXT_PUBLIC_SITE_URL`

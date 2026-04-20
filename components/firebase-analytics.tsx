@@ -1,14 +1,18 @@
 "use client";
 
 import { useEffect } from "react";
-import { firebaseConfig, getFirebaseApp } from "@/lib/firebase/client";
+import {
+  getFirebaseApp,
+  getFirebaseMeasurementId,
+  hasFirebaseClientConfig,
+} from "@/lib/firebase/client";
 
 export function FirebaseAnalytics() {
   useEffect(() => {
     let isMounted = true;
 
     async function enableAnalytics() {
-      if (!firebaseConfig.measurementId) {
+      if (!hasFirebaseClientConfig() || !getFirebaseMeasurementId()) {
         return;
       }
 
