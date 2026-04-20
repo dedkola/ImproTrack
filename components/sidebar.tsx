@@ -47,21 +47,20 @@ export function Sidebar({
 
   return (
     <>
-      {/* Mobile overlay */}
       {isOpen && (
         <div
+          aria-hidden="true"
           className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:hidden"
           onClick={onToggle}
         />
       )}
 
-      {/* Sidebar */}
       <aside
+        aria-label="Dashboard sidebar"
         className={`fixed left-0 top-0 z-50 flex h-full w-72 flex-col border-r border-black/[0.06] bg-white/80 backdrop-blur-2xl transition-transform duration-300 ease-out lg:sticky lg:z-30 lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Logo area */}
         <div className="flex h-14 items-center justify-between border-b border-black/[0.06] px-4">
           <Link
             href="/dashboard"
@@ -95,8 +94,7 @@ export function Sidebar({
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-3 py-3">
+        <nav aria-label="Dashboard navigation" className="sidebar-nav flex-1 overflow-y-auto px-3 py-3">
           <div className="rounded-[24px] border border-black/[0.06] bg-white px-3 py-3 shadow-[var(--shadow-card)] lg:hidden">
             <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
               Quick actions
@@ -126,12 +124,11 @@ export function Sidebar({
               href="/dashboard"
               label="Dashboard"
               icon={<LayoutGrid className="h-4 w-4" strokeWidth={1.5} />}
-              active={pathname === "/dashboard"}
+              active={pathname === "/dashboard" || pathname.startsWith("/dashboard/habits/")}
               onClick={closeOnMobile}
             />
           </div>
 
-          {/* Habits section */}
           <div className="mt-5">
             <div className="flex items-center justify-between px-2 py-1">
               <span className="text-[12px] font-semibold uppercase tracking-wider text-ink-600">
@@ -148,34 +145,52 @@ export function Sidebar({
               </button>
             </div>
 
-            <div className="mt-1 space-y-0.5">
-              {habits.map((habit) => (
-                <NavItem
-                  key={habit.id}
-                  href={`/dashboard/habits/${habit.slug}`}
-                  label={habit.name}
-                  icon={
-                    <HabitIcon
-                      name={habit.icon}
-                      size={14}
-                      className={accentClass(habit.tone)}
-                      style={accentStyle(habit.tone)}
-                    />
-                  }
-                  active={pathname === `/dashboard/habits/${habit.slug}`}
-                  badge={
-                    <span
-                      className={`h-2 w-2 rounded-full ${fillClass(habit.tone)}`}
-                      style={fillStyle(habit.tone)}
-                    />
-                  }
-                  onClick={closeOnMobile}
-                />
-              ))}
-            </div>
+            {habits.length > 0 ? (
+              <div className="mt-1 space-y-0.5">
+                {habits.map((habit) => (
+                  <NavItem
+                    key={habit.id}
+                    href={`/dashboard/habits/${habit.slug}`}
+                    label={habit.name}
+                    icon={
+                      <HabitIcon
+                        name={habit.icon}
+                        size={14}
+                        className={accentClass(habit.tone)}
+                        style={accentStyle(habit.tone)}
+                      />
+                    }
+                    active={pathname === `/dashboard/habits/${habit.slug}`}
+                    badge={
+                      <span
+                        className={`h-2 w-2 rounded-full ${fillClass(habit.tone)}`}
+                        style={fillStyle(habit.tone)}
+                      />
+                    }
+                    onClick={closeOnMobile}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="mt-2 rounded-[22px] border border-dashed border-black/[0.08] bg-white px-4 py-4 shadow-[var(--shadow-card)]">
+                <p className="text-[13px] font-semibold text-ink-950">
+                  No active habits yet
+                </p>
+                <p className="mt-1 text-[12px] leading-5 text-ink-700">
+                  Create your first habit to pin it here for fast access.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleAddHabit}
+                  className="pill-btn tap-target-compact mt-3 inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)]"
+                >
+                  <Plus className="h-3.5 w-3.5" strokeWidth={2} />
+                  Create habit
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Archive & Stats */}
           <div className="mt-5 hidden border-t border-black/[0.06] pt-3 lg:block">
             <NavItem
               href="/dashboard/archive"
@@ -249,13 +264,12 @@ function NavItem({
   }
 
   return (
-    <Link href={href} onClick={onClick}>
+    <Link href={href} onClick={onClick} aria-current={active ? "page" : undefined}>
       {content}
     </Link>
   );
 }
 
-/** Hamburger button for mobile — placed in the header */
 export function SidebarToggle({ onToggle }: { onToggle: () => void }) {
   return (
     <button

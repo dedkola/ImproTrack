@@ -148,13 +148,76 @@ type HabitMutationInput = Omit<
   "id" | "slug" | "createdAt" | "archived"
 >;
 
+type BootstrapErrorSource = "habits" | "records";
+
+export type HabitStorageBootstrapError = {
+  source: BootstrapErrorSource;
+  message: string;
+};
+
+export type HabitStorageMutationKind =
+  | "add-habit"
+  | "update-habit"
+  | "delete-habit"
+  | "archive-habit"
+  | "restore-habit"
+  | "reorder-habits"
+  | "toggle-record";
+
+export type HabitStorageMutationError = {
+  kind: "mutation";
+  mutation: HabitStorageMutationKind;
+  message: string;
+};
+
+export type HabitStorageSyncIssue =
+  | HabitStorageMutationError
+  | {
+      kind: "listener";
+      source: BootstrapErrorSource;
+      message: string;
+    };
+
+export type HabitStorageSyncState = {
+  isSyncing: boolean;
+  pendingMutationCount: number;
+  pendingRecordCount: number;
+  latestIssue: HabitStorageSyncIssue | null;
+  latestMutationError: HabitStorageMutationError | null;
+  isRecordPending: (habitId: string, dateKey: string) => boolean;
+};
+
+export type HabitStorageFullHistoryState =
+  | {
+      status: "idle";
+      hasFullHistory: false;
+      error: null;
+    }
+  | {
+      status: "loading";
+      hasFullHistory: false;
+      error: null;
+    }
+  | {
+      status: "ready";
+      hasFullHistory: true;
+      error: null;
+    }
+  | {
+      status: "error";
+      hasFullHistory: false;
+      error: string;
+    };
+
 type HabitStorageContextValue = {
   habits: HabitDefinition[];
   activeHabits: HabitDefinition[];
   archivedHabits: HabitDefinition[];
   records: HabitRecords;
   isLoading: boolean;
-  error: string | null;
+  bootstrapError: HabitStorageBootstrapError | null;
+  syncState: HabitStorageSyncState;
+  fullHistoryState: HabitStorageFullHistoryState;
   addHabit: (habit: HabitMutationInput) => Promise<void>;
   updateHabit: (
     id: string,
@@ -172,7 +235,6 @@ type HabitStorageContextValue = {
   getHabitBySlug: (slug: string) => HabitDefinition | undefined;
   loadMonth: (yearMonth: string) => Promise<void>;
   loadFullHistory: () => Promise<void>;
-  hasFullHistory: boolean;
 };
 
 const HabitStorageContext = createContext<HabitStorageContextValue | undefined>(
@@ -289,6 +351,76 @@ function toErrorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
+function createBootstrapError(
+  source: BootstrapErrorSource,
+  error: unknown,
+  fallback: string,
+): HabitStorageBootstrapError {
+  return {
+    source,
+    message: toErrorMessage(error, fallback),
+  };
+}
+
+function createListenerIssue(
+  source: BootstrapErrorSource,
+  error: unknown,
+  fallback: string,
+): HabitStorageSyncIssue {
+  return {
+    kind: "listener",
+    source,
+    message: toErrorMessage(error, fallback),
+  };
+}
+
+function createMutationIssue(
+  mutation: HabitStorageMutationKind,
+  error: unknown,
+  fallback: string,
+): HabitStorageMutationError {
+  return {
+    kind: "mutation",
+    mutation,
+    message: toErrorMessage(error, fallback),
+  };
+}
+
+function getIdleFullHistoryState(): HabitStorageFullHistoryState {
+  return {
+    status: "idle",
+    hasFullHistory: false,
+    error: null,
+  };
+}
+
+function getLoadingFullHistoryState(): HabitStorageFullHistoryState {
+  return {
+    status: "loading",
+    hasFullHistory: false,
+    error: null,
+  };
+}
+
+function getReadyFullHistoryState(): HabitStorageFullHistoryState {
+  return {
+    status: "ready",
+    hasFullHistory: true,
+    error: null,
+  };
+}
+
+function getErroredFullHistoryState(
+  error: unknown,
+  fallback: string,
+): HabitStorageFullHistoryState {
+  return {
+    status: "error",
+    hasFullHistory: false,
+    error: toErrorMessage(error, fallback),
+  };
+}
+
 function useHabitStorageContext() {
   const context = useContext(HabitStorageContext);
 
@@ -314,10 +446,18 @@ export function HabitStorageProvider({
     useState<PendingRecordPatches>({});
   const [isLoadingHabits, setIsLoadingHabits] = useState(true);
   const [isLoadingRecords, setIsLoadingRecords] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [bootstrapError, setBootstrapError] =
+    useState<HabitStorageBootstrapError | null>(null);
+  const [latestSyncIssue, setLatestSyncIssue] =
+    useState<HabitStorageSyncIssue | null>(null);
+  const [pendingMutationCount, setPendingMutationCount] = useState(0);
   const loadedMonthsRef = useRef<Set<string>>(new Set());
-  const [hasFullHistory, setHasFullHistory] = useState(false);
+  const [fullHistoryState, setFullHistoryState] =
+    useState<HabitStorageFullHistoryState>(getIdleFullHistoryState);
+  const hasBootstrappedHabitsRef = useRef(false);
+  const hasBootstrappedRecordsRef = useRef(false);
   const fullHistoryLoadedRef = useRef(false);
+  const isLoadingFullHistoryRef = useRef(false);
 
   useEffect(() => {
     if (isAuthLoading) {
@@ -331,18 +471,30 @@ export function HabitStorageProvider({
       setServerRecords({});
       setCachedRecords({});
       setPendingRecordPatches({});
-      setError(null);
+      setBootstrapError(null);
+      setLatestSyncIssue(null);
+      setPendingMutationCount(0);
       setIsLoadingHabits(false);
       setIsLoadingRecords(false);
       loadedMonthsRef.current = new Set();
-      setHasFullHistory(false);
+      setFullHistoryState(getIdleFullHistoryState());
+      hasBootstrappedHabitsRef.current = false;
+      hasBootstrappedRecordsRef.current = false;
       fullHistoryLoadedRef.current = false;
+      isLoadingFullHistoryRef.current = false;
       return;
     }
 
-    setError(null);
+    setBootstrapError(null);
+    setLatestSyncIssue(null);
+    setPendingMutationCount(0);
+    setFullHistoryState(getIdleFullHistoryState());
     setIsLoadingHabits(true);
     setIsLoadingRecords(true);
+    hasBootstrappedHabitsRef.current = false;
+    hasBootstrappedRecordsRef.current = false;
+    fullHistoryLoadedRef.current = false;
+    isLoadingFullHistoryRef.current = false;
 
     const now = new Date();
     const fromKey = toDateKey(startOfMonth(now));
@@ -353,13 +505,23 @@ export function HabitStorageProvider({
     const unsubscribeHabits = listenToUserHabits(
       user.uid,
       (nextHabits) => {
+        hasBootstrappedHabitsRef.current = true;
         setHabits(sortHabits(normalizeHabits(nextHabits)));
         setIsLoadingHabits(false);
       },
       (nextError) => {
-        setError(toErrorMessage(nextError, "Unable to load habits."));
-        setHabits([]);
-        setIsLoadingHabits(false);
+        if (!hasBootstrappedHabitsRef.current) {
+          setBootstrapError(
+            createBootstrapError("habits", nextError, "Unable to load habits."),
+          );
+          setHabits([]);
+          setIsLoadingHabits(false);
+          return;
+        }
+
+        setLatestSyncIssue(
+          createListenerIssue("habits", nextError, "Unable to sync habits."),
+        );
       },
     );
 
@@ -368,14 +530,24 @@ export function HabitStorageProvider({
       fromKey,
       toKey,
       (nextRecords) => {
+        hasBootstrappedRecordsRef.current = true;
         setServerRecords(nextRecords);
         setIsLoadingRecords(false);
       },
       (nextError) => {
-        setError(toErrorMessage(nextError, "Unable to load records."));
-        setServerRecords({});
-        setPendingRecordPatches({});
-        setIsLoadingRecords(false);
+        if (!hasBootstrappedRecordsRef.current) {
+          setBootstrapError(
+            createBootstrapError("records", nextError, "Unable to load records."),
+          );
+          setServerRecords({});
+          setPendingRecordPatches({});
+          setIsLoadingRecords(false);
+          return;
+        }
+
+        setLatestSyncIssue(
+          createListenerIssue("records", nextError, "Unable to sync records."),
+        );
       },
     );
 
@@ -385,6 +557,11 @@ export function HabitStorageProvider({
     };
   }, [isAuthLoading, user]);
 
+  const persistedRecords = useMemo(
+    () => mergeRecordLayers(cachedRecords, serverRecords),
+    [cachedRecords, serverRecords],
+  );
+
   useEffect(() => {
     setPendingRecordPatches((current) => {
       let hasChanges = false;
@@ -392,7 +569,7 @@ export function HabitStorageProvider({
 
       Object.entries(current).forEach(([patchKey, slots]) => {
         const { habitId, dateKey } = parsePendingPatchKey(patchKey);
-        const persistedSlots = serverRecords[habitId]?.[dateKey];
+        const persistedSlots = persistedRecords[habitId]?.[dateKey];
 
         if (areSlotRecordsEqual(persistedSlots, slots)) {
           delete nextPatches[patchKey];
@@ -402,15 +579,11 @@ export function HabitStorageProvider({
 
       return hasChanges ? nextPatches : current;
     });
-  }, [serverRecords]);
+  }, [persistedRecords]);
 
   const mergedRecords = useMemo(
-    () =>
-      mergePendingRecordPatches(
-        mergeRecordLayers(cachedRecords, serverRecords),
-        pendingRecordPatches,
-      ),
-    [cachedRecords, serverRecords, pendingRecordPatches],
+    () => mergePendingRecordPatches(persistedRecords, pendingRecordPatches),
+    [pendingRecordPatches, persistedRecords],
   );
 
   const loadMonth = useCallback(
@@ -445,24 +618,88 @@ export function HabitStorageProvider({
   );
 
   const loadFullHistory = useCallback(async () => {
-    if (!user || fullHistoryLoadedRef.current) return;
+    if (
+      !user ||
+      fullHistoryLoadedRef.current ||
+      isLoadingFullHistoryRef.current
+    ) {
+      return;
+    }
 
-    fullHistoryLoadedRef.current = true;
+    isLoadingFullHistoryRef.current = true;
+    setFullHistoryState(getLoadingFullHistoryState());
 
     try {
       const fetched = await fetchAllRecords(user.uid);
       setCachedRecords((current) => mergeRecordLayers(current, fetched));
-      setHasFullHistory(true);
-    } catch {
+      fullHistoryLoadedRef.current = true;
+      setFullHistoryState(getReadyFullHistoryState());
+    } catch (nextError) {
       fullHistoryLoadedRef.current = false;
+      setFullHistoryState(
+        getErroredFullHistoryState(
+          nextError,
+          "Unable to load your full history right now.",
+        ),
+      );
+    } finally {
+      isLoadingFullHistoryRef.current = false;
     }
   }, [user]);
+
+  const beginMutation = useCallback(() => {
+    setPendingMutationCount((current) => current + 1);
+    setLatestSyncIssue((current) =>
+      current?.kind === "mutation" ? null : current,
+    );
+  }, []);
+
+  const finishMutation = useCallback((issue?: HabitStorageSyncIssue) => {
+    setPendingMutationCount((current) => Math.max(0, current - 1));
+    setLatestSyncIssue((current) => {
+      if (issue) {
+        return issue;
+      }
+
+      return current?.kind === "mutation" ? null : current;
+    });
+  }, []);
+
+  const isRecordPending = useCallback(
+    (habitId: string, dateKey: string) =>
+      Boolean(pendingRecordPatches[getPendingPatchKey(habitId, dateKey)]),
+    [pendingRecordPatches],
+  );
+
+  const latestMutationError =
+    latestSyncIssue?.kind === "mutation" ? latestSyncIssue : null;
+  const pendingRecordCount = Object.keys(pendingRecordPatches).length;
+  const isSyncing = pendingMutationCount > 0 || pendingRecordCount > 0;
+
+  const syncState = useMemo(
+    () => ({
+      isSyncing,
+      pendingMutationCount,
+      pendingRecordCount,
+      latestIssue: latestSyncIssue,
+      latestMutationError,
+      isRecordPending,
+    }),
+    [
+      isRecordPending,
+      isSyncing,
+      latestMutationError,
+      latestSyncIssue,
+      pendingMutationCount,
+      pendingRecordCount,
+    ],
+  );
 
   const addHabit = useCallback(
     async (habit: HabitMutationInput) => {
       if (!user) return;
 
-      setError(null);
+      beginMutation();
 
       const normalizedFrequency = getNormalizedFrequency(
         habit.frequencyPerDay,
@@ -492,11 +729,18 @@ export function HabitStorageProvider({
 
       try {
         await saveUserHabit(user.uid, nextHabit);
+        finishMutation();
       } catch (nextError) {
-        setError(toErrorMessage(nextError, "Unable to create habit."));
+        finishMutation(
+          createMutationIssue(
+            "add-habit",
+            nextError,
+            "Unable to create habit.",
+          ),
+        );
       }
     },
-    [habits, user],
+    [beginMutation, finishMutation, habits, user],
   );
 
   const updateHabit = useCallback(
@@ -509,7 +753,7 @@ export function HabitStorageProvider({
       const currentHabit = habits.find((habit) => habit.id === id);
       if (!currentHabit) return;
 
-      setError(null);
+      beginMutation();
 
       const merged = { ...currentHabit, ...updates };
       const normalizedFrequency = getNormalizedFrequency(
@@ -541,18 +785,25 @@ export function HabitStorageProvider({
 
       try {
         await saveUserHabit(user.uid, nextHabit);
+        finishMutation();
       } catch (nextError) {
-        setError(toErrorMessage(nextError, "Unable to update habit."));
+        finishMutation(
+          createMutationIssue(
+            "update-habit",
+            nextError,
+            "Unable to update habit.",
+          ),
+        );
       }
     },
-    [habits, user],
+    [beginMutation, finishMutation, habits, user],
   );
 
   const deleteHabit = useCallback(
     async (id: string) => {
       if (!user) return;
 
-      setError(null);
+      beginMutation();
 
       const knownDateKeys = Object.keys(mergedRecords[id] ?? {});
 
@@ -562,11 +813,18 @@ export function HabitStorageProvider({
           id,
           knownDateKeys.length > 0 ? knownDateKeys : undefined,
         );
+        finishMutation();
       } catch (nextError) {
-        setError(toErrorMessage(nextError, "Unable to delete habit."));
+        finishMutation(
+          createMutationIssue(
+            "delete-habit",
+            nextError,
+            "Unable to delete habit.",
+          ),
+        );
       }
     },
-    [user, mergedRecords],
+    [beginMutation, finishMutation, mergedRecords, user],
   );
 
   const archiveHabit = useCallback(
@@ -574,15 +832,22 @@ export function HabitStorageProvider({
       const currentHabit = habits.find((habit) => habit.id === id);
       if (!user || !currentHabit) return;
 
-      setError(null);
+      beginMutation();
 
       try {
         await saveUserHabit(user.uid, { ...currentHabit, archived: true });
+        finishMutation();
       } catch (nextError) {
-        setError(toErrorMessage(nextError, "Unable to archive habit."));
+        finishMutation(
+          createMutationIssue(
+            "archive-habit",
+            nextError,
+            "Unable to archive habit.",
+          ),
+        );
       }
     },
-    [habits, user],
+    [beginMutation, finishMutation, habits, user],
   );
 
   const restoreHabit = useCallback(
@@ -590,7 +855,7 @@ export function HabitStorageProvider({
       const currentHabit = habits.find((habit) => habit.id === id);
       if (!user || !currentHabit) return;
 
-      setError(null);
+      beginMutation();
 
       const nextHabit =
         typeof currentHabit.sortOrder === "number"
@@ -603,11 +868,18 @@ export function HabitStorageProvider({
 
       try {
         await saveUserHabit(user.uid, nextHabit);
+        finishMutation();
       } catch (nextError) {
-        setError(toErrorMessage(nextError, "Unable to restore habit."));
+        finishMutation(
+          createMutationIssue(
+            "restore-habit",
+            nextError,
+            "Unable to restore habit.",
+          ),
+        );
       }
     },
-    [habits, user],
+    [beginMutation, finishMutation, habits, user],
   );
 
   const reorderHabits = useCallback(
@@ -642,16 +914,23 @@ export function HabitStorageProvider({
       );
 
       setHabits(nextHabits);
-      setError(null);
+      beginMutation();
 
       try {
         await saveUserHabitOrder(user.uid, sanitizedIds);
+        finishMutation();
       } catch (nextError) {
         setHabits(previousHabits);
-        setError(toErrorMessage(nextError, "Unable to reorder habits."));
+        finishMutation(
+          createMutationIssue(
+            "reorder-habits",
+            nextError,
+            "Unable to reorder habits.",
+          ),
+        );
       }
     },
-    [habits, user],
+    [beginMutation, finishMutation, habits, user],
   );
 
   const toggleHabitDay = useCallback(
@@ -678,13 +957,16 @@ export function HabitStorageProvider({
         ...current,
         [patchKey]: nextSlots,
       }));
-
-      setError(null);
+      beginMutation();
 
       try {
         await saveUserRecordSlots(user.uid, dateKey, habitId, nextSlots, {
           useLegacyBoolean: allowSingleSlotFallback,
         });
+        setCachedRecords((current) =>
+          upsertDaySlots(current, habitId, dateKey, nextSlots),
+        );
+        finishMutation();
       } catch (nextError) {
         setPendingRecordPatches((current) => {
           const nextPatches = { ...current };
@@ -697,10 +979,16 @@ export function HabitStorageProvider({
 
           return nextPatches;
         });
-        setError(toErrorMessage(nextError, "Unable to save record."));
+        finishMutation(
+          createMutationIssue(
+            "toggle-record",
+            nextError,
+            "Unable to save record.",
+          ),
+        );
       }
     },
-    [habits, mergedRecords, user],
+    [beginMutation, finishMutation, habits, mergedRecords, user],
   );
 
   const getHabitBySlug = useCallback(
@@ -726,7 +1014,9 @@ export function HabitStorageProvider({
       archivedHabits,
       records: mergedRecords,
       isLoading,
-      error,
+      bootstrapError,
+      syncState,
+      fullHistoryState,
       addHabit,
       updateHabit,
       deleteHabit,
@@ -737,7 +1027,6 @@ export function HabitStorageProvider({
       getHabitBySlug,
       loadMonth,
       loadFullHistory,
-      hasFullHistory,
     }),
     [
       habits,
@@ -745,7 +1034,9 @@ export function HabitStorageProvider({
       archivedHabits,
       mergedRecords,
       isLoading,
-      error,
+      bootstrapError,
+      syncState,
+      fullHistoryState,
       addHabit,
       updateHabit,
       deleteHabit,
@@ -756,7 +1047,6 @@ export function HabitStorageProvider({
       getHabitBySlug,
       loadMonth,
       loadFullHistory,
-      hasFullHistory,
     ],
   );
 
@@ -769,7 +1059,8 @@ export function useHabits() {
     activeHabits,
     archivedHabits,
     isLoading,
-    error,
+    bootstrapError,
+    syncState,
     addHabit,
     updateHabit,
     deleteHabit,
@@ -784,7 +1075,8 @@ export function useHabits() {
     activeHabits,
     archivedHabits,
     isLoading,
-    error,
+    bootstrapError,
+    syncState,
     addHabit,
     updateHabit,
     deleteHabit,
@@ -800,19 +1092,21 @@ export function useHabitRecords(_habits: HabitDefinition[]) {
     records,
     toggleHabitDay,
     isLoading,
-    error,
+    bootstrapError,
+    syncState,
     loadMonth,
     loadFullHistory,
-    hasFullHistory,
+    fullHistoryState,
   } = useHabitStorageContext();
 
   return {
     records,
     toggleHabitDay,
     isLoading,
-    error,
+    bootstrapError,
+    syncState,
     loadMonth,
     loadFullHistory,
-    hasFullHistory,
+    fullHistoryState,
   };
 }

@@ -55,7 +55,14 @@ export type HabitDefinition = {
   tone: HabitTone;
 };
 
-const DEFAULT_TIME_SLOT_NAMES = ["Morning", "Afternoon", "Evening", "Night"];
+const DEFAULT_TIME_SLOT_NAMES = [
+  "Morning",
+  "Midday",
+  "Afternoon",
+  "Evening",
+  "Night",
+  "Late night",
+];
 
 export function getNormalizedFrequency(
   frequencyPerDay: number,
@@ -78,7 +85,7 @@ export function normalizeTimeSlots(
 
   return Array.from({ length: frequencyPerDay }, (_, index) => {
     const rawSlot = timeSlots[index]?.trim();
-    const fallback = DEFAULT_TIME_SLOT_NAMES[index] ?? `Slot ${index + 1}`;
+    const fallback = DEFAULT_TIME_SLOT_NAMES[index] ?? `Check-in ${index + 1}`;
     const baseLabel = rawSlot && rawSlot !== "default" ? rawSlot : fallback;
     let label = baseLabel;
     let counter = 2;

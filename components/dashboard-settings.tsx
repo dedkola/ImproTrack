@@ -11,12 +11,15 @@ import {
 } from "lucide-react";
 import { ProfileSettingsCard } from "@/components/profile-settings-card";
 import { useFirebaseAuth } from "@/components/firebase-auth-provider";
+import { useHabits } from "@/lib/storage";
 import { signOutFromFirebase } from "@/lib/firebase/auth";
 
 export function DashboardSettings() {
   const { user } = useFirebaseAuth();
+  const { syncState } = useHabits();
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const syncSummary = getSyncSummary(syncState);
 
   const handleSignOut = async () => {
     setError(null);
@@ -74,11 +77,10 @@ export function DashboardSettings() {
               Account snapshot
             </p>
             <p className="mt-2 text-[14px] font-semibold text-ink-950">
-              Signed in and synced
+              {syncSummary.statusLabel}
             </p>
             <p className="mt-1 text-[12px] leading-5 text-ink-600">
-              Profile edits, habit data, and settings all stay attached to this
-              Google account.
+              {syncSummary.shortDetail}
             </p>
           </div>
         </div>
@@ -128,6 +130,59 @@ export function DashboardSettings() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-[14px] font-semibold text-ink-950">
+                  Sync health
+                </h2>
+                <p className="mt-1 text-[13px] leading-5 text-ink-700 sm:leading-6">
+                  See whether recent habit edits and check-ins are fully synced.
+                </p>
+              </div>
+              <span
+                className={`rounded-full px-3 py-1 text-[12px] font-semibold ${syncSummary.badgeClass}`}
+              >
+                {syncSummary.statusLabel}
+              </span>
+            </div>
+
+            <div className="mt-4 rounded-[24px] border border-black/[0.06] bg-white px-4 py-4 shadow-[var(--shadow-card)]">
+              <p className="text-[14px] font-semibold text-ink-950">
+                {syncSummary.title}
+              </p>
+              <p className="mt-1 text-[13px] leading-6 text-ink-700">
+                {syncSummary.detail}
+              </p>
+
+              <div className="mt-4 grid gap-2 text-[12px] leading-5 text-ink-700">
+                <p>
+                  Pending record confirmations:{" "}
+                  <span className="font-semibold text-ink-950">
+                    {syncState.pendingRecordCount}
+                  </span>
+                </p>
+                <p>
+                  Active save requests:{" "}
+                  <span className="font-semibold text-ink-950">
+                    {syncState.pendingMutationCount}
+                  </span>
+                </p>
+                {syncState.latestMutationError ? (
+                  <p className="text-red-700">
+                    Last save error: {syncState.latestMutationError.message}
+                  </p>
+                ) : null}
+                {syncState.latestIssue?.kind === "listener" ? (
+                  <p className="text-red-700">
+                    Live {syncState.latestIssue.source} sync warning:{" "}
+                    {syncState.latestIssue.message}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          </section>
+
+          <section className="animate-fade-in-up surface-panel rounded-[28px] p-4 sm:p-6">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-[14px] font-semibold text-ink-950">
                   Account access
                 </h2>
                 <p className="mt-1 text-[13px] leading-5 text-ink-700 sm:leading-6">
@@ -136,8 +191,10 @@ export function DashboardSettings() {
                     : "Your dashboard syncs through your Google account."}
                 </p>
               </div>
-              <span className="rounded-full bg-ink-950/[0.05] px-3 py-1 text-[12px] font-semibold text-ink-700">
-                Synced
+              <span
+                className={`rounded-full px-3 py-1 text-[12px] font-semibold ${syncSummary.badgeClass}`}
+              >
+                {syncSummary.statusLabel}
               </span>
             </div>
 
@@ -199,4 +256,44 @@ function SettingsLinkCard({
       </p>
     </Link>
   );
+}
+
+function getSyncSummary(syncState: ReturnType<typeof useHabits>["syncState"]) {
+  if (syncState.latestIssue) {
+    return {
+      statusLabel: "Needs attention",
+      badgeClass: "bg-red-100 text-red-700",
+      title:
+        syncState.latestIssue.kind === "listener"
+          ? "Live sync ran into a hiccup."
+          : "Your last change did not reach Firestore.",
+      detail: syncState.latestIssue.message,
+      shortDetail:
+        "Recent edits may need another try before every device sees them.",
+    };
+  }
+
+  if (syncState.isSyncing) {
+    return {
+      statusLabel: "Saving",
+      badgeClass: "bg-sky-100 text-sky-700",
+      title: "Recent updates are still syncing.",
+      detail:
+        syncState.pendingRecordCount > 0
+          ? "Keep the tab open until record confirmations finish so current and past check-ins settle cleanly."
+          : "Firestore is still processing your latest habit changes.",
+      shortDetail:
+        "This account is connected, and your newest changes are still saving.",
+    };
+  }
+
+  return {
+    statusLabel: "Synced",
+    badgeClass: "bg-emerald-100 text-emerald-700",
+    title: "Everything is up to date.",
+    detail:
+      "Habit edits, reorder changes, and completed check-ins are synced to your Google account.",
+    shortDetail:
+      "Profile edits, habit data, and settings stay attached to this Google account.",
+  };
 }

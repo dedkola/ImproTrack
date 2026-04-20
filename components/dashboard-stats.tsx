@@ -88,7 +88,7 @@ function getAverage(values: number[]) {
 
 export function DashboardStats() {
   const { habits, activeHabits, archivedHabits } = useHabits();
-  const { records, loadFullHistory } = useHabitRecords(habits);
+  const { records, loadFullHistory, fullHistoryState } = useHabitRecords(habits);
   const [selectedPreset, setSelectedPreset] = useState<StatsPreset>("month");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [customFrom, setCustomFrom] = useState(getRollingRange(30, today).from);
@@ -293,6 +293,47 @@ export function DashboardStats() {
         }
       />
 
+      {fullHistoryState.status !== "ready" ? (
+        <section
+          className={`animate-fade-in-up rounded-[24px] border px-4 py-3 shadow-[var(--shadow-card)] sm:px-5 ${
+            fullHistoryState.status === "error"
+              ? "border-red-200 bg-red-50 text-red-950"
+              : "border-sky-200 bg-sky-50 text-sky-950"
+          }`}
+        >
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-[13px] font-semibold">
+                {fullHistoryState.status === "error"
+                  ? "Older stats history could not load"
+                  : "Loading older stats history"}
+              </p>
+              <p
+                className={`mt-1 text-[12px] leading-5 ${
+                  fullHistoryState.status === "error"
+                    ? "text-red-900/85"
+                    : "text-sky-900/85"
+                }`}
+              >
+                {fullHistoryState.status === "error"
+                  ? `${fullHistoryState.error} Longer ranges and all-time comparisons may still be incomplete.`
+                  : "Longer ranges, leaderboards, and all-time comparisons will sharpen as older months finish loading."}
+              </p>
+            </div>
+
+            {fullHistoryState.status === "error" ? (
+              <button
+                type="button"
+                onClick={() => void loadFullHistory()}
+                className="pill-btn inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-4 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]"
+              >
+                Retry history load
+              </button>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+
       <section className="stagger-children grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
         <StatsCard
           label="Habits in scope"
@@ -307,7 +348,11 @@ export function DashboardStats() {
         <StatsCard
           label="Completed days"
           value={String(summary.totalCompleted)}
-          detail="Habit-days in range"
+          detail={
+            fullHistoryState.status === "ready"
+              ? "Habit-days in range"
+              : "Habit-days in visible history"
+          }
         />
         <StatsCard
           label="Best live streak"
