@@ -165,7 +165,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        {syncState.isSyncing || syncState.latestIssue ? (
+        {syncState.latestIssue ? (
           <div className="page-shell pt-3 sm:pt-4">
             <SyncStatusBanner syncState={syncState} />
           </div>
@@ -204,28 +204,8 @@ function SyncStatusBanner({
         ? "Live record sync needs attention"
         : "Live habit sync needs attention"
       : "Last change did not sync";
-  const recordLabel =
-    syncState.pendingRecordCount === 1 ? "record update" : "record updates";
-  const mutationLabel =
-    syncState.pendingMutationCount === 1 ? "save request" : "save requests";
-
   return (
     <div className="grid gap-2">
-      {syncState.isSyncing ? (
-        <div
-          role="status"
-          aria-live="polite"
-          className="rounded-[22px] border border-sky-200 bg-sky-50 px-4 py-3 text-sky-950 shadow-[var(--shadow-card)]"
-        >
-          <p className="text-[13px] font-semibold">Saving your latest changes…</p>
-          <p className="mt-1 text-[12px] leading-5 text-sky-900/85">
-            {syncState.pendingRecordCount > 0
-              ? `${syncState.pendingRecordCount} ${recordLabel} still waiting for confirmation.`
-              : `${syncState.pendingMutationCount} ${mutationLabel} still heading to Firestore.`}
-          </p>
-        </div>
-      ) : null}
-
       {syncState.latestIssue ? (
         <div
           role="alert"
