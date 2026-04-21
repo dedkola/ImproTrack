@@ -7,6 +7,7 @@ import { useEffect, useId, useState } from "react";
 import { AuthControls } from "@/components/auth-controls";
 import { Footer } from "@/components/footer";
 import { usePwaInstall } from "@/components/pwa-controller";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type PublicPageNavLink = {
   href: string;
@@ -94,6 +95,7 @@ export function PublicPageShell({
           ) : null}
 
           <div className="flex items-center gap-2">
+            <ThemeToggle showLabel={false} />
             {hasMounted && isInstallAvailable ? (
               <button
                 type="button"
