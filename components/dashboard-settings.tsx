@@ -10,6 +10,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { ProfileSettingsCard } from "@/components/profile-settings-card";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useFirebaseAuth } from "@/components/firebase-auth-provider";
 import { useHabits } from "@/lib/storage";
 import { signOutFromFirebase } from "@/lib/firebase/auth";
@@ -93,6 +94,20 @@ export function DashboardSettings() {
         />
 
         <div className="flex flex-col gap-3.5 sm:gap-4">
+          <section className="animate-fade-in-up surface-panel rounded-[28px] p-4 sm:p-6">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-[14px] font-semibold text-ink-950">
+                  Appearance
+                </h2>
+                <p className="mt-1 text-[13px] leading-5 text-ink-700 sm:leading-6">
+                  Choose light or dark mode for your dashboard surfaces.
+                </p>
+              </div>
+              <ThemeToggle />
+            </div>
+          </section>
+
           <section className="animate-fade-in-up surface-panel rounded-[28px] p-4 sm:p-6">
             <div>
               <h2 className="text-[14px] font-semibold text-ink-950">

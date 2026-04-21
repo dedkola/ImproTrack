@@ -43,6 +43,7 @@ import { useHabits, useHabitRecords } from "@/lib/storage";
 import { HabitForm, HabitMenu, ConfirmDialog } from "@/components/habit-form";
 import { ArchiveFeedback } from "@/components/archive-feedback";
 import { HabitIcon } from "@/components/habit-icon";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const today = startOfDay(new Date());
 const todayKey = toDateKey(today);
@@ -558,6 +559,7 @@ export function HabitTrackerApp() {
             </div>
 
             <div className="flex items-center gap-3">
+              <ThemeToggle className="ml-auto" />
               <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-semibold text-ink-950 shadow-[var(--shadow-card)] md:hidden">
                 {mobileRangeLabel}
               </span>
