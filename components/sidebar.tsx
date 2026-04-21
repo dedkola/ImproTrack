@@ -245,7 +245,7 @@ function NavItem({
     <div
       className={`flex min-h-10 items-center gap-2.5 rounded-lg px-2.5 py-2 text-[14px] font-medium transition-colors ${
         active
-          ? "bg-ink-950/[0.06] text-ink-950"
+          ? "bg-[rgba(10,22,40,0.06)] text-[#0A1628]"
           : disabled
             ? "cursor-not-allowed text-ink-500"
             : "text-ink-700 hover:bg-black/[0.04] hover:text-ink-950"
