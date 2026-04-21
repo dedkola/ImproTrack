@@ -34,7 +34,7 @@
   --background: #ffffff;
 }
 
-:root[data-theme="dark"] {
+html[data-theme="dark"] {
   color-scheme: dark;
   --focus-ring: rgba(125, 211, 252, 0.75);
   --focus-ring-offset: rgba(15, 23, 42, 0.95);
@@ -521,6 +521,16 @@ html[data-theme="dark"] .brand-shot-frame {
   transform: translateY(0) scale(0.97);
 }
 
+.theme-toggle-pill {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-ink-950);
+}
+
+html[data-theme="dark"] .theme-toggle-pill {
+  background: rgba(17, 27, 51, 0.92);
+  border-color: rgba(148, 163, 184, 0.24);
+}
+
 /* --- Checkbox pop ------------------------------------------------------ */
 
 @keyframes check-pop {
@@ -667,12 +677,23 @@ html[data-theme="dark"] .mobile-matrix-date-row {
   border-bottom-color: rgba(148, 163, 184, 0.2);
 }
 
-html[data-theme="dark"] [class*="bg-white"] {
-  background-color: rgba(17, 27, 51, 0.9) !important;
+html[data-theme="dark"] .bg-white {
+  background-color: rgba(17, 27, 51, 0.92);
 }
 
-html[data-theme="dark"] [class*="border-black"] {
-  border-color: rgba(148, 163, 184, 0.24) !important;
+html[data-theme="dark"] .bg-white\/80 {
+  background-color: rgba(17, 27, 51, 0.8);
+}
+
+html[data-theme="dark"] .bg-white\/70 {
+  background-color: rgba(17, 27, 51, 0.7);
+}
+
+html[data-theme="dark"] .border-black\/\[0\.05\],
+html[data-theme="dark"] .border-black\/\[0\.06\],
+html[data-theme="dark"] .border-black\/\[0\.08\],
+html[data-theme="dark"] .border-black\/\[0\.1\] {
+  border-color: rgba(148, 163, 184, 0.24);
 }
 
 @media (min-width: 640px) {
