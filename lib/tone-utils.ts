@@ -208,6 +208,34 @@ export function softFillClass(tone: HabitTone): string {
   return tone.softFill;
 }
 
+const SOFT_FILL_DARK_MAP: Record<string, string> = {
+  "bg-sky-100 text-sky-800": "bg-sky-900/60 text-sky-200",
+  "bg-emerald-100 text-emerald-800": "bg-emerald-900/60 text-emerald-200",
+  "bg-violet-100 text-violet-800": "bg-violet-900/60 text-violet-200",
+  "bg-amber-100 text-amber-800": "bg-amber-900/60 text-amber-200",
+  "bg-rose-100 text-rose-800": "bg-rose-900/60 text-rose-200",
+  "bg-teal-100 text-teal-800": "bg-teal-900/60 text-teal-200",
+  "bg-indigo-100 text-indigo-800": "bg-indigo-900/60 text-indigo-200",
+  "bg-slate-100 text-slate-800": "bg-slate-700/60 text-slate-200",
+};
+
+export function softFillClassDark(tone: HabitTone): string {
+  if (tone.hex) return "";
+  return SOFT_FILL_DARK_MAP[tone.softFill] ?? tone.softFill;
+}
+
+export function softFillStyleDark(
+  tone: HabitTone,
+): React.CSSProperties | undefined {
+  if (tone.hex) {
+    return {
+      backgroundColor: withAlpha(tone.hex, 0.28),
+      color: "rgba(255, 255, 255, 0.88)",
+    };
+  }
+  return undefined;
+}
+
 export function badgeStyle(tone: HabitTone): React.CSSProperties | undefined {
   if (tone.hex) {
     return {

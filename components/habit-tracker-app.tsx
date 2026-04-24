@@ -29,6 +29,8 @@ import {
   getCardGradientStyleFromHexDark,
   softFillClass,
   softFillStyle,
+  softFillClassDark,
+  softFillStyleDark,
   accentClass,
   accentStyle,
   badgeClass,
@@ -795,9 +797,9 @@ export function HabitTrackerApp() {
                               </div>
 
                               <span
-                                className={`rounded-md px-1.5 py-1 text-[11px] font-semibold ${softFillClass(habit.tone)} ${badgeClass(habit.tone)}`}
+                                className={`rounded-md px-1.5 py-1 text-[11px] font-semibold ${isDark ? softFillClassDark(habit.tone) : softFillClass(habit.tone)} ${badgeClass(habit.tone)}`}
                                 style={{
-                                  ...softFillStyle(habit.tone),
+                                  ...(isDark ? softFillStyleDark(habit.tone) : softFillStyle(habit.tone)),
                                   ...badgeStyle(habit.tone),
                                 }}
                               >
@@ -1141,9 +1143,9 @@ export function HabitTrackerApp() {
                                   />
                                   <div className="flex-1" />
                                   <span
-                                    className={`rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${softFillClass(habit.tone)} ${badgeClass(habit.tone)}`}
+                                    className={`rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${isDark ? softFillClassDark(habit.tone) : softFillClass(habit.tone)} ${badgeClass(habit.tone)}`}
                                     style={{
-                                      ...softFillStyle(habit.tone),
+                                      ...(isDark ? softFillStyleDark(habit.tone) : softFillStyle(habit.tone)),
                                       ...badgeStyle(habit.tone),
                                     }}
                                   >
@@ -1351,8 +1353,8 @@ export function HabitTrackerApp() {
                           </h3>
                         </div>
                         <span
-                          className={`rounded-md px-2 py-0.5 text-[12px] font-semibold ${softFillClass(habit.tone)}`}
-                          style={softFillStyle(habit.tone)}
+                          className={`rounded-md px-2 py-0.5 text-[12px] font-semibold ${isDark ? softFillClassDark(habit.tone) : softFillClass(habit.tone)}`}
+                          style={isDark ? softFillStyleDark(habit.tone) : softFillStyle(habit.tone)}
                         >
                           {rate}%
                         </span>
@@ -1367,8 +1369,8 @@ export function HabitTrackerApp() {
                           {habit.timeSlots.map((slot) => (
                             <span
                               key={slot}
-                              className={`rounded-md px-1.5 py-0.5 text-[11px] font-medium ${softFillClass(habit.tone)}`}
-                              style={softFillStyle(habit.tone)}
+                              className={`rounded-md px-1.5 py-0.5 text-[11px] font-medium ${isDark ? softFillClassDark(habit.tone) : softFillClass(habit.tone)}`}
+                              style={isDark ? softFillStyleDark(habit.tone) : softFillStyle(habit.tone)}
                             >
                               {slot}
                             </span>
