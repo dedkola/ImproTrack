@@ -1,6 +1,7 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
+import { useTranslation } from "@/components/i18n-provider";
 import { useTheme } from "@/components/theme-provider";
 
 export function ThemeToggle({
@@ -11,13 +12,17 @@ export function ThemeToggle({
   showLabel?: boolean;
 }) {
   const { isDark, toggleTheme } = useTheme();
-  const label = isDark ? "Dark" : "Light";
+  const { t } = useTranslation();
+  const label = isDark ? t("theme_dark") : t("theme_light");
+  const ariaLabel = isDark
+    ? t("theme_switch_to_light")
+    : t("theme_switch_to_dark");
 
   return (
     <button
       type="button"
       onClick={toggleTheme}
-      aria-label={`Switch to ${isDark ? "light" : "dark"} theme`}
+      aria-label={ariaLabel}
       className={`pill-btn theme-toggle-pill tap-target-compact inline-flex items-center gap-2 rounded-lg border border-black/[0.06] px-3 py-2 text-[13px] font-semibold shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)] ${className}`}
     >
       {isDark ? (

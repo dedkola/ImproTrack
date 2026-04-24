@@ -16,6 +16,7 @@ import {
 } from "@/lib/date";
 import { DatePicker } from "@/components/date-picker";
 import { HabitIcon } from "@/components/habit-icon";
+import { useTranslation } from "@/components/i18n-provider";
 import type { HabitDefinition } from "@/lib/habits";
 import { useHabits, useHabitRecords } from "@/lib/storage";
 import {
@@ -87,6 +88,7 @@ function getAverage(values: number[]) {
 }
 
 export function DashboardStats() {
+  const { t } = useTranslation();
   const { habits, activeHabits, archivedHabits } = useHabits();
   const { records, loadFullHistory, fullHistoryState } = useHabitRecords(habits);
   const [selectedPreset, setSelectedPreset] = useState<StatsPreset>("month");
@@ -259,18 +261,17 @@ export function DashboardStats() {
         <div className="surface-panel flex max-w-lg flex-col items-center gap-3 rounded-[28px] px-8 py-10 text-center">
           <span className="text-[34px]">📈</span>
           <h1 className="font-display text-[28px] font-semibold tracking-tight text-ink-950">
-            Statistics wake up after your first habit
-          </h1>
-          <p className="max-w-md text-[15px] leading-7 text-ink-700">
-            Add a habit on the dashboard and ImproTrack will start filling this
-            page with completion trends and streak summaries.
-          </p>
+             {t("stats_empty_title")}
+           </h1>
+           <p className="max-w-md text-[15px] leading-7 text-ink-700">
+             {t("stats_empty_desc")}
+           </p>
           <Link
             href="/dashboard"
             className="pill-btn tap-target mt-2 inline-flex items-center rounded-lg bg-white px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)]"
           >
-            Go to dashboard
-          </Link>
+             {t("settings_back")}
+           </Link>
         </div>
       </div>
     );

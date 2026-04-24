@@ -47,6 +47,7 @@ import { useHabits, useHabitRecords } from "@/lib/storage";
 import { HabitForm, HabitMenu, ConfirmDialog } from "@/components/habit-form";
 import { ArchiveFeedback } from "@/components/archive-feedback";
 import { HabitIcon } from "@/components/habit-icon";
+import { useTranslation } from "@/components/i18n-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const today = startOfDay(new Date());
@@ -311,6 +312,7 @@ function MobileMatrixDayCell({
 }
 
 export function HabitTrackerApp() {
+  const { t } = useTranslation();
   const { isDark } = useTheme();
   const {
     activeHabits,
@@ -569,25 +571,25 @@ export function HabitTrackerApp() {
         <div className="page-shell flex flex-col gap-2.5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-5">
-              <h1 className="font-display text-[20px] font-semibold leading-none tracking-tight text-ink-950">
-                Dashboard
-              </h1>
+                <h1 className="font-display text-[20px] font-semibold leading-none tracking-tight text-ink-950">
+                  {t("nav_dashboard")}
+                </h1>
               <span className="hidden h-4 w-px bg-ink-950/10 sm:block" />
               <div className="hidden items-center gap-5 sm:flex">
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-[14px] text-ink-700">Habits</span>
+                  <span className="text-[14px] text-ink-700">{t("sidebar_habits")}</span>
                   <span className="font-display text-[14px] font-semibold tabular-nums text-ink-950">
                     {activeHabits.length}
                   </span>
                 </div>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-[14px] text-ink-700">Hit rate</span>
+                  <span className="text-[14px] text-ink-700">{t("tracker_hit_rate")}</span>
                   <span className="font-display text-[14px] font-semibold tabular-nums text-ink-950">
                     {averageRate}%
                   </span>
                 </div>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-[14px] text-ink-700">Total</span>
+                  <span className="text-[14px] text-ink-700">{t("tracker_total")}</span>
                   <span className="font-display text-[14px] font-semibold tabular-nums text-ink-950">
                     {totalCompleted}
                   </span>
@@ -607,11 +609,11 @@ export function HabitTrackerApp() {
                 href="/dashboard/stats"
                 className="pill-btn tap-target-compact hidden items-center gap-1.5 rounded-lg bg-white/80 px-3 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm transition-all hover:bg-white hover:shadow-[var(--shadow-card-hover)] md:inline-flex"
               >
-                Statistics
-              </Link>
+                 {t("nav_stats")}
+               </Link>
               <button
                 type="button"
-                aria-label="Add habit"
+                 aria-label={t("tab_add_habit_aria")}
                 onClick={() => {
                   setEditingHabit(null);
                   setFormOpen(true);
@@ -619,9 +621,9 @@ export function HabitTrackerApp() {
                 className="pill-btn tap-target-compact flex items-center gap-1.5 rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)]"
               >
                 <Plus className="h-3.5 w-3.5" strokeWidth={2} />
-                <span className="hidden sm:inline">Add habit</span>
-                <span className="sm:hidden">Add</span>
-              </button>
+                 <span className="hidden sm:inline">{t("tab_add_habit")}</span>
+                 <span className="sm:hidden">{t("tab_add_habit")}</span>
+               </button>
             </div>
           </div>
         </div>
@@ -631,12 +633,12 @@ export function HabitTrackerApp() {
         {activeHabits.length === 0 ? (
           <div className="surface-panel flex flex-col items-center justify-center gap-3 rounded-2xl px-8 py-16 text-center">
             <span className="text-[32px]">🎯</span>
-            <h2 className="text-[18px] font-semibold text-ink-950">
-              No habits yet
-            </h2>
-            <p className="max-w-xs text-[14px] text-ink-700">
-              Create your first habit to start tracking your progress.
-            </p>
+             <h2 className="text-[18px] font-semibold text-ink-950">
+               {t("sidebar_no_habits_title")}
+             </h2>
+             <p className="max-w-xs text-[14px] text-ink-700">
+               {t("tracker_empty_desc")}
+             </p>
             <div className="mt-2 flex w-full max-w-sm flex-col gap-2 sm:flex-row sm:justify-center">
               <button
                 type="button"
@@ -646,15 +648,15 @@ export function HabitTrackerApp() {
                 }}
                 className="pill-btn tap-target rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)]"
               >
-                Create first habit
-              </button>
+                 {t("sidebar_create_habit")}
+               </button>
               {archivedHabits.length > 0 ? (
                 <Link
                   href="/dashboard/archive"
                   className="pill-btn tap-target inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]"
                 >
-                  Open archive
-                </Link>
+                   {t("nav_archive")}
+                 </Link>
               ) : null}
             </div>
           </div>
@@ -663,17 +665,17 @@ export function HabitTrackerApp() {
             {/* Mobile matrix */}
             <section className="animate-scale-in surface-panel rounded-[28px] p-3.5 md:hidden">
               <div className="flex items-center justify-between gap-3">
-                <h2 className="text-[15px] font-semibold text-ink-950">
-                  Habit matrix
-                </h2>
+                 <h2 className="text-[15px] font-semibold text-ink-950">
+                   {t("tracker_matrix")}
+                 </h2>
                 {isLatestMobileWeek ? null : (
                   <button
                     type="button"
                     onClick={() => setMobileWeekOffset(0)}
                     className="pill-btn tap-target-compact inline-flex items-center rounded-lg bg-white px-3 py-2 text-[12px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]"
                   >
-                    Latest
-                  </button>
+                     {t("tracker_latest")}
+                   </button>
                 )}
               </div>
 
