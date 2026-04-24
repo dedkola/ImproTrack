@@ -717,6 +717,10 @@ html[data-theme="dark"] .bg-white\/75 {
   background-color: rgba(17, 27, 51, 0.75);
 }
 
+html[data-theme="dark"] .border-white\/75 {
+  border-color: rgba(148, 163, 184, 0.12);
+}
+
 html[data-theme="dark"] .bg-white\/70 {
   background-color: rgba(17, 27, 51, 0.7);
 }

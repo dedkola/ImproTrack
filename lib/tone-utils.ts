@@ -152,6 +152,15 @@ export function getCardGradientStyleFromHex(hex: string): React.CSSProperties {
   };
 }
 
+/** Dark-mode variant: rich saturated gradient ending at the dark page background. */
+export function getCardGradientStyleFromHexDark(
+  hex: string,
+): React.CSSProperties {
+  return {
+    backgroundImage: `linear-gradient(to bottom right, ${withAlpha(hex, 0.55)}, ${withAlpha(hex, 0.35)}, rgba(11, 18, 32, 0.92))`,
+  };
+}
+
 export function getChartColorsFromHex(hex: string): {
   fill: string;
   stroke: string;

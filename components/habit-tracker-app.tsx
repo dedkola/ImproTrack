@@ -26,6 +26,7 @@ import { HabitDefinition } from "@/lib/habits";
 import {
   getMatrixToneFromHex,
   getCardGradientStyleFromHex,
+  getCardGradientStyleFromHexDark,
   softFillClass,
   softFillStyle,
   accentClass,
@@ -33,6 +34,7 @@ import {
   badgeClass,
   badgeStyle,
 } from "@/lib/tone-utils";
+import { useTheme } from "@/components/theme-provider";
 import {
   completedSlotsInDay,
   completionRate,
@@ -77,14 +79,46 @@ function getAppleCardGradient(fillClass: string) {
   return gradients[fillClass] ?? "from-sky-200/80 via-cyan-100/80 to-white";
 }
 
-function getAppleCardGradientStyle(tone: { fill: string; hex?: string }): {
+function getAppleCardGradientDark(fillClass: string) {
+  const gradients: Record<string, string> = {
+    "bg-sky-500": "from-sky-900/60 via-sky-950/45 to-slate-950/90",
+    "bg-sky-600": "from-sky-900/60 via-sky-950/45 to-slate-950/90",
+    "bg-emerald-500": "from-emerald-900/60 via-emerald-950/45 to-slate-950/90",
+    "bg-emerald-600": "from-emerald-900/60 via-emerald-950/45 to-slate-950/90",
+    "bg-violet-500": "from-violet-900/60 via-violet-950/45 to-slate-950/90",
+    "bg-violet-600": "from-violet-900/60 via-violet-950/45 to-slate-950/90",
+    "bg-amber-500": "from-amber-900/60 via-amber-950/45 to-slate-950/90",
+    "bg-amber-600": "from-amber-900/60 via-amber-950/45 to-slate-950/90",
+    "bg-rose-500": "from-rose-900/60 via-rose-950/45 to-slate-950/90",
+    "bg-rose-600": "from-rose-900/60 via-rose-950/45 to-slate-950/90",
+    "bg-teal-500": "from-teal-900/60 via-teal-950/45 to-slate-950/90",
+    "bg-teal-600": "from-teal-900/60 via-teal-950/45 to-slate-950/90",
+    "bg-indigo-500": "from-indigo-900/60 via-indigo-950/45 to-slate-950/90",
+    "bg-indigo-600": "from-indigo-900/60 via-indigo-950/45 to-slate-950/90",
+    "bg-slate-500": "from-slate-800/70 via-slate-900/55 to-slate-950/90",
+    "bg-slate-600": "from-slate-800/70 via-slate-900/55 to-slate-950/90",
+  };
+  return gradients[fillClass] ?? "from-sky-900/60 via-sky-950/45 to-slate-950/90";
+}
+
+function getAppleCardGradientStyle(
+  tone: { fill: string; hex?: string },
+  isDark: boolean,
+): {
   className?: string;
   style?: React.CSSProperties;
 } {
   if (tone.hex) {
-    return { style: getCardGradientStyleFromHex(tone.hex) };
+    return {
+      style: isDark
+        ? getCardGradientStyleFromHexDark(tone.hex)
+        : getCardGradientStyleFromHex(tone.hex),
+    };
   }
-  return { className: `bg-linear-to-br ${getAppleCardGradient(tone.fill)}` };
+  const gradient = isDark
+    ? getAppleCardGradientDark(tone.fill)
+    : getAppleCardGradient(tone.fill);
+  return { className: `bg-linear-to-br ${gradient}` };
 }
 
 function getMatrixTone(fillClass: string) {
@@ -275,6 +309,7 @@ function MobileMatrixDayCell({
 }
 
 export function HabitTrackerApp() {
+  const { isDark } = useTheme();
   const {
     activeHabits,
     archivedHabits,
@@ -1293,7 +1328,7 @@ export function HabitTrackerApp() {
             {/* Habit cards */}
             <section className="stagger-children grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
               {habitSummaries.map(({ habit, completed, rate }) => {
-                const cardGradient = getAppleCardGradientStyle(habit.tone);
+                const cardGradient = getAppleCardGradientStyle(habit.tone, isDark);
                 return (
                   <Link
                     key={habit.id}
