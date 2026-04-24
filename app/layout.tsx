@@ -6,6 +6,7 @@ import { FirebaseAnalytics } from "@/components/firebase-analytics";
 import { FirebaseAuthProvider } from "@/components/firebase-auth-provider";
 import { I18nProvider } from "@/components/i18n-provider";
 import { PwaController } from "@/components/pwa-controller";
+import { ThemeProvider } from "@/components/theme-provider";
 import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
@@ -91,7 +92,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  colorScheme: "light",
+  colorScheme: "light dark",
   themeColor: "#6D28D9",
 };
 
@@ -112,9 +113,11 @@ export default function RootLayout({
       <body className={`${sans.variable} ${display.variable} antialiased`}>
         <FirebaseAnalytics />
         <I18nProvider>
-          <FirebaseAuthProvider>
-            <PwaController>{children}</PwaController>
-          </FirebaseAuthProvider>
+          <ThemeProvider>
+            <FirebaseAuthProvider>
+              <PwaController>{children}</PwaController>
+            </FirebaseAuthProvider>
+          </ThemeProvider>
         </I18nProvider>
         <Analytics />
         <SpeedInsights />

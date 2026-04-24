@@ -9,6 +9,7 @@ import { Footer } from "@/components/footer";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { usePwaInstall } from "@/components/pwa-controller";
 import { useTranslation } from "@/components/i18n-provider";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type PublicPageNavLink = {
   href: string;
@@ -97,6 +98,7 @@ export function PublicPageShell({
           ) : null}
 
           <div className="flex items-center gap-2">
+            <ThemeToggle showLabel={false} />
             {hasMounted && isInstallAvailable ? (
               <button
                 type="button"
