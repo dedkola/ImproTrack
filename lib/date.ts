@@ -81,8 +81,8 @@ export function clampDateKey(value: string, min: string, max: string) {
 
 /**
  * Resolves the locale used for date formatting.
- * Prefers an explicit locale, then the document language on the client,
- * and falls back to English when neither is available.
+ * Prefers an explicit locale, then the document language on the client
+ * when it is present, and falls back to English otherwise.
  */
 function resolveDateLocale(locale?: string) {
   if (locale) return locale;
