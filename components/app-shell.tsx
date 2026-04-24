@@ -7,6 +7,7 @@ import { Sidebar, SidebarToggle } from "@/components/sidebar";
 import { Footer } from "@/components/footer";
 import { HabitForm } from "@/components/habit-form";
 import { MobileTabBar } from "@/components/mobile-tab-bar";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   HabitStorageProvider,
   type HabitStorageSyncState,
@@ -62,6 +63,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
             <span className="font-display text-[15px] font-semibold text-ink-950 sm:text-[16px]">
               ImproTrack
             </span>
+            <ThemeToggle className="ml-auto" showLabel={false} />
           </div>
         </div>
 
@@ -89,6 +91,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
             <span className="font-display text-[15px] font-semibold text-ink-950 sm:text-[16px]">
               ImproTrack
             </span>
+            <ThemeToggle className="ml-auto" showLabel={false} />
           </div>
         </div>
 
@@ -118,6 +121,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
             <span className="font-display text-[15px] font-semibold text-ink-950 sm:text-[16px]">
               ImproTrack
             </span>
+            <ThemeToggle className="ml-auto" showLabel={false} />
           </div>
         </div>
 
@@ -162,6 +166,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
             <span className="ml-2.5 font-display text-[15px] font-semibold text-ink-950 sm:ml-3 sm:text-[16px]">
               ImproTrack
             </span>
+            <ThemeToggle className="ml-auto" showLabel={false} />
           </div>
         </div>
 
