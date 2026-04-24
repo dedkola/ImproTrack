@@ -725,6 +725,19 @@ html[data-theme="dark"] .bg-white\/60 {
   background-color: rgba(17, 27, 51, 0.6);
 }
 
+/* bg-paper-50 is #f8fafc (near-white) — override to an elevated dark surface */
+html[data-theme="dark"] .bg-paper-50 {
+  background-color: #16233a;
+}
+
+html[data-theme="dark"] .bg-paper-50\/80 {
+  background-color: rgba(22, 35, 58, 0.8);
+}
+
+html[data-theme="dark"] .hover\:bg-paper-50:hover {
+  background-color: #16233a;
+}
+
 /* Primary dark button (bg-ink-950): keep dark in dark mode since --color-ink-950
    inverts to near-white for text, making bg-ink-950 unusable as a button bg */
 html[data-theme="dark"] .bg-ink-950 {
