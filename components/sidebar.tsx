@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { AuthControls } from "@/components/auth-controls";
 import { HabitIcon } from "@/components/habit-icon";
+import { useTranslation } from "@/components/i18n-provider";
 import { HabitDefinition } from "@/lib/habits";
 import {
   accentClass,
@@ -34,6 +35,7 @@ export function Sidebar({
   onAddHabit,
 }: SidebarProps) {
   const pathname = usePathname();
+  const { t } = useTranslation();
   const closeOnMobile = () => {
     if (typeof window !== "undefined" && window.innerWidth < 1024 && isOpen) {
       onToggle();
@@ -75,7 +77,7 @@ export function Sidebar({
           <button
             type="button"
             onClick={onToggle}
-            aria-label="Close sidebar"
+            aria-label={t("sidebar_close")}
             className="tap-target-compact flex items-center justify-center rounded-md text-ink-700 hover:bg-black/[0.04] lg:hidden"
           >
             <svg
@@ -97,7 +99,7 @@ export function Sidebar({
         <nav aria-label="Dashboard navigation" className="sidebar-nav flex-1 overflow-y-auto px-3 py-3">
           <div className="rounded-[24px] border border-black/[0.06] bg-white px-3 py-3 shadow-[var(--shadow-card)] lg:hidden">
             <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
-              Quick actions
+              {t("sidebar_quick_actions")}
             </p>
             <div className="mt-3 grid grid-cols-2 gap-2">
               <button
@@ -106,7 +108,7 @@ export function Sidebar({
                 className="pill-btn inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)]"
               >
                 <Plus className="h-3.5 w-3.5" strokeWidth={2} />
-                Add habit
+                {t("sidebar_add_habit")}
               </button>
               <Link
                 href="/dashboard/settings"
@@ -114,7 +116,7 @@ export function Sidebar({
                 className="pill-btn inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-3 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]"
               >
                 <Settings className="h-3.5 w-3.5" strokeWidth={1.8} />
-                Settings
+                {t("sidebar_settings")}
               </Link>
             </div>
           </div>
@@ -122,7 +124,7 @@ export function Sidebar({
           <div className="mt-5 hidden lg:block">
             <NavItem
               href="/dashboard"
-              label="Dashboard"
+              label={t("nav_dashboard")}
               icon={<LayoutGrid className="h-4 w-4" strokeWidth={1.5} />}
               active={pathname === "/dashboard" || pathname.startsWith("/dashboard/habits/")}
               onClick={closeOnMobile}
@@ -132,14 +134,14 @@ export function Sidebar({
           <div className="mt-5">
             <div className="flex items-center justify-between px-2 py-1">
               <span className="text-[12px] font-semibold uppercase tracking-wider text-ink-600">
-                Habits
+                {t("sidebar_habits")}
               </span>
               <button
                 type="button"
                 onClick={handleAddHabit}
-                aria-label="Add habit"
+                aria-label={t("sidebar_add_habit")}
                 className="tap-target-compact flex items-center justify-center rounded-md text-ink-700 hover:bg-black/[0.06] hover:text-ink-950"
-                title="Add habit"
+                title={t("sidebar_add_habit")}
               >
                 <Plus className="h-3.5 w-3.5" strokeWidth={2} />
               </button>
@@ -174,10 +176,10 @@ export function Sidebar({
             ) : (
               <div className="mt-2 rounded-[22px] border border-dashed border-black/[0.08] bg-white px-4 py-4 shadow-[var(--shadow-card)]">
                 <p className="text-[13px] font-semibold text-ink-950">
-                  No active habits yet
+                  {t("sidebar_no_habits_title")}
                 </p>
                 <p className="mt-1 text-[12px] leading-5 text-ink-700">
-                  Create your first habit to pin it here for fast access.
+                  {t("sidebar_no_habits_desc")}
                 </p>
                 <button
                   type="button"
@@ -185,7 +187,7 @@ export function Sidebar({
                   className="pill-btn tap-target-compact mt-3 inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)]"
                 >
                   <Plus className="h-3.5 w-3.5" strokeWidth={2} />
-                  Create habit
+                  {t("sidebar_create_habit")}
                 </button>
               </div>
             )}
@@ -194,21 +196,21 @@ export function Sidebar({
           <div className="mt-5 hidden border-t border-black/[0.06] pt-3 lg:block">
             <NavItem
               href="/dashboard/archive"
-              label="Archive"
+              label={t("nav_archive")}
               icon={<Archive className="h-4 w-4" strokeWidth={1.5} />}
               active={pathname === "/dashboard/archive"}
               onClick={closeOnMobile}
             />
             <NavItem
               href="/dashboard/stats"
-              label="Statistics"
+              label={t("nav_stats")}
               icon={<BarChart2 className="h-4 w-4" strokeWidth={1.5} />}
               active={pathname === "/dashboard/stats"}
               onClick={closeOnMobile}
             />
             <NavItem
               href="/dashboard/settings"
-              label="Settings"
+              label={t("nav_settings")}
               icon={<Settings className="h-4 w-4" strokeWidth={1.5} />}
               active={pathname === "/dashboard/settings"}
               onClick={closeOnMobile}

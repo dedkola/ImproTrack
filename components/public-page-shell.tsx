@@ -6,7 +6,9 @@ import { Download, Menu, X } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 import { AuthControls } from "@/components/auth-controls";
 import { Footer } from "@/components/footer";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { usePwaInstall } from "@/components/pwa-controller";
+import { useTranslation } from "@/components/i18n-provider";
 
 type PublicPageNavLink = {
   href: string;
@@ -47,6 +49,7 @@ export function PublicPageShell({
   navLinks = [],
   width = "wide",
 }: PublicPageShellProps) {
+  const { t } = useTranslation();
   const widthClass = width === "standard" ? "max-w-5xl" : "max-w-6xl";
   const pathname = usePathname();
   const mobileMenuId = useId();
@@ -58,9 +61,9 @@ export function PublicPageShell({
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  const installPillLabel = installMode === "ios" ? "Install" : "Install app";
+  const installPillLabel = installMode === "ios" ? t("install_app_short") : t("install_app");
   const mobileInstallLabel =
-    installMode === "ios" ? "How to install the app" : "Install app";
+    installMode === "ios" ? t("install_how") : t("install_app");
 
   return (
     <div className="public-backdrop relative min-h-screen overflow-hidden text-ink-950">
@@ -68,7 +71,7 @@ export function PublicPageShell({
         href="#main-content"
         className="sr-only z-[120] rounded-xl bg-ink-950 px-4 py-2 text-[14px] font-semibold text-white shadow-lg focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
       >
-        Skip to content
+        {t("skip_to_content")}
       </a>
 
       <header className="header-bar sticky top-0 z-40">
@@ -102,9 +105,11 @@ export function PublicPageShell({
               >
                 <Download className="h-4 w-4" strokeWidth={1.8} />
                 <span className="hidden sm:inline">{installPillLabel}</span>
-                <span className="sm:hidden">Install</span>
+                <span className="sm:hidden">{t("install_app_short")}</span>
               </button>
             ) : null}
+
+            <LanguageSwitcher />
 
             <div className="hidden md:block">
               <AuthControls variant="landing" />
@@ -114,7 +119,7 @@ export function PublicPageShell({
               type="button"
               aria-expanded={mobileMenuOpen}
               aria-controls={mobileMenuId}
-              aria-label={mobileMenuOpen ? "Close site menu" : "Open site menu"}
+              aria-label={mobileMenuOpen ? t("close_menu") : t("open_menu")}
               onClick={() => setMobileMenuOpen((open) => !open)}
               className="tap-target inline-flex items-center justify-center rounded-xl border border-black/[0.06] bg-white/80 text-ink-950 shadow-[var(--shadow-card)] md:hidden"
             >
