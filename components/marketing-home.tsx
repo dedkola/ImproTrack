@@ -8,6 +8,9 @@ const quietPoints = [
   "Archive old routines without losing history.",
 ];
 
+const THEME_INVARIANT_PRIMARY_CTA_CLASS =
+  "bg-[#0A1628] text-white shadow-[0_10px_24px_rgba(10,22,40,0.16)]";
+
 const sectionNotes = [
   {
     id: "workspace",
@@ -69,7 +72,7 @@ export function MarketingHome() {
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
           <Link
             href="/dashboard"
-            className="pill-btn inline-flex items-center justify-center rounded-xl bg-ink-950 px-5 py-3 text-[15px] font-semibold text-white shadow-[0_10px_24px_rgba(10,22,40,0.16)]"
+            className={`pill-btn inline-flex items-center justify-center rounded-xl px-5 py-3 text-[15px] font-semibold ${THEME_INVARIANT_PRIMARY_CTA_CLASS}`}
           >
             Open dashboard
           </Link>
