@@ -3,29 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Archive, BarChart2, LayoutGrid, Plus, Settings } from "lucide-react";
-
-const mobileTabs = [
-  {
-    href: "/dashboard",
-    label: "Dashboard",
-    icon: LayoutGrid,
-  },
-  {
-    href: "/dashboard/stats",
-    label: "Stats",
-    icon: BarChart2,
-  },
-  {
-    href: "/dashboard/archive",
-    label: "Archive",
-    icon: Archive,
-  },
-  {
-    href: "/dashboard/settings",
-    label: "Settings",
-    icon: Settings,
-  },
-] as const;
+import { useTranslation } from "@/components/i18n-provider";
 
 type MobileTabBarProps = {
   onAddHabit: () => void;
@@ -41,6 +19,14 @@ function isTabActive(pathname: string, href: string) {
 
 export function MobileTabBar({ onAddHabit }: MobileTabBarProps) {
   const pathname = usePathname();
+  const { t } = useTranslation();
+
+  const mobileTabs = [
+    { href: "/dashboard", label: t("nav_dashboard"), icon: LayoutGrid },
+    { href: "/dashboard/stats", label: t("nav_stats"), icon: BarChart2 },
+    { href: "/dashboard/archive", label: t("nav_archive"), icon: Archive },
+    { href: "/dashboard/settings", label: t("nav_settings"), icon: Settings },
+  ] as const;
 
   return (
     <nav
@@ -51,11 +37,11 @@ export function MobileTabBar({ onAddHabit }: MobileTabBarProps) {
         <button
           type="button"
           onClick={onAddHabit}
-          aria-label="Add a new habit"
+          aria-label={t("tab_add_habit_aria")}
           className="pill-btn absolute right-4 top-0 z-10 inline-flex min-h-12 -translate-y-1/2 items-center gap-2 rounded-full bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-4 py-2 text-[13px] font-semibold text-white shadow-[0_12px_32px_rgba(109,40,217,0.35)]"
         >
           <Plus className="h-4 w-4" strokeWidth={2.1} />
-          Add habit
+          {t("tab_add_habit")}
         </button>
 
         <div className="grid grid-cols-4 gap-1 rounded-[24px] border border-black/[0.05] bg-white/80 p-1 shadow-[0_-8px_24px_rgba(10,22,40,0.08)] pt-5">
