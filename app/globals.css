@@ -681,12 +681,54 @@ html[data-theme="dark"] .bg-white {
   background-color: rgba(17, 27, 51, 0.92);
 }
 
+html[data-theme="dark"] .hover\:bg-white:hover {
+  background-color: rgba(17, 27, 51, 1);
+}
+
+html[data-theme="dark"] .bg-white\/96 {
+  background-color: rgba(17, 27, 51, 0.96);
+}
+
+html[data-theme="dark"] .bg-white\/95 {
+  background-color: rgba(17, 27, 51, 0.95);
+}
+
+html[data-theme="dark"] .bg-white\/92 {
+  background-color: rgba(11, 18, 32, 0.92);
+}
+
+html[data-theme="dark"] .bg-white\/90 {
+  background-color: rgba(17, 27, 51, 0.9);
+}
+
+html[data-theme="dark"] .bg-white\/88 {
+  background-color: rgba(17, 27, 51, 0.88);
+}
+
 html[data-theme="dark"] .bg-white\/80 {
   background-color: rgba(17, 27, 51, 0.8);
 }
 
+html[data-theme="dark"] .bg-white\/78 {
+  background-color: rgba(17, 27, 51, 0.78);
+}
+
+html[data-theme="dark"] .bg-white\/75 {
+  background-color: rgba(17, 27, 51, 0.75);
+}
+
 html[data-theme="dark"] .bg-white\/70 {
   background-color: rgba(17, 27, 51, 0.7);
+}
+
+html[data-theme="dark"] .bg-white\/60 {
+  background-color: rgba(17, 27, 51, 0.6);
+}
+
+/* Primary dark button (bg-ink-950): keep dark in dark mode since --color-ink-950
+   inverts to near-white for text, making bg-ink-950 unusable as a button bg */
+html[data-theme="dark"] .bg-ink-950 {
+  background-color: rgba(17, 27, 51, 0.95);
 }
 
 html[data-theme="dark"] .border-black\/\[0\.05\],
