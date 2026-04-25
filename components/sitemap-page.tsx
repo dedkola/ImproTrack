@@ -86,10 +86,10 @@ export function SitemapPage() {
                   {route.href}
                 </p>
                 <h2 className="mt-3 font-display text-[28px] font-semibold tracking-tight text-ink-950">
-                  {display ? t(display.title) : route.href}
+                  {display ? t(display.title) : route.title}
                 </h2>
                 <p className="mt-3 flex-1 text-[15px] leading-7 text-ink-700">
-                  {display ? t(display.description) : route.href}
+                  {display ? t(display.description) : route.description}
                 </p>
                 <span className="mt-5 inline-flex items-center text-[14px] font-semibold text-ink-950 transition-colors group-hover:text-sky-700">
                   {t("sitemap_open_page")}

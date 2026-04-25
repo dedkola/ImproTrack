@@ -21,6 +21,21 @@ export function Footer() {
           <span className="text-[12px] text-ink-600">v0.2.0</span>
         </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[12px] font-medium text-ink-700">
+          <Link href="/about" className="transition-colors hover:text-ink-950">
+            About
+          </Link>
+          <Link
+            href="/features"
+            className="transition-colors hover:text-ink-950"
+          >
+            Features
+          </Link>
+          <Link
+            href="/compare"
+            className="transition-colors hover:text-ink-950"
+          >
+            Compare
+          </Link>
           <Link
             href="/sitemap"
             className="transition-colors hover:text-ink-950"

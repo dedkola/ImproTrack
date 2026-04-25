@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { SEO_PAGES } from "@/lib/seo-pages";
 
 export type PublicSiteRoute = {
   href: string;
@@ -21,6 +22,14 @@ export const PUBLIC_SITE_ROUTES: PublicSiteRoute[] = [
     changeFrequency: "weekly",
     lastModified: "2026-04-25T00:00:00.000Z",
   },
+  ...SEO_PAGES.map((page) => ({
+    href: page.path,
+    title: page.routeTitle,
+    description: page.routeDescription,
+    priority: page.priority,
+    changeFrequency: page.changeFrequency,
+    lastModified: page.lastModified,
+  })),
   {
     href: "/privacy",
     title: "Privacy Policy",

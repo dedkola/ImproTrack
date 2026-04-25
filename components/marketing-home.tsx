@@ -44,9 +44,10 @@ export function MarketingHome() {
   return (
     <PublicPageShell
       navLinks={[
-        { href: "#workspace", label: t("home_nav_workspace") },
-        { href: "#signal", label: t("home_nav_signal") },
-        { href: "#system", label: t("home_nav_system") },
+        { href: "/features", label: "Features" },
+        { href: "/compare", label: "Compare" },
+        { href: "/about", label: "About" },
+        { href: "/habit-tracker", label: "Habit tracker" },
       ]}
       width="wide"
     >
