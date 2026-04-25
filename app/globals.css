@@ -497,6 +497,36 @@ html[data-theme="dark"] .seo-hero-section::after {
   }
 }
 
+/* --- Locale-aware hero heading scale-down -------------------------------- */
+/* Russian (and similarly verbose Cyrillic locales) produce titles that are  */
+/* substantially longer than English, causing the hero to overflow and push  */
+/* the collage image far down on ≤ 1024 px viewports.                       */
+
+html[lang="ru"] .marketing-hero-copy h1,
+html[lang="ru"] .seo-hero-copy h1,
+html[lang="uk"] .marketing-hero-copy h1,
+html[lang="uk"] .seo-hero-copy h1 {
+  font-size: 2.75rem; /* 44px – mobile stays the same */
+}
+
+@media (min-width: 640px) {
+  html[lang="ru"] .marketing-hero-copy h1,
+  html[lang="ru"] .seo-hero-copy h1,
+  html[lang="uk"] .marketing-hero-copy h1,
+  html[lang="uk"] .seo-hero-copy h1 {
+    font-size: 3.25rem; /* 52px instead of 66px */
+  }
+}
+
+@media (min-width: 1024px) {
+  html[lang="ru"] .marketing-hero-copy h1,
+  html[lang="ru"] .seo-hero-copy h1,
+  html[lang="uk"] .marketing-hero-copy h1,
+  html[lang="uk"] .seo-hero-copy h1 {
+    font-size: 4rem; /* 64px instead of 86px */
+  }
+}
+
 /* --- Video embed --------------------------------------------------------- */
 
 .video-embed-frame {
