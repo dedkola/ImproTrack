@@ -4,6 +4,29 @@ import Link from "next/link";
 import { PublicPageShell } from "@/components/public-page-shell";
 import { CRAWLER_BLOCKED_PATHS, PUBLIC_SITE_ROUTES } from "@/lib/public-routes";
 import { useTranslation } from "@/components/i18n-provider";
+import type { Translations } from "@/lib/i18n";
+
+const routeTranslationKeys: Record<
+  string,
+  { title: keyof Translations; description: keyof Translations }
+> = {
+  "/": {
+    title: "sitemap_route_home_title",
+    description: "sitemap_route_home_desc",
+  },
+  "/privacy": {
+    title: "sitemap_route_privacy_title",
+    description: "sitemap_route_privacy_desc",
+  },
+  "/terms": {
+    title: "sitemap_route_terms_title",
+    description: "sitemap_route_terms_desc",
+  },
+  "/sitemap": {
+    title: "sitemap_route_sitemap_title",
+    description: "sitemap_route_sitemap_desc",
+  },
+};
 
 export function SitemapPage() {
   const { t } = useTranslation();
@@ -11,12 +34,12 @@ export function SitemapPage() {
     {
       href: "/sitemap.xml",
       label: "sitemap.xml",
-      description: "XML sitemap for search engines with the public static routes only.",
+      description: t("sitemap_file_xml_desc"),
     },
     {
       href: "/robots.txt",
       label: "robots.txt",
-      description: "Crawler rules that point to the sitemap and block signed-in dashboard paths.",
+      description: t("sitemap_file_robots_desc"),
     },
   ];
 
@@ -50,26 +73,30 @@ export function SitemapPage() {
         </div>
 
         <section className="mt-6 grid gap-4 md:grid-cols-2">
-          {PUBLIC_SITE_ROUTES.map((route) => (
-            <Link
-              key={route.href}
-              href={route.href}
-              className="feature-panel group flex h-full flex-col rounded-[28px] px-6 py-6"
-            >
-              <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
-                {route.href}
-              </p>
-              <h2 className="mt-3 font-display text-[28px] font-semibold tracking-tight text-ink-950">
-                {route.title}
-              </h2>
-              <p className="mt-3 flex-1 text-[15px] leading-7 text-ink-700">
-                {route.description}
-              </p>
-              <span className="mt-5 inline-flex items-center text-[14px] font-semibold text-ink-950 transition-colors group-hover:text-sky-700">
-                {t("sitemap_open_page")}
-              </span>
-            </Link>
-          ))}
+          {PUBLIC_SITE_ROUTES.map((route) => {
+            const display = routeTranslationKeys[route.href];
+
+            return (
+              <Link
+                key={route.href}
+                href={route.href}
+                className="feature-panel group flex h-full flex-col rounded-[28px] px-6 py-6"
+              >
+                <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
+                  {route.href}
+                </p>
+                <h2 className="mt-3 font-display text-[28px] font-semibold tracking-tight text-ink-950">
+                  {display ? t(display.title) : route.href}
+                </h2>
+                <p className="mt-3 flex-1 text-[15px] leading-7 text-ink-700">
+                  {display ? t(display.description) : route.href}
+                </p>
+                <span className="mt-5 inline-flex items-center text-[14px] font-semibold text-ink-950 transition-colors group-hover:text-sky-700">
+                  {t("sitemap_open_page")}
+                </span>
+              </Link>
+            );
+          })}
         </section>
 
         <section className="mt-6 grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
