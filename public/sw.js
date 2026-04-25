@@ -19,6 +19,7 @@ const CORE_ASSETS = [
   "/icon-512.png",
   "/safari-pinned-tab.svg",
   "/logo.svg",
+  "/brand/home-collage.png",
   "/brand/dashboard-shot.png",
   "/brand/stats-shot.png",
   "/brand/archive-shot.png",

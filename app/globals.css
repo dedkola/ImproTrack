@@ -316,6 +316,187 @@ html[data-theme="dark"] .brand-shot-frame {
   }
 }
 
+.product-collage {
+  margin: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.product-collage-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter:
+    drop-shadow(0 30px 60px rgba(10, 22, 40, 0.14))
+    drop-shadow(0 2px 8px rgba(10, 22, 40, 0.06));
+}
+
+.marketing-hero-section,
+.seo-hero-section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.marketing-hero-section {
+  min-height: min(860px, calc(100svh - 4.5rem));
+  padding-block: 1.5rem 0;
+}
+
+.seo-hero-section {
+  min-height: 680px;
+  padding-block: 1.25rem 0;
+}
+
+.marketing-hero-section::before,
+.seo-hero-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0.96) 40%, rgba(255, 255, 255, 0.58) 100%),
+    linear-gradient(135deg, rgba(14, 165, 233, 0.11), transparent 34%),
+    linear-gradient(155deg, transparent 44%, rgba(245, 158, 11, 0.08) 100%);
+}
+
+.marketing-hero-section::after,
+.seo-hero-section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(10, 22, 40, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(10, 22, 40, 0.04) 1px, transparent 1px);
+  background-size: 42px 42px;
+  -webkit-mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0.12) 44%, transparent 78%);
+  mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0.12) 44%, transparent 78%);
+}
+
+html[data-theme="dark"] .marketing-hero-section::before,
+html[data-theme="dark"] .seo-hero-section::before {
+  background:
+    linear-gradient(90deg, rgba(11, 18, 32, 0.98) 0%, rgba(11, 18, 32, 0.94) 42%, rgba(11, 18, 32, 0.64) 100%),
+    linear-gradient(135deg, rgba(14, 165, 233, 0.12), transparent 34%),
+    linear-gradient(155deg, transparent 44%, rgba(245, 158, 11, 0.09) 100%);
+}
+
+html[data-theme="dark"] .marketing-hero-section::after,
+html[data-theme="dark"] .seo-hero-section::after {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.075) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.075) 1px, transparent 1px);
+}
+
+.marketing-hero-inner,
+.seo-hero-inner {
+  position: relative;
+  display: flex;
+  min-height: inherit;
+  align-items: center;
+}
+
+.marketing-hero-copy,
+.seo-hero-copy {
+  position: relative;
+  z-index: 2;
+  max-width: 760px;
+}
+
+.marketing-hero-copy {
+  padding-block: 4rem 8rem;
+}
+
+.seo-hero-copy {
+  padding-block: 4rem 7rem;
+}
+
+.marketing-hero-collage,
+.seo-hero-collage {
+  position: absolute;
+  z-index: 1;
+}
+
+.marketing-hero-collage {
+  right: -24rem;
+  bottom: -9rem;
+  width: min(92vw, 1080px);
+}
+
+.seo-hero-collage {
+  right: -27rem;
+  bottom: -11rem;
+  width: min(88vw, 980px);
+  opacity: 0.94;
+}
+
+@media (min-width: 1280px) {
+  .marketing-hero-collage {
+    right: -16rem;
+  }
+
+  .seo-hero-collage {
+    right: -20rem;
+  }
+}
+
+@media (max-width: 1023px) {
+  .marketing-hero-section,
+  .seo-hero-section {
+    min-height: auto;
+  }
+
+  .marketing-hero-section::before,
+  .seo-hero-section::before {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.72)),
+      linear-gradient(135deg, rgba(14, 165, 233, 0.11), transparent 40%),
+      linear-gradient(155deg, transparent 48%, rgba(245, 158, 11, 0.08) 100%);
+  }
+
+  html[data-theme="dark"] .marketing-hero-section::before,
+  html[data-theme="dark"] .seo-hero-section::before {
+    background:
+      linear-gradient(180deg, rgba(11, 18, 32, 0.98), rgba(11, 18, 32, 0.76)),
+      linear-gradient(135deg, rgba(14, 165, 233, 0.12), transparent 40%),
+      linear-gradient(155deg, transparent 48%, rgba(245, 158, 11, 0.09) 100%);
+  }
+
+  .marketing-hero-inner,
+  .seo-hero-inner {
+    display: block;
+  }
+
+  .marketing-hero-copy,
+  .seo-hero-copy {
+    max-width: 100%;
+    padding-block: 3rem 1rem;
+  }
+
+  .marketing-hero-collage,
+  .seo-hero-collage {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    width: min(112vw, 860px);
+    margin: 0 -18vw -4rem auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .marketing-hero-copy,
+  .seo-hero-copy {
+    padding-block-start: 2.5rem;
+  }
+
+  .marketing-hero-collage,
+  .seo-hero-collage {
+    width: 138vw;
+    margin: -0.5rem -34vw -4rem auto;
+  }
+}
+
 /* --- Global utility interactions ---------------------------------------- */
 
 .pill-btn {

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { ProductCollage } from "@/components/product-collage";
 import { PublicPageShell } from "@/components/public-page-shell";
 import { useTranslation } from "@/components/i18n-provider";
 
@@ -51,41 +52,51 @@ export function MarketingHome() {
       ]}
       width="wide"
     >
-      <section className="page-shell mx-auto max-w-5xl pt-12 pb-14 text-center sm:pt-16 sm:pb-16 lg:pt-20 lg:pb-20">
-        <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
-          ImproTrack
-        </p>
-        <h1 className="mx-auto mt-4 max-w-4xl font-display text-[44px] font-semibold leading-[0.94] tracking-tight text-ink-950 sm:text-[66px] lg:text-[88px]">
-          {t("home_hero_title")}
-        </h1>
-        <p className="mx-auto mt-5 max-w-2xl text-[16px] leading-7 text-ink-700 sm:text-[19px] sm:leading-8">
-          {t("home_hero_desc")}
-        </p>
+      <section className="marketing-hero-section">
+        <div className="page-shell marketing-hero-inner mx-auto max-w-6xl">
+          <div className="marketing-hero-copy">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
+              ImproTrack
+            </p>
+            <h1 className="mt-4 max-w-4xl font-display text-[44px] font-semibold leading-[0.94] tracking-tight text-ink-950 sm:text-[66px] lg:text-[86px]">
+              {t("home_hero_title")}
+            </h1>
+            <p className="mt-5 max-w-2xl text-[16px] leading-7 text-ink-700 sm:text-[19px] sm:leading-8">
+              {t("home_hero_desc")}
+            </p>
 
-        <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-          <Link
-            href="/dashboard"
-            className={`pill-btn inline-flex items-center justify-center rounded-xl px-5 py-3 text-[15px] font-semibold ${THEME_INVARIANT_PRIMARY_CTA_CLASS}`}
-          >
-            {t("home_open_dashboard")}
-          </Link>
-          <Link
-            href="/privacy"
-            className="pill-btn inline-flex items-center justify-center rounded-xl border border-black/[0.06] bg-white px-5 py-3 text-[15px] font-semibold text-ink-950 shadow-[var(--shadow-card)]"
-          >
-            {t("home_review_privacy")}
-          </Link>
-        </div>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/dashboard"
+                className={`pill-btn inline-flex items-center justify-center rounded-xl px-5 py-3 text-[15px] font-semibold ${THEME_INVARIANT_PRIMARY_CTA_CLASS}`}
+              >
+                {t("home_open_dashboard")}
+              </Link>
+              <Link
+                href="/features"
+                className="pill-btn inline-flex items-center justify-center rounded-xl border border-black/[0.06] bg-white px-5 py-3 text-[15px] font-semibold text-ink-950 shadow-[var(--shadow-card)]"
+              >
+                Features
+              </Link>
+            </div>
 
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-3 text-[13px] font-medium text-ink-700 sm:mt-12">
-          {quietPoints.map((point) => (
-            <span
-              key={point}
-              className="rounded-full border border-black/[0.06] bg-white px-4 py-2 shadow-[var(--shadow-card)]"
-            >
-              {point}
-            </span>
-          ))}
+            <div className="mt-10 flex flex-wrap gap-3 text-[13px] font-medium text-ink-700 sm:mt-12">
+              {quietPoints.map((point) => (
+                <span
+                  key={point}
+                  className="rounded-full border border-black/[0.06] bg-white px-4 py-2 shadow-[var(--shadow-card)]"
+                >
+                  {point}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <ProductCollage
+            alt="ImproTrack product collage with dashboard, statistics, archive, and progress badges"
+            className="marketing-hero-collage"
+            priority
+          />
         </div>
       </section>
 

@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ProductCollage } from "@/components/product-collage";
 import { PublicPageShell } from "@/components/public-page-shell";
 import {
   SEO_PAGES_BY_SLUG,
@@ -67,9 +67,9 @@ export function SeoMarketingPage({ page }: { page: SeoPage }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <PublicPageShell navLinks={publicNavLinks} width="wide">
-        <section className="page-shell mx-auto max-w-6xl pt-10 pb-8 sm:pt-14 sm:pb-10 lg:pt-16">
-          <div className="grid gap-8 lg:grid-cols-[1fr_0.9fr] lg:items-center">
-            <div>
+        <section className="seo-hero-section">
+          <div className="page-shell seo-hero-inner mx-auto max-w-6xl">
+            <div className="seo-hero-copy">
               <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
                 {page.eyebrow}
               </p>
@@ -97,17 +97,11 @@ export function SeoMarketingPage({ page }: { page: SeoPage }) {
               </div>
             </div>
 
-            <figure className="brand-shot-frame">
-              <Image
-                src={page.heroImage}
-                alt={page.heroImageAlt}
-                width={1600}
-                height={1080}
-                priority
-                className="brand-shot-image"
-                sizes="(min-width: 1024px) 45vw, 100vw"
-              />
-            </figure>
+            <ProductCollage
+              alt={`ImproTrack product collage for ${page.routeTitle}`}
+              className="seo-hero-collage"
+              priority
+            />
           </div>
         </section>
 
