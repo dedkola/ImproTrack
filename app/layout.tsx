@@ -24,17 +24,18 @@ const display = Space_Grotesk({
 
 const siteUrl = getSiteUrl();
 const metadataBase = new URL(siteUrl);
-const title = "ImproTrack";
+const siteName = "ImproTrack";
+const title = "ImproTrack: Habit Dashboard for Routines and Progress";
 const description =
   "ImproTrack is a focused habit tracker for daily routines, streaks, archive history, and progress insights across your dashboard, stats, and archive views.";
 const socialImage = `${siteUrl}/brand/opengraph.png`;
 
 export const metadata: Metadata = {
   metadataBase,
-  applicationName: title,
+  applicationName: siteName,
   title: {
     default: title,
-    template: `%s | ${title}`,
+    template: `%s | ${siteName}`,
   },
   description,
   manifest: "/manifest.webmanifest",
@@ -50,8 +51,8 @@ export const metadata: Metadata = {
     "progress dashboard",
     "productivity PWA",
   ],
-  creator: title,
-  publisher: title,
+  creator: siteName,
+  publisher: siteName,
   category: "productivity",
   classification: "Productivity",
   formatDetection: {
@@ -61,13 +62,13 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title,
+    title: siteName,
     statusBarStyle: "default",
   },
   openGraph: {
     type: "website",
     url: siteUrl,
-    siteName: title,
+    siteName,
     locale: "en_US",
     title,
     description,
