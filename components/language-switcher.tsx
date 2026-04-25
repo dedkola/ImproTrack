@@ -52,7 +52,7 @@ export function LanguageSwitcher() {
         aria-controls={dropdownId}
         aria-label={t("language_select")}
         onClick={() => setOpen((v) => !v)}
-        className="pill-btn inline-flex min-h-9 items-center gap-1.5 rounded-full border border-black/[0.06] bg-white/80 px-2.5 py-1.5 text-[12px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-colors hover:bg-white sm:px-3 sm:text-[13px]"
+        className="inline-flex min-h-9 items-center gap-1.5 bg-transparent px-1 py-1.5 text-[12px] font-semibold text-ink-950 transition-colors hover:text-ink-700 sm:px-1.5 sm:text-[13px]"
       >
         <span aria-hidden="true" className="text-[14px] leading-none">
           {current.flag}
