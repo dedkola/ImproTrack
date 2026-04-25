@@ -15,6 +15,7 @@ import { completedSlotsInDay } from "@/lib/stats";
 import type { HabitTone } from "@/lib/habits";
 import { getChartColorsFromHex } from "@/lib/tone-utils";
 import { DatePicker } from "@/components/date-picker";
+import { useTranslation } from "@/components/i18n-provider";
 
 // ---- SVG smooth curve helper -----------------------------------------------
 // Catmull-Rom → cubic Bézier conversion (tension 0.4) for pretty line charts.
@@ -96,6 +97,7 @@ function LineChartViz({
   strokeClass: string;
   inlineColor?: string;
 }) {
+  const { locale, t } = useTranslation();
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -159,7 +161,7 @@ function LineChartViz({
       viewBox={`0 0 ${VW} ${VH}`}
       width="100%"
       className="cursor-crosshair"
-      aria-label="7-day rolling completion rate line chart"
+      aria-label={t("chart_aria")}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
@@ -267,7 +269,7 @@ function LineChartViz({
                   textAnchor="middle"
                 >
                   {Math.round(hRate * 100)}% —{" "}
-                  {hDate.toLocaleString("en", {
+                  {hDate.toLocaleString(locale, {
                     month: "short",
                     day: "numeric",
                   })}
@@ -279,7 +281,7 @@ function LineChartViz({
                   fill="#8090a5"
                   textAnchor="middle"
                 >
-                  {Math.round(hPoint.ratio * 100)}% day · 7d avg
+                   {t("chart_day_average", { rate: String(Math.round(hPoint.ratio * 100)) })}
                 </text>
               </>
             );
@@ -316,7 +318,7 @@ function LineChartViz({
               fill="#8090a5"
               textAnchor="middle"
             >
-              {d.toLocaleString("en", { month: "short", day: "numeric" })}
+              {d.toLocaleString(locale, { month: "short", day: "numeric" })}
             </text>
           );
         })}
@@ -327,9 +329,10 @@ function LineChartViz({
 // ---- Empty state ------------------------------------------------------------
 
 function ChartEmpty() {
+  const { t } = useTranslation();
   return (
     <div className="flex h-28 items-center justify-center text-[13px] text-ink-700">
-      No data for this period
+      {t("chart_no_data")}
     </div>
   );
 }
@@ -347,6 +350,7 @@ export function HabitChart({
   timeSlots: string[];
   tone: HabitTone;
 }) {
+  const { t } = useTranslation();
   const [preset, setPreset] = useState<TimePreset>("30");
   const [customFrom, setCustomFrom] = useState(
     toDateKey(subtractDays(today, 29)),
@@ -377,7 +381,7 @@ export function HabitChart({
   const PRESET_OPTIONS: { value: TimePreset; label: string }[] = [
     { value: "7", label: "7d" },
     { value: "30", label: "30d" },
-    { value: "custom", label: "Custom" },
+    { value: "custom", label: t("chart_custom") },
   ];
 
   const CONTROL_BTN_BASE =
@@ -387,7 +391,7 @@ export function HabitChart({
     <section className="animate-fade-in-up surface-panel rounded-[28px] p-4 sm:p-6">
       {/* Controls row */}
       <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-[13px] font-semibold text-ink-950">Chart</h2>
+        <h2 className="text-[13px] font-semibold text-ink-950">{t("chart")}</h2>
 
         <div className="comparison-scroll -mx-1 flex gap-1 overflow-x-auto px-1 pb-1 sm:mx-0 sm:flex-wrap sm:justify-end sm:overflow-visible sm:px-0 sm:pb-0">
           {PRESET_OPTIONS.map(({ value, label }) => (
@@ -412,7 +416,7 @@ export function HabitChart({
       {preset === "custom" && (
         <div className="mt-3 grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-1.5">
           <DatePicker
-            label="From"
+            label={t("date_from")}
             value={customFrom}
             max={customTo}
             onChange={(v) => setCustomFrom(v)}
@@ -420,7 +424,7 @@ export function HabitChart({
           />
           <span className="text-[11px] text-ink-700">–</span>
           <DatePicker
-            label="To"
+            label={t("date_to")}
             value={customTo}
             min={customFrom}
             max={todayKey}
@@ -444,8 +448,7 @@ export function HabitChart({
 
       {/* Summary */}
       <p className="mt-3 text-[12px] leading-5 text-ink-700">
-        {doneCount} / {points.length} days completed &middot; {rate}% completion
-        rate · 7-day rolling average
+        {t("chart_summary", { done: String(doneCount), total: String(points.length), rate: String(rate) })}
       </p>
     </section>
   );

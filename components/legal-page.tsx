@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { PublicPageShell } from "@/components/public-page-shell";
+import { useTranslation } from "@/components/i18n-provider";
 
 export type LegalSection = {
   title: string;
@@ -28,13 +31,14 @@ export function LegalPage({
   highlights,
   sections,
 }: LegalPageProps) {
+  const { t } = useTranslation();
   return (
     <PublicPageShell
       navLinks={[
-        { href: "/", label: "Home" },
-        { href: "/privacy", label: "Privacy" },
-        { href: "/terms", label: "Terms" },
-        { href: "/dashboard", label: "Dashboard" },
+        { href: "/", label: t("nav_home") },
+        { href: "/privacy", label: t("footer_privacy") },
+        { href: "/terms", label: t("footer_terms") },
+        { href: "/dashboard", label: t("nav_dashboard") },
       ]}
       width="standard"
     >
@@ -57,26 +61,26 @@ export function LegalPage({
 
             <aside className="rounded-[24px] border border-black/[0.06] bg-paper-50/80 px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-600">
-                Last updated
+                {t("legal_last_updated")}
               </p>
               <p className="mt-2 text-[14px] font-semibold text-ink-950">
                 {lastUpdated}
               </p>
               <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-600">
-                Quick links
+                {t("legal_quick_links")}
               </p>
               <div className="mt-3 flex flex-wrap gap-2 text-[12px] font-semibold text-ink-950">
                 <Link
                   href="/privacy"
                   className="rounded-full border border-black/[0.06] bg-white px-3 py-1.5 transition-colors hover:bg-paper-50"
                 >
-                  Privacy
+                  {t("footer_privacy")}
                 </Link>
                 <Link
                   href="/terms"
                   className="rounded-full border border-black/[0.06] bg-white px-3 py-1.5 transition-colors hover:bg-paper-50"
                 >
-                  Terms
+                  {t("footer_terms")}
                 </Link>
               </div>
             </aside>
@@ -130,9 +134,7 @@ export function LegalPage({
         <section className="mt-4 rounded-[28px] border border-black/[0.06] bg-white px-5 py-5 shadow-[var(--shadow-card)] sm:px-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="max-w-2xl text-[14px] leading-7 text-ink-700">
-              Privacy or legal requests can be sent to the contact address
-              listed in the app&apos;s published support details or Google OAuth
-              consent screen.
+              {t("legal_contact")}
             </p>
 
             <div className="flex flex-wrap items-center gap-4 text-[14px] font-semibold text-ink-950">
@@ -140,13 +142,13 @@ export function LegalPage({
                 href="/privacy"
                 className="transition-colors hover:text-ink-700"
               >
-                Privacy Policy
+                {t("footer_privacy")}
               </Link>
               <Link
                 href="/terms"
                 className="transition-colors hover:text-ink-700"
               >
-                Terms of Service
+                {t("footer_terms")}
               </Link>
             </div>
           </div>

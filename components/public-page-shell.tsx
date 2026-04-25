@@ -88,7 +88,7 @@ export function PublicPageShell({
 
           {navLinks.length > 0 ? (
             <nav
-              aria-label="Primary public navigation"
+              aria-label={t("public_nav_aria")}
               className="hidden items-center gap-5 text-[14px] font-medium text-ink-700 md:flex"
             >
               {navLinks.map((link) => (
@@ -142,7 +142,7 @@ export function PublicPageShell({
             <div className="surface-panel rounded-[24px] p-3.5">
               {navLinks.length > 0 ? (
                 <nav
-                  aria-label="Mobile public navigation"
+                  aria-label={t("public_nav_mobile_aria")}
                   className="flex flex-col gap-1 text-[14px] font-medium text-ink-700"
                 >
                   {navLinks.map((link) => (

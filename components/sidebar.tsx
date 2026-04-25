@@ -61,7 +61,7 @@ export function Sidebar({
       )}
 
       <aside
-        aria-label="Dashboard sidebar"
+        aria-label={t("sidebar_habits")}
         className={`fixed left-0 top-0 z-50 flex h-full w-72 flex-col border-r border-black/[0.06] bg-white/80 backdrop-blur-2xl transition-transform duration-300 ease-out lg:sticky lg:z-30 lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
@@ -99,7 +99,7 @@ export function Sidebar({
           </button>
         </div>
 
-        <nav aria-label="Dashboard navigation" className="sidebar-nav flex-1 overflow-y-auto px-3 py-3">
+        <nav aria-label={t("nav_dashboard")} className="sidebar-nav flex-1 overflow-y-auto px-3 py-3">
           <div className="rounded-[24px] border border-black/[0.06] bg-white px-3 py-3 shadow-[var(--shadow-card)] lg:hidden">
             <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
               {t("sidebar_quick_actions")}
@@ -276,11 +276,13 @@ function NavItem({
 }
 
 export function SidebarToggle({ onToggle }: { onToggle: () => void }) {
+  const { t } = useTranslation();
+
   return (
     <button
       type="button"
       onClick={onToggle}
-      aria-label="Open sidebar"
+      aria-label={t("sidebar_open")}
       className="tap-target flex items-center justify-center rounded-lg text-ink-700 hover:bg-black/[0.04] lg:hidden"
     >
       <Menu className="h-4 w-4" strokeWidth={1.8} />

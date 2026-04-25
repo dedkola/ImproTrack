@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { updateProfile } from "firebase/auth";
 import { Loader2, Upload, X } from "lucide-react";
 import { useFirebaseAuth } from "@/components/firebase-auth-provider";
+import { useTranslation } from "@/components/i18n-provider";
 import { getFirebaseAuth } from "@/lib/firebase/auth";
 import { deleteUserAvatar, uploadUserAvatar } from "@/lib/firebase/storage";
 
@@ -15,12 +16,15 @@ type ProfileSettingsCardProps = {
 };
 
 export function ProfileSettingsCard({
-  title = "Profile settings",
-  description = "Adjust how your name and avatar appear across the dashboard.",
+  title,
+  description,
   variant = "page",
   onClose,
 }: ProfileSettingsCardProps) {
+  const { t } = useTranslation();
   const { user } = useFirebaseAuth();
+  const resolvedTitle = title ?? t("profile_settings_title");
+  const resolvedDescription = description ?? t("profile_settings_desc");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewObjectUrlRef = useRef<string | null>(null);
 
@@ -189,17 +193,17 @@ export function ProfileSettingsCard({
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="font-display text-[18px] font-semibold tracking-tight text-ink-950 sm:text-[20px]">
-            {title}
+            {resolvedTitle}
           </h2>
           <p className="mt-1 text-[13px] leading-6 text-ink-700">
-            {description}
+            {resolvedDescription}
           </p>
         </div>
         {onClose ? (
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close settings"
+            aria-label={t("profile_close_settings")}
             className="tap-target-compact flex items-center justify-center rounded-lg text-ink-600 transition-colors hover:bg-black/[0.05] hover:text-ink-950"
           >
             <X className="h-4 w-4" strokeWidth={1.5} />
@@ -214,7 +218,7 @@ export function ProfileSettingsCard({
               {previewUrl ? (
                 <img
                   src={previewUrl}
-                  alt="Profile avatar"
+                  alt={t("profile_avatar_alt")}
                   className="h-20 w-20 rounded-[22px] border border-black/[0.08] object-cover sm:h-24 sm:w-24 sm:rounded-[24px]"
                 />
               ) : (
@@ -225,7 +229,7 @@ export function ProfileSettingsCard({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                aria-label="Upload avatar"
+                aria-label={t("profile_upload_avatar")}
                 className="absolute inset-0 flex items-center justify-center rounded-[22px] bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 sm:rounded-[24px]"
               >
                 <Upload className="h-5 w-5 text-white" strokeWidth={1.5} />
@@ -235,21 +239,20 @@ export function ProfileSettingsCard({
             <div className="min-w-0 flex-1 text-center sm:text-left">
               <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
                 <span className="rounded-full bg-ink-950/[0.05] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-700">
-                  Google account
+                  {t("profile_google_account")}
                 </span>
                 <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-ink-950 shadow-[var(--shadow-card)]">
-                  Synced profile
+                  {t("profile_synced_profile")}
                 </span>
               </div>
               <p className="mt-2.5 text-[15px] font-semibold text-ink-950 sm:mt-3 sm:text-[16px]">
-                {displayName.trim() || user?.displayName || "Your profile"}
+                {displayName.trim() || user?.displayName || t("profile_your_profile")}
               </p>
               <p className="mt-1 text-[13px] text-ink-600">
-                {user?.email ?? "Signed in account"}
+                {user?.email ?? t("profile_signed_in_account")}
               </p>
               <p className="mt-2 text-[12px] leading-5 text-ink-600">
-                Keep the same name and avatar across the drawer, settings page,
-                and future shared views.
+                {t("profile_keep_same")}
               </p>
             </div>
           </div>
@@ -260,7 +263,7 @@ export function ProfileSettingsCard({
               onClick={() => fileInputRef.current?.click()}
               className={`${actionButtonClassName} shrink-0 text-[#6D28D9]`}
             >
-              Upload photo
+              {t("profile_upload_photo")}
             </button>
             {googlePhotoUrl && previewUrl !== googlePhotoUrl ? (
               <button
@@ -268,7 +271,7 @@ export function ProfileSettingsCard({
                 onClick={handleUseGooglePhoto}
                 className={`${actionButtonClassName} shrink-0`}
               >
-                Use Google photo
+                {t("profile_use_google_photo")}
               </button>
             ) : null}
             {previewUrl ? (
@@ -277,7 +280,7 @@ export function ProfileSettingsCard({
                 onClick={handleRemoveAvatar}
                 className={`${actionButtonClassName} shrink-0 text-red-700`}
               >
-                Remove photo
+                {t("profile_remove_photo")}
               </button>
             ) : null}
           </div>
@@ -287,7 +290,7 @@ export function ProfileSettingsCard({
             type="file"
             accept="image/*"
             className="sr-only"
-            aria-label="Choose profile photo"
+            aria-label={t("profile_choose_photo")}
             onChange={handleFileChange}
           />
         </div>
@@ -297,7 +300,7 @@ export function ProfileSettingsCard({
             htmlFor={`profile-display-name-${variant}`}
             className="mb-1.5 block text-[12px] font-semibold uppercase tracking-[0.16em] text-ink-600"
           >
-            Display name
+            {t("profile_display_name")}
           </label>
           <input
             id={`profile-display-name-${variant}`}
@@ -307,12 +310,12 @@ export function ProfileSettingsCard({
               setDisplayName(event.target.value);
               setSuccess(null);
             }}
-            placeholder="Your name"
+            placeholder={t("profile_your_name")}
             maxLength={60}
             className="w-full rounded-xl border border-black/[0.1] bg-white px-3 py-3 text-[14px] text-ink-950 outline-none transition-shadow placeholder:text-ink-400 focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/20"
           />
           <p className="mt-2 text-[12px] leading-5 text-ink-600">
-            Saved changes sync to this account immediately after you confirm.
+            {t("profile_save_help")}
           </p>
         </div>
 
@@ -330,7 +333,7 @@ export function ProfileSettingsCard({
               onClick={onClose}
               className="flex-1 min-h-11 rounded-xl border border-black/[0.08] bg-white px-3 py-2 text-[13px] font-semibold text-ink-950 transition-colors hover:bg-black/[0.02]"
             >
-              Cancel
+              {t("cancel")}
             </button>
           ) : null}
           <button
@@ -342,10 +345,10 @@ export function ProfileSettingsCard({
             {isSaving ? (
               <>
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                Saving...
+                {t("saving")}
               </>
             ) : (
-              "Save changes"
+              t("save_changes")
             )}
           </button>
         </div>

@@ -1,8 +1,11 @@
+"use client";
+
 import {
   LegalPage,
   type LegalHighlight,
   type LegalSection,
 } from "@/components/legal-page";
+import { useTranslation } from "@/components/i18n-provider";
 
 const highlights: LegalHighlight[] = [
   {
@@ -86,11 +89,12 @@ const sections: LegalSection[] = [
 ];
 
 export function TermsOfServicePage() {
+  const { t } = useTranslation();
   return (
     <LegalPage
-      eyebrow="Terms of Service"
-      title="Practical terms for a focused habit tracker."
-      intro="These terms cover the public site, sign-in flow, dashboard, archive, statistics, and related product surfaces. The rules stay short: use the service lawfully, keep your account secure, and understand the platform is provided as-is."
+      eyebrow={t("footer_terms")}
+      title={t("terms_title")}
+      intro={t("terms_intro")}
       lastUpdated="April 11, 2026"
       highlights={highlights}
       sections={sections}

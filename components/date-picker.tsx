@@ -9,6 +9,7 @@ import {
   startOfMonth,
   toDateKey,
 } from "@/lib/date";
+import { useTranslation } from "@/components/i18n-provider";
 
 const WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
@@ -43,6 +44,7 @@ export function DatePicker({
   size?: "default" | "compact";
   align?: "left" | "right";
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -214,7 +216,7 @@ export function DatePicker({
               }}
               className="w-full rounded-lg px-2 py-1.5 text-center text-[12px] font-medium text-ink-700 transition hover:bg-ink-950/[0.04]"
             >
-              Today
+              {t("date_today")}
             </button>
           </div>
         </div>

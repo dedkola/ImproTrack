@@ -30,7 +30,7 @@ export function MobileTabBar({ onAddHabit }: MobileTabBarProps) {
 
   return (
     <nav
-      aria-label="Primary mobile navigation"
+      aria-label={t("dashboard_mobile_nav_aria")}
       className="mobile-tab-bar fixed inset-x-0 bottom-0 z-30 border-t border-black/[0.06] bg-white/92 backdrop-blur-2xl md:hidden"
     >
       <div className="page-shell relative py-2">

@@ -1,8 +1,11 @@
+"use client";
+
 import {
   LegalPage,
   type LegalHighlight,
   type LegalSection,
 } from "@/components/legal-page";
+import { useTranslation } from "@/components/i18n-provider";
 
 const highlights: LegalHighlight[] = [
   {
@@ -73,11 +76,12 @@ const sections: LegalSection[] = [
 ];
 
 export function PrivacyPolicyPage() {
+  const { t } = useTranslation();
   return (
     <LegalPage
-      eyebrow="Privacy Policy"
-      title="Privacy in plain language."
-      intro="ImproTrack only uses the account and product data required to sign you in, sync habits, and keep the app reliable. This page explains that scope without turning the policy into filler."
+      eyebrow={t("footer_privacy")}
+      title={t("privacy_title")}
+      intro={t("privacy_intro")}
       lastUpdated="April 11, 2026"
       highlights={highlights}
       sections={sections}

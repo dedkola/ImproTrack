@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArchiveRestore, X } from "lucide-react";
 import { useEffect } from "react";
+import { useTranslation } from "@/components/i18n-provider";
 
 type ArchiveFeedbackProps = {
   habitName: string | null;
@@ -19,6 +20,7 @@ export function ArchiveFeedback({
   onDismiss,
   archiveHref = "/dashboard/archive",
 }: ArchiveFeedbackProps) {
+  const { t } = useTranslation();
   useEffect(() => {
     if (!open) return;
 
@@ -46,10 +48,10 @@ export function ArchiveFeedback({
 
         <div className="min-w-0 flex-1">
           <p className="text-[14px] font-semibold text-ink-950">
-            "{habitName}" moved to archive.
+            {t("archive_feedback_title", { name: habitName })}
           </p>
           <p className="mt-1 text-[13px] leading-5 text-ink-700">
-            Undo if you still want it in your active tracker.
+            {t("archive_feedback_desc")}
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <button
@@ -57,13 +59,13 @@ export function ArchiveFeedback({
               onClick={onUndo}
               className="pill-btn tap-target-compact inline-flex items-center rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3.5 py-2 text-[13px] font-semibold text-white shadow-[0_6px_20px_rgba(109,40,217,0.3)]"
             >
-              Undo archive
+              {t("archive_feedback_undo")}
             </button>
             <Link
               href={archiveHref}
               className="pill-btn tap-target-compact inline-flex items-center rounded-lg bg-white px-3.5 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]"
             >
-              Open archive
+              {t("archive_feedback_open")}
             </Link>
           </div>
         </div>
@@ -71,7 +73,7 @@ export function ArchiveFeedback({
         <button
           type="button"
           onClick={onDismiss}
-          aria-label="Dismiss archive message"
+          aria-label={t("archive_feedback_dismiss")}
           className="tap-target-compact inline-flex items-center justify-center rounded-lg text-ink-600 transition-colors hover:bg-black/[0.05] hover:text-ink-950"
         >
           <X className="h-4 w-4" strokeWidth={1.8} />
