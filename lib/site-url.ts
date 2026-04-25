@@ -13,7 +13,7 @@ function normalizeSiteUrl(value: string) {
       ? normalizedValue
       : `https://${normalizedValue}`;
 
-  return withProtocol.replace(/\/+$/, "");
+  return new URL(withProtocol).origin;
 }
 
 export function getSiteUrl() {
