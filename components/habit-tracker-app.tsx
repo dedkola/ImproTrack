@@ -47,6 +47,7 @@ import { useHabits, useHabitRecords } from "@/lib/storage";
 import { HabitForm, HabitMenu, ConfirmDialog } from "@/components/habit-form";
 import { ArchiveFeedback } from "@/components/archive-feedback";
 import { HabitIcon } from "@/components/habit-icon";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { useTranslation } from "@/components/i18n-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -597,8 +598,9 @@ export function HabitTrackerApp() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <ThemeToggle className="ml-auto" showLabel={false} />
+            <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+              <ThemeToggle showLabel={false} />
+              <LanguageSwitcher />
               <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-semibold text-ink-950 shadow-[var(--shadow-card)] md:hidden">
                 {mobileRangeLabel}
               </span>
