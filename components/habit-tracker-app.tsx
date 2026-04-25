@@ -599,8 +599,10 @@ export function HabitTrackerApp() {
             </div>
 
             <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
-              <ThemeToggle showLabel={false} />
-              <LanguageSwitcher />
+              <div className="hidden items-center gap-3 lg:flex">
+                <ThemeToggle showLabel={false} />
+                <LanguageSwitcher />
+              </div>
               <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-semibold text-ink-950 shadow-[var(--shadow-card)] md:hidden">
                 {mobileRangeLabel}
               </span>

@@ -6,6 +6,7 @@ import { useFirebaseAuth } from "@/components/firebase-auth-provider";
 import { Sidebar, SidebarToggle } from "@/components/sidebar";
 import { Footer } from "@/components/footer";
 import { HabitForm } from "@/components/habit-form";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { MobileTabBar } from "@/components/mobile-tab-bar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useTranslation } from "@/components/i18n-provider";
@@ -168,7 +169,10 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
             <span className="ml-2.5 font-display text-[15px] font-semibold text-ink-950 sm:ml-3 sm:text-[16px]">
               ImproTrack
             </span>
-            <ThemeToggle className="ml-auto" showLabel={false} />
+            <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+              <LanguageSwitcher />
+              <ThemeToggle showLabel={false} />
+            </div>
           </div>
         </div>
 
@@ -228,5 +232,4 @@ function SyncStatusBanner({
     </div>
   );
 }
-
 
