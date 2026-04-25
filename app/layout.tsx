@@ -30,6 +30,43 @@ const description =
   "ImproTrack is a focused habit tracker for daily routines, streaks, archive history, and progress insights across your dashboard, stats, and archive views.";
 const socialImage = `${siteUrl}/brand/opengraph.png`;
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": `${siteUrl}/#webapp`,
+      name: siteName,
+      url: siteUrl,
+      description,
+      applicationCategory: "LifestyleApplication",
+      operatingSystem: "Any",
+      browserRequirements: "Requires JavaScript",
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+      },
+      featureList: [
+        "Daily habit tracking",
+        "Streak analytics",
+        "Offline PWA support",
+        "Progress dashboard",
+        "Archive history",
+        "Multi-slot habits",
+      ],
+      screenshot: socialImage,
+    },
+    {
+      "@type": "Organization",
+      "@id": `${siteUrl}/#organization`,
+      name: siteName,
+      url: siteUrl,
+      logo: `${siteUrl}/icon-512.png`,
+    },
+  ],
+};
+
 export const metadata: Metadata = {
   metadataBase,
   applicationName: siteName,
@@ -104,11 +141,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      {/* lang="en" is the SSR default; I18nProvider overrides it client-side for non-English locales */}
       <head>
         <link
           rel="mask-icon"
           href="/safari-pinned-tab.svg"
           color="#6D28D9"
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
       <body className={`${sans.variable} ${display.variable} antialiased`}>

@@ -14,6 +14,10 @@ const allowedDevOrigins = Array.from(
 
 const nextConfig: NextConfig = {
   allowedDevOrigins,
+  images: {
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 60 * 60 * 24 * 365, // 1 year in seconds
+  },
   async headers() {
     return [
       {
