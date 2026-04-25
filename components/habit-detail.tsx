@@ -33,11 +33,13 @@ import {
   fillClass,
   fillStyle,
 } from "@/lib/tone-utils";
+import { useTranslation } from "@/components/i18n-provider";
 
 const today = startOfDay(new Date());
 const todayKey = toDateKey(today);
 
 export function HabitDetail({ slug }: { slug: string }) {
+  const { t } = useTranslation();
   const {
     getHabitBySlug,
     updateHabit,
@@ -61,25 +63,25 @@ export function HabitDetail({ slug }: { slug: string }) {
     return (
       <div className="page-shell flex min-h-[60vh] items-center justify-center py-5">
         <div className="animate-scale-in surface-panel max-w-lg rounded-2xl p-6 text-center">
-          <p className="text-[14px] text-ink-700">Habit not found</p>
+          <p className="text-[14px] text-ink-700">{t("habit_not_found_label")}</p>
           <h1 className="mt-2 text-[20px] font-semibold text-ink-950">
-            This habit does not exist.
+            {t("habit_not_found_title")}
           </h1>
           <p className="mt-2 text-[14px] leading-6 text-ink-700">
-            It may have been deleted, archived, or opened from an old link.
+            {t("habit_not_found_desc")}
           </p>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-center">
             <Link
               href="/dashboard"
               className="pill-btn tap-target inline-flex items-center justify-center rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)]"
             >
-              Back to tracker
+              {t("back_to_tracker")}
             </Link>
             <Link
               href="/dashboard/archive"
               className="pill-btn tap-target inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]"
             >
-              Open archive
+              {t("archive_feedback_open")}
             </Link>
           </div>
         </div>
@@ -128,10 +130,10 @@ export function HabitDetail({ slug }: { slug: string }) {
   );
   const todaySummary =
     habit.frequencyPerDay > 1
-      ? `${todayCompleted}/${habit.timeSlots.length} slots today`
+      ? t("habit_slots_today", { done: String(todayCompleted), total: String(habit.timeSlots.length) })
       : todayCompleted > 0
-        ? "Completed today"
-        : "Not done today";
+        ? t("habit_completed_today")
+        : t("habit_not_done_today");
   const monthLabel = formatMonthLabel(currentMonth);
 
   const handleSave = async (
@@ -160,8 +162,8 @@ export function HabitDetail({ slug }: { slug: string }) {
               href="/dashboard"
               className="pill-btn tap-target inline-flex items-center justify-center rounded-lg bg-white/80 px-4 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm transition-all hover:bg-white hover:shadow-[var(--shadow-card-hover)] sm:text-[14px]"
             >
-              <span className="sm:hidden">&larr; Back</span>
-              <span className="hidden sm:inline">&larr; Dashboard</span>
+              <span className="sm:hidden">&larr; {t("back")}</span>
+              <span className="hidden sm:inline">&larr; {t("nav_dashboard")}</span>
             </Link>
             <HabitMenu
               tone={habit.tone}
@@ -198,7 +200,7 @@ export function HabitDetail({ slug }: { slug: string }) {
                 </p>
               ) : (
                 <p className="mt-1.5 max-w-xl text-[14px] leading-5 text-ink-600 sm:mt-2 sm:leading-6">
-                  This habit is being tracked without a description yet.
+                  {t("habit_no_description")}
                 </p>
               )}
             </div>
@@ -209,20 +211,20 @@ export function HabitDetail({ slug }: { slug: string }) {
               {todaySummary}
             </span>
             <span className="shrink-0 rounded-full bg-white px-3 py-2 text-[12px] font-semibold text-ink-950 shadow-[var(--shadow-card)]">
-              {monthRate}% this month
+              {t("habit_this_month", { rate: String(monthRate) })}
             </span>
             <span
               className={`shrink-0 rounded-full px-3 py-2 text-[12px] font-medium ${softFillClass(habit.tone)}`}
               style={softFillStyle(habit.tone)}
             >
-              {currentStreak} day streak
+               {t("habit_day_streak", { count: String(currentStreak) })}
             </span>
             {habit.frequencyPerDay > 1 && (
               <span
                 className={`shrink-0 rounded-full px-3 py-2 text-[12px] font-medium ${softFillClass(habit.tone)}`}
                 style={softFillStyle(habit.tone)}
               >
-                {habit.frequencyPerDay}x / day
+                 {t("habit_times_per_day_badge", { count: String(habit.frequencyPerDay) })}
               </span>
             )}
             <span className="shrink-0 rounded-full bg-white px-3 py-2 text-[12px] font-medium text-ink-700 shadow-[var(--shadow-card)]">
@@ -245,8 +247,8 @@ export function HabitDetail({ slug }: { slug: string }) {
             <div>
               <p className="text-[13px] font-semibold">
                 {fullHistoryState.status === "error"
-                  ? "Older history could not load"
-                  : "Loading older history"}
+                  ? t("habit_history_error_title")
+                  : t("habit_history_loading_title")}
               </p>
               <p
                 className={`mt-1 text-[12px] leading-5 ${
@@ -256,8 +258,8 @@ export function HabitDetail({ slug }: { slug: string }) {
                 }`}
               >
                 {fullHistoryState.status === "error"
-                  ? `${fullHistoryState.error} All-time totals, streaks, and weekday patterns may still be incomplete.`
-                  : "All-time totals, streaks, monthly trend, and weekday patterns will fill in as older months finish syncing."}
+                  ? t("habit_history_error_desc", { error: fullHistoryState.error })
+                  : t("habit_history_loading_desc")}
               </p>
             </div>
 
@@ -267,7 +269,7 @@ export function HabitDetail({ slug }: { slug: string }) {
                 onClick={() => void loadFullHistory()}
                 className="pill-btn inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-4 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]"
               >
-                Retry history load
+                {t("retry_history_load")}
               </button>
             ) : null}
           </div>
@@ -281,7 +283,7 @@ export function HabitDetail({ slug }: { slug: string }) {
           style={{ animationDelay: "75ms" }}
         >
           <h2 className="text-[13px] font-semibold text-ink-950">
-            Slot breakdown
+             {t("habit_slot_breakdown")}
           </h2>
 
           <div className="comparison-scroll mt-4 flex gap-3 overflow-x-auto pb-1 md:hidden">
@@ -298,7 +300,7 @@ export function HabitDetail({ slug }: { slug: string }) {
                     {slot.rate}%
                   </span>
                   <span className="mb-0.5 text-[12px] text-ink-700">
-                    {slot.completed} / {slot.total} days
+                    {slot.completed} / {slot.total} {t("habit_days")}
                   </span>
                 </div>
                 <div className="mt-2 h-[6px] overflow-hidden rounded-full bg-black/[0.04]">
@@ -325,7 +327,7 @@ export function HabitDetail({ slug }: { slug: string }) {
                     {slot.rate}%
                   </span>
                   <span className="mb-0.5 text-[12px] text-ink-700">
-                    {slot.completed} / {slot.total} days
+                     {slot.completed} / {slot.total} {t("habit_days")}
                   </span>
                 </div>
                 <div className="mt-2 h-[6px] overflow-hidden rounded-full bg-black/[0.04]">
@@ -352,28 +354,28 @@ export function HabitDetail({ slug }: { slug: string }) {
         </div>
         <div className="stagger-children grid grid-cols-2 gap-2 sm:grid-cols-4 lg:flex lg:w-48 lg:shrink-0 lg:grid-cols-1 lg:flex-col">
           <StatCard
-            label="This month"
+            label={t("habit_this_month_label")}
             value={`${monthRate}%`}
-            detail={`${monthCompleted} completed`}
+            detail={`${monthCompleted} ${t("stats_completed")}`}
           />
           <StatCard
-            label="All time"
+            label={t("habit_all_time")}
             value={String(total)}
             detail={
               fullHistoryState.status === "ready"
                 ? habit.unitLabel
-                : `${habit.unitLabel} · partial history`
+                : `${habit.unitLabel} · ${t("habit_partial_history")}`
             }
           />
           <StatCard
-            label="Current streak"
+            label={t("habit_current_streak")}
             value={`${currentStreak}`}
-            detail="days"
+            detail={t("habit_days")}
           />
           <StatCard
-            label="Best streak"
+            label={t("habit_best_streak")}
             value={`${bestStreak}`}
-            detail="best run"
+            detail={t("habit_best_run")}
           />
         </div>
       </div>
@@ -386,13 +388,13 @@ export function HabitDetail({ slug }: { slug: string }) {
         >
           <div className="flex items-center justify-between">
             <h2 className="text-[13px] font-semibold text-ink-950">
-              Monthly trend
+             {t("habit_monthly_trend")}
             </h2>
             <span
               className={`rounded-md px-2 py-0.5 text-[12px] font-semibold ${softFillClass(habit.tone)}`}
               style={softFillStyle(habit.tone)}
             >
-              Last 6 months
+              {t("habit_last_6_months")}
             </span>
           </div>
 
@@ -406,7 +408,7 @@ export function HabitDetail({ slug }: { slug: string }) {
                 <p className="mt-1.5 font-display text-[22px] font-semibold tabular-nums text-ink-950">
                   {completed}
                 </p>
-                <p className="mt-0.5 text-[11px] text-ink-700">completed</p>
+                <p className="mt-0.5 text-[11px] text-ink-700">{t("stats_completed")}</p>
               </div>
             ))}
           </div>
@@ -421,7 +423,7 @@ export function HabitDetail({ slug }: { slug: string }) {
                 <p className="mt-1.5 font-display text-[22px] font-semibold tabular-nums text-ink-950">
                   {completed}
                 </p>
-                <p className="mt-0.5 text-[11px] text-ink-700">completed</p>
+                <p className="mt-0.5 text-[11px] text-ink-700">{t("stats_completed")}</p>
               </div>
             ))}
           </div>
@@ -432,7 +434,7 @@ export function HabitDetail({ slug }: { slug: string }) {
           style={{ animationDelay: "150ms" }}
         >
           <h2 className="text-[13px] font-semibold text-ink-950">
-            Weekday pattern
+             {t("habit_weekday_pattern")}
           </h2>
 
           <div className="comparison-scroll mt-4 flex gap-3 overflow-x-auto pb-1 md:hidden">
@@ -503,8 +505,8 @@ export function HabitDetail({ slug }: { slug: string }) {
 
       <ConfirmDialog
         open={deleteOpen}
-        title="Delete habit"
-        message={`Are you sure you want to permanently delete "${habit.name}"? This action cannot be undone.`}
+        title={t("archive_delete_permanently")}
+        message={t("habit_delete_confirm", { name: habit.name })}
         onConfirm={() => {
           deleteHabit(habit.id);
           setDeleteOpen(false);

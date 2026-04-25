@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Settings } from "lucide-react";
 import { useFirebaseAuth } from "@/components/firebase-auth-provider";
 import { signInWithGoogle, signOutFromFirebase } from "@/lib/firebase/auth";
+import { useTranslation } from "@/components/i18n-provider";
 
 type AuthControlsProps = {
   variant?: "landing" | "sidebar" | "panel";
@@ -13,9 +14,11 @@ type AuthControlsProps = {
 function getUserSummary(user: {
   displayName: string | null;
   email: string | null;
+  firebaseAccountLabel?: string;
 }) {
+  const fallback = user.firebaseAccountLabel ?? "Firebase account";
   const primary = user.displayName ?? user.email ?? "Signed in";
-  const secondary = user.email ?? "Firebase account";
+  const secondary = user.email ?? fallback;
   const initial = primary.trim().charAt(0).toUpperCase() || "M";
 
   return { initial, primary, secondary };
@@ -31,12 +34,14 @@ function getErrorMessage(error: unknown, fallback: string) {
 
 export function AuthControls({ variant = "landing" }: AuthControlsProps) {
   const { user, isLoading } = useFirebaseAuth();
+  const { t } = useTranslation();
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
 
   const { initial, primary, secondary } = getUserSummary({
     displayName: user?.displayName ?? null,
     email: user?.email ?? null,
+    firebaseAccountLabel: t("auth_firebase_account"),
   });
 
   const handleSignIn = async () => {
@@ -71,9 +76,9 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
         {isLoading ? (
           <div className="space-y-2">
             <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
-              Account
+              {t("auth_account")}
             </p>
-            <p className="text-[13px] text-ink-700">Checking session...</p>
+            <p className="text-[13px] text-ink-700">{t("auth_checking_session")}</p>
           </div>
         ) : user ? (
           <>
@@ -81,7 +86,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
               {user.photoURL ? (
                 <img
                   src={user.photoURL}
-                  alt="Profile"
+                  alt={t("auth_profile_photo")}
                   className="h-10 w-10 rounded-xl border border-black/[0.08] object-cover"
                 />
               ) : (
@@ -97,7 +102,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
               </div>
               <Link
                 href="/dashboard/settings"
-                aria-label="Profile settings"
+                aria-label={t("auth_profile")}
                 className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-ink-500 transition-colors hover:bg-black/[0.05] hover:text-ink-950"
               >
                 <Settings className="h-3.5 w-3.5" strokeWidth={1.5} />
@@ -108,7 +113,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
                 href="/dashboard"
                 className="pill-btn inline-flex min-h-10 flex-1 items-center justify-center rounded-lg bg-white px-3 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:bg-black/[0.02] hover:shadow-[var(--shadow-card-hover)]"
               >
-                Dashboard
+                {t("auth_dashboard")}
               </Link>
               <button
                 type="button"
@@ -116,17 +121,17 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
                 disabled={isPending}
                 className="pill-btn min-h-10 rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isPending ? "Signing out..." : "Sign out"}
+                {isPending ? t("auth_signing_out") : t("auth_sign_out")}
               </button>
             </div>
           </>
         ) : (
           <>
             <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
-              Account
+              {t("auth_account")}
             </p>
             <p className="mt-2 text-[13px] leading-6 text-ink-700">
-              Sign in to sync your habits and records across devices.
+              {t("auth_sync_description")}
             </p>
             <button
               type="button"
@@ -134,7 +139,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
               disabled={isPending}
               className="pill-btn mt-3 min-h-10 w-full rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isPending ? "Signing in..." : "Continue with Google"}
+              {isPending ? t("auth_signing_in") : t("auth_continue_google")}
             </button>
           </>
         )}
@@ -149,16 +154,18 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
     return (
       <div className="flex flex-col items-center gap-3">
         {isLoading ? (
-          <p className="text-[14px] text-ink-700">Checking session...</p>
+          <p className="text-[14px] text-ink-700">{t("auth_checking_session")}</p>
         ) : user ? (
           <>
-            <p className="text-[14px] text-ink-700">Signed in as {primary}.</p>
+            <p className="text-[14px] text-ink-700">
+              {t("auth_signed_in_as", { name: primary })}
+            </p>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Link
                 href="/dashboard"
                 className="pill-btn inline-flex min-h-11 items-center justify-center rounded-xl bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_28px_rgba(109,40,217,0.45)]"
               >
-                Open dashboard
+                {t("auth_open_dashboard")}
               </Link>
               <button
                 type="button"
@@ -166,7 +173,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
                 disabled={isPending}
                 className="pill-btn min-h-11 rounded-xl border border-black/[0.06] bg-white/88 px-5 py-3 text-[15px] font-semibold text-ink-950 shadow-[var(--shadow-card)] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isPending ? "Signing out..." : "Sign out"}
+                {isPending ? t("auth_signing_out") : t("auth_sign_out")}
               </button>
             </div>
           </>
@@ -178,13 +185,13 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
               disabled={isPending}
               className="pill-btn inline-flex min-h-11 items-center justify-center rounded-xl bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-5 py-3 text-[15px] font-semibold text-white shadow-[0_8px_28px_rgba(109,40,217,0.45)] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isPending ? "Signing in..." : "Continue with Google"}
+              {isPending ? t("auth_signing_in") : t("auth_continue_google")}
             </button>
             <Link
               href="/"
               className="pill-btn inline-flex min-h-11 items-center justify-center rounded-xl border border-black/[0.06] bg-white/88 px-5 py-3 text-[15px] font-semibold text-ink-950 shadow-[var(--shadow-card)]"
             >
-              Back home
+              {t("auth_back_home")}
             </Link>
           </>
         )}
@@ -200,7 +207,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
       <div className="flex items-center gap-2">
         {isLoading ? (
           <span className="hidden rounded-lg border border-black/[0.06] bg-white/70 px-3 py-2 text-[13px] font-semibold text-ink-600 shadow-[var(--shadow-card)] sm:inline-flex">
-            Checking session...
+            {t("auth_checking_session")}
           </span>
         ) : user ? (
           <>
@@ -208,7 +215,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
               {user.photoURL ? (
                 <img
                   src={user.photoURL}
-                  alt="Profile"
+                  alt={t("auth_profile_photo")}
                   className="h-8 w-8 rounded-lg object-cover border border-black/[0.08]"
                 />
               ) : (
@@ -229,13 +236,13 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
               disabled={isPending}
               className="pill-btn hidden rounded-lg px-3 py-2 text-[13px] font-semibold text-ink-950 sm:inline-flex disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isPending ? "Signing out..." : "Sign out"}
+              {isPending ? t("auth_signing_out") : t("auth_sign_out")}
             </button>
             <Link
               href="/dashboard"
               className="pill-btn inline-flex items-center rounded-lg border border-black/[0.06] bg-white/78 px-4 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm hover:bg-white hover:shadow-[var(--shadow-card-hover)] sm:hidden"
             >
-              Dashboard
+              {t("auth_dashboard")}
             </Link>
           </>
         ) : (
@@ -246,7 +253,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
               disabled={isPending}
               className="pill-btn inline-flex rounded-lg border border-black/[0.06] bg-white/70 px-3 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] disabled:cursor-not-allowed disabled:opacity-60 sm:hidden"
             >
-              {isPending ? "Signing in..." : "Sign in"}
+              {isPending ? t("auth_signing_in") : t("auth_sign_in_short")}
             </button>
             <button
               type="button"
@@ -254,7 +261,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
               disabled={isPending}
               className="pill-btn hidden rounded-lg border border-black/[0.06] bg-white/70 px-3 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] sm:inline-flex disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isPending ? "Signing in..." : "Sign in with Google"}
+              {isPending ? t("auth_signing_in") : t("auth_sign_in_google")}
             </button>
           </>
         )}
@@ -262,7 +269,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
           href="/dashboard"
           className="pill-btn hidden items-center rounded-lg border border-black/[0.06] bg-white/78 px-4 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm hover:bg-white hover:shadow-[var(--shadow-card-hover)] sm:inline-flex"
         >
-          Dashboard
+          {t("auth_dashboard")}
         </Link>
       </div>
       {error ? (

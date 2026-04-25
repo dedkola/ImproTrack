@@ -16,6 +16,7 @@ import {
 } from "@/lib/date";
 import { DatePicker } from "@/components/date-picker";
 import { HabitIcon } from "@/components/habit-icon";
+import { useTranslation } from "@/components/i18n-provider";
 import type { HabitDefinition } from "@/lib/habits";
 import { useHabits, useHabitRecords } from "@/lib/storage";
 import {
@@ -87,6 +88,7 @@ function getAverage(values: number[]) {
 }
 
 export function DashboardStats() {
+  const { t } = useTranslation();
   const { habits, activeHabits, archivedHabits } = useHabits();
   const { records, loadFullHistory, fullHistoryState } = useHabitRecords(habits);
   const [selectedPreset, setSelectedPreset] = useState<StatsPreset>("month");
@@ -259,18 +261,17 @@ export function DashboardStats() {
         <div className="surface-panel flex max-w-lg flex-col items-center gap-3 rounded-[28px] px-8 py-10 text-center">
           <span className="text-[34px]">📈</span>
           <h1 className="font-display text-[28px] font-semibold tracking-tight text-ink-950">
-            Statistics wake up after your first habit
-          </h1>
-          <p className="max-w-md text-[15px] leading-7 text-ink-700">
-            Add a habit on the dashboard and ImproTrack will start filling this
-            page with completion trends and streak summaries.
-          </p>
+             {t("stats_empty_title")}
+           </h1>
+           <p className="max-w-md text-[15px] leading-7 text-ink-700">
+             {t("stats_empty_desc")}
+           </p>
           <Link
             href="/dashboard"
             className="pill-btn tap-target mt-2 inline-flex items-center rounded-lg bg-white px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)]"
           >
-            Go to dashboard
-          </Link>
+             {t("settings_back")}
+           </Link>
         </div>
       </div>
     );
@@ -305,8 +306,8 @@ export function DashboardStats() {
             <div>
               <p className="text-[13px] font-semibold">
                 {fullHistoryState.status === "error"
-                  ? "Older stats history could not load"
-                  : "Loading older stats history"}
+                  ? t("stats_history_error_title")
+                  : t("stats_history_loading_title")}
               </p>
               <p
                 className={`mt-1 text-[12px] leading-5 ${
@@ -316,8 +317,8 @@ export function DashboardStats() {
                 }`}
               >
                 {fullHistoryState.status === "error"
-                  ? `${fullHistoryState.error} Longer ranges and all-time comparisons may still be incomplete.`
-                  : "Longer ranges, leaderboards, and all-time comparisons will sharpen as older months finish loading."}
+                  ? t("stats_history_error_desc", { error: fullHistoryState.error })
+                  : t("stats_history_loading_desc")}
               </p>
             </div>
 
@@ -327,7 +328,7 @@ export function DashboardStats() {
                 onClick={() => void loadFullHistory()}
                 className="pill-btn inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-4 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]"
               >
-                Retry history load
+                {t("retry_history_load")}
               </button>
             ) : null}
           </div>
@@ -336,28 +337,28 @@ export function DashboardStats() {
 
       <section className="stagger-children grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
         <StatsCard
-          label="Habits in scope"
+          label={t("stats_habits_in_scope")}
           value={String(filteredHabits.length)}
-          detail={`${archivedHabits.length} archived habits`}
+          detail={t("stats_archived_habits", { count: String(archivedHabits.length) })}
         />
         <StatsCard
-          label="Average hit rate"
+          label={t("stats_average_hit_rate")}
           value={`${summary.averageRate}%`}
           detail={compactRangeDetail}
         />
         <StatsCard
-          label="Completed days"
+          label={t("stats_completed_days")}
           value={String(summary.totalCompleted)}
           detail={
             fullHistoryState.status === "ready"
-              ? "Habit-days in range"
-              : "Habit-days in visible history"
+              ? t("stats_habit_days_range")
+              : t("stats_habit_days_visible")
           }
         />
         <StatsCard
-          label="Best live streak"
+          label={t("stats_best_live_streak")}
           value={String(summary.bestStreak)}
-          detail="Longest current run"
+          detail={t("stats_longest_current_run")}
         />
       </section>
 
@@ -369,11 +370,11 @@ export function DashboardStats() {
                 {periodHeading}
               </h2>
               <p className="mt-1 text-[13px] text-ink-700">
-                Daily completion across all selected habit slots.
+                 {t("stats_daily_completion_desc")}
               </p>
             </div>
             <span className="rounded-full bg-ink-950/[0.05] px-3 py-1 text-[12px] font-semibold text-ink-700">
-              Peak {summary.bestRate}%
+              {t("stats_peak", { rate: String(summary.bestRate) })}
             </span>
           </div>
 
@@ -384,9 +385,9 @@ export function DashboardStats() {
             <span className="hidden rounded-full bg-white px-3 py-1.5 font-semibold text-ink-950 shadow-[var(--shadow-card)] sm:inline-flex">
               {rangeDescription}
             </span>
-            <span>Average daily rate {summary.trendAverage}%</span>
+            <span>{t("stats_average_daily_rate", { rate: String(summary.trendAverage) })}</span>
             {summary.highestDay && (
-              <span>Best day {formatLongDate(summary.highestDay.dateKey)}</span>
+              <span>{t("stats_best_day", { date: formatLongDate(summary.highestDay.dateKey) })}</span>
             )}
           </div>
 
@@ -422,7 +423,7 @@ export function DashboardStats() {
               ))}
             </div>
             <p className="mt-3 text-[12px] leading-5 text-ink-600">
-              Recent {recentTrend.length}-day snapshot from the selected range.
+              {t("stats_recent_snapshot", { count: String(recentTrend.length) })}
             </p>
           </div>
 
@@ -473,10 +474,10 @@ export function DashboardStats() {
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="text-[14px] font-semibold text-ink-950">
-                Strongest habit in range
+                {t("stats_strongest_habit")}
               </h2>
               <p className="mt-1 text-[13px] text-ink-700">
-                The best-performing routine in the selected scope.
+                {t("stats_strongest_desc")}
               </p>
             </div>
             {summary.topHabit && (
@@ -514,21 +515,21 @@ export function DashboardStats() {
                   className={`self-start rounded-full px-3 py-1 text-[12px] font-semibold ${softFillClass(summary.topHabit.habit.tone)}`}
                   style={softFillStyle(summary.topHabit.habit.tone)}
                 >
-                  {summary.topHabit.completed} completed
+                  {summary.topHabit.completed} {t("stats_completed")}
                 </span>
               </div>
 
               <div className="mt-4 grid grid-cols-3 gap-2.5 sm:mt-5 sm:gap-3">
                 <MiniStat
-                  label="Hit rate"
+                  label={t("tracker_hit_rate")}
                   value={`${summary.topHabit.rate}%`}
                 />
                 <MiniStat
-                  label="Completed"
+                  label={t("stats_completed_days")}
                   value={String(summary.topHabit.completed)}
                 />
                 <MiniStat
-                  label="Live streak"
+                  label={t("stats_live_streak")}
                   value={`${summary.topHabit.streak}d`}
                 />
               </div>
@@ -537,7 +538,7 @@ export function DashboardStats() {
                 href={`/dashboard/habits/${summary.topHabit.habit.slug}`}
                 className="pill-btn mt-4 inline-flex w-full items-center justify-center rounded-lg bg-white px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)] sm:mt-5 sm:w-auto"
               >
-                Open habit details
+                {t("stats_open_habit_details")}
               </Link>
             </div>
           ) : null}
@@ -552,15 +553,14 @@ export function DashboardStats() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-[14px] font-semibold text-ink-950">
-                Habit leaderboard
+                {t("stats_leaderboard")}
               </h2>
               <p className="mt-1 text-[13px] text-ink-700">
-                Ranked by completion rate and follow-through in the selected
-                range.
+                {t("stats_leaderboard_desc")}
               </p>
             </div>
             <span className="rounded-full bg-ink-950/[0.05] px-3 py-1 text-[12px] font-semibold text-ink-700">
-              {summary.sortedHabits.length} tracked
+              {t("stats_tracked", { count: String(summary.sortedHabits.length) })}
             </span>
           </div>
 
@@ -601,7 +601,7 @@ export function DashboardStats() {
                     {snapshot.rate}%
                   </p>
                   <p className="text-[12px] text-ink-600">
-                    {snapshot.streak}d streak
+                    {t("stats_streak_short", { count: String(snapshot.streak) })}
                   </p>
                 </div>
               </Link>
@@ -617,15 +617,14 @@ export function DashboardStats() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="text-[14px] font-semibold text-ink-950">
-              Weekday rhythm
+              {t("stats_weekday_rhythm")}
             </h2>
             <p className="mt-1 text-[13px] text-ink-700">
-              Average slot completion rate across the selected range.
+              {t("stats_weekday_desc")}
             </p>
           </div>
           <p className="hidden text-[13px] text-ink-700 sm:block">
-            Useful for spotting where your schedule actually supports
-            consistency.
+            {t("stats_weekday_hint")}
           </p>
         </div>
 
@@ -704,12 +703,13 @@ function StatsHeader({
   mobileFiltersOpen: boolean;
   onToggleMobileFilters: () => void;
 }) {
+  const { t } = useTranslation();
   const presetOptions: Array<{ value: StatsPreset; label: string }> = [
-    { value: "month", label: "Monthly" },
+    { value: "month", label: t("stats_monthly") },
     { value: "7", label: "7d" },
     { value: "30", label: "30d" },
     { value: "90", label: "90d" },
-    { value: "custom", label: "Custom" },
+    { value: "custom", label: t("chart_custom") },
   ];
 
   const controlButtonBase =
@@ -721,21 +721,19 @@ function StatsHeader({
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <span className="inline-flex rounded-full bg-ink-950/[0.05] px-3 py-1 text-[12px] font-semibold uppercase tracking-[0.2em] text-ink-700">
-              Statistics
+              {t("nav_stats")}
             </span>
             <h1 className="mt-3 font-display text-[28px] font-semibold tracking-tight text-ink-950 sm:mt-4 sm:text-[40px]">
-              See what is compounding and what is slipping.
+              {t("stats_heading_title")}
             </h1>
             <p className="mt-2 text-[14px] leading-6 text-ink-700 sm:hidden">
-              A quicker mobile read on pressure points, momentum, and drop-off.
+              {t("stats_heading_desc_mobile")}
             </p>
             <p className="mt-2 text-[12px] font-medium text-ink-600 md:hidden">
-              {rangeLabel} · {archivedCount} archived
+              {rangeLabel} · {t("stats_archived_habits", { count: String(archivedCount) })}
             </p>
             <p className="mt-3 hidden max-w-2xl text-[15px] leading-7 text-ink-700 sm:block">
-              This view rolls your active habits into one calm control room, now
-              with range filters so you can isolate short-term pressure or wider
-              trend drift.
+              {t("stats_heading_desc")}
             </p>
           </div>
 
@@ -744,7 +742,7 @@ function StatsHeader({
               {rangeLabel}
             </span>
             <span className="hidden rounded-full bg-ink-950/[0.05] px-3 py-2 text-[13px] font-semibold text-ink-700 md:inline-flex">
-              {archivedCount} archived
+              {t("stats_archived_habits", { count: String(archivedCount) })}
             </span>
             <button
               type="button"
@@ -752,7 +750,7 @@ function StatsHeader({
               className="pill-btn tap-target-compact inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] md:hidden"
             >
               <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1.8} />
-              Filters
+              {t("stats_filters")}
               <ChevronDown
                 className={`h-3.5 w-3.5 transition-transform ${mobileFiltersOpen ? "rotate-180" : ""}`}
                 strokeWidth={1.8}
@@ -762,13 +760,13 @@ function StatsHeader({
               href="/dashboard/archive"
               className="pill-btn tap-target-compact hidden items-center rounded-lg bg-white/80 px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm transition-all hover:bg-white hover:shadow-[var(--shadow-card-hover)] md:inline-flex"
             >
-              Archive
+              {t("nav_archive")}
             </Link>
             <Link
               href="/dashboard"
               className="pill-btn tap-target-compact hidden items-center rounded-lg bg-white px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm transition-all hover:shadow-[var(--shadow-card-hover)] md:inline-flex"
             >
-              Back to dashboard
+              {t("back_to_dashboard")}
             </Link>
           </div>
         </div>
@@ -779,7 +777,7 @@ function StatsHeader({
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
             <div>
               <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
-                Time range
+                {t("stats_time_range")}
               </p>
               <div className="comparison-scroll -mx-1 mt-2 flex gap-1.5 overflow-x-auto px-1 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:px-0 md:pb-0">
                 {presetOptions.map((option) => (
@@ -802,15 +800,15 @@ function StatsHeader({
             {selectedPreset === "custom" && (
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <DatePicker
-                  label="From"
+                  label={t("date_from")}
                   value={customFrom}
                   max={customTo}
                   onChange={onCustomFromChange}
                   size="compact"
                 />
-                <span className="text-[11px] text-ink-600">to</span>
+                <span className="text-[11px] text-ink-600">–</span>
                 <DatePicker
-                  label="To"
+                  label={t("date_to")}
                   value={customTo}
                   min={customFrom}
                   max={todayKey}

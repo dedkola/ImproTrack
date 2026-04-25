@@ -17,6 +17,7 @@ import {
   randomHabitColor,
 } from "@/lib/tone-utils";
 import { HabitIcon } from "@/components/habit-icon";
+import { useTranslation } from "@/components/i18n-provider";
 
 type HabitFormProps = {
   open: boolean;
@@ -45,6 +46,7 @@ function getSlotPlaceholder(index: number) {
 }
 
 export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
+  const { t } = useTranslation();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const formId = useId();
@@ -203,17 +205,17 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
         <div className="flex items-center justify-between border-b border-black/[0.06] bg-white px-5 py-3.5">
           <div>
             <h2 id={titleId} className="text-[16px] font-semibold text-ink-950">
-              {initial ? "Edit Habit" : "New Habit"}
+              {initial ? t("form_edit_habit") : t("form_new_habit")}
             </h2>
             <p id={introId} className="mt-1 text-[12px] text-ink-600">
-              Give it a name, choose a cue, and optionally describe the goal behind it.
+              {t("form_intro")}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            aria-label="Close habit form"
+            aria-label={t("form_close")}
             className="tap-target-compact flex items-center justify-center rounded-md text-ink-700 hover:bg-black/[0.06] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <X className="h-4 w-4" strokeWidth={1.5} />
@@ -222,9 +224,9 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
 
         <div className="max-h-[72vh] space-y-5 overflow-y-auto bg-white px-5 py-4">
           <fieldset>
-            <legend className="text-[13px] font-medium text-ink-700">Icon</legend>
+            <legend className="text-[13px] font-medium text-ink-700">{t("form_icon")}</legend>
             <p id={iconHelpId} className="mt-1 text-[12px] leading-5 text-ink-600">
-              Pick the symbol that will help you recognize this habit quickly. Currently selected: {formatIconLabel(icon)}.
+              {t("form_icon_help", { icon: formatIconLabel(icon) })}
             </p>
             <div className="mt-3 flex flex-wrap gap-2" aria-describedby={iconHelpId}>
               {HABIT_ICON_NAMES.map((iconName) => {
@@ -235,7 +237,7 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
                     type="button"
                     onClick={() => setIcon(iconName)}
                     aria-pressed={selected}
-                    aria-label={`Choose ${formatIconLabel(iconName)} icon`}
+                    aria-label={t("form_choose_icon", { icon: formatIconLabel(iconName) })}
                     title={formatIconLabel(iconName)}
                     className={`tap-target flex items-center justify-center rounded-lg transition ${
                       selected
@@ -253,7 +255,7 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <label htmlFor={nameId} className="mb-1.5 block text-[13px] font-medium text-ink-700">
-                Name <span className="text-rose-500">*</span>
+                {t("form_name")} <span className="text-rose-500">*</span>
               </label>
               <input
                 ref={nameInputRef}
@@ -261,7 +263,7 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g., Take vitamins"
+                placeholder={t("form_name_placeholder")}
                 required
                 aria-invalid={showNameError}
                 aria-describedby={showNameError ? `${nameHelpId} ${nameErrorId}` : nameHelpId}
@@ -270,11 +272,11 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
                 }`}
               />
               <p id={nameHelpId} className="mt-1.5 text-[12px] leading-5 text-ink-600">
-                Keep it short and clear so it reads well in the tracker and sidebar.
+                {t("form_name_help")}
               </p>
               {showNameError ? (
                 <p id={nameErrorId} className="mt-1 text-[12px] font-medium text-rose-600">
-                  Habit name is required.
+                  {t("form_name_required")}
                 </p>
               ) : null}
             </div>
@@ -284,7 +286,7 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
                 htmlFor={descriptionId}
                 className="mb-1.5 block text-[13px] font-medium text-ink-700"
               >
-                Description <span className="text-ink-500">(optional)</span>
+                {t("form_description")} <span className="text-ink-500">{t("form_optional")}</span>
               </label>
               <textarea
                 id={descriptionId}
@@ -292,11 +294,11 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
                 aria-describedby={descriptionHelpId}
-                placeholder="Add a quick note so future-you remembers what counts."
+                placeholder={t("form_description_placeholder")}
                 className="w-full rounded-lg border border-black/[0.16] bg-white px-3 py-2.5 text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
               />
               <p id={descriptionHelpId} className="mt-1.5 text-[12px] leading-5 text-ink-600">
-                Useful for defining the habit or reminding yourself why it matters.
+                {t("form_description_help")}
               </p>
             </div>
 
@@ -305,7 +307,7 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
                 htmlFor={goalLabelId}
                 className="mb-1.5 block text-[13px] font-medium text-ink-700"
               >
-                Goal label <span className="text-ink-500">(optional)</span>
+                {t("form_goal_label")} <span className="text-ink-500">{t("form_optional")}</span>
               </label>
               <input
                 id={goalLabelId}
@@ -313,19 +315,19 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
                 value={goalLabel}
                 onChange={(e) => setGoalLabel(e.target.value)}
                 aria-describedby={goalLabelHelpId}
-                placeholder="e.g., Daily vitamins"
+                placeholder={t("form_goal_placeholder")}
                 className="w-full rounded-lg border border-black/[0.16] bg-white px-3 py-2.5 text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
               />
               <p id={goalLabelHelpId} className="mt-1.5 text-[12px] leading-5 text-ink-600">
-                Shown as a compact label on detail screens. Leave blank to reuse the habit name.
+                {t("form_goal_help")}
               </p>
             </div>
           </div>
 
           <fieldset>
-            <legend className="text-[13px] font-medium text-ink-700">Color</legend>
+            <legend className="text-[13px] font-medium text-ink-700">{t("form_color")}</legend>
             <p id={colorHelpId} className="mt-1 text-[12px] leading-5 text-ink-600">
-              Pick a preset or use a custom hex color to match the mood of this habit.
+              {t("form_color_help")}
             </p>
             <div className="mt-3 flex flex-wrap gap-2" aria-describedby={colorHelpId}>
               {TONE_PRESETS.map((preset, index) => {
@@ -380,7 +382,7 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
                         }
                   }
                 />
-                Custom
+                {t("form_custom")}
               </button>
             </div>
 
@@ -391,7 +393,7 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
                   <input
                     type="color"
                     value={customHex}
-                    aria-label="Choose custom habit color"
+                    aria-label={t("form_custom_color_aria")}
                     onChange={(e) => {
                       const nextHex = e.target.value.toLowerCase();
                       setCustomHex(nextHex);
@@ -415,7 +417,7 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
                   onBlur={() => {
                     if (customHex) setHexInput(customHex);
                   }}
-                  aria-label="Custom color hex value"
+                  aria-label={t("form_custom_hex_aria")}
                   placeholder="#3b82f6"
                   maxLength={7}
                   className="w-24 rounded-lg border border-black/[0.16] bg-white px-3 py-2.5 font-mono text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
@@ -427,7 +429,7 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
                     setCustomHex(nextColor);
                     setHexInput(nextColor);
                   }}
-                  aria-label="Choose a random custom color"
+                  aria-label={t("form_random_color_aria")}
                   className="tap-target-compact flex items-center justify-center rounded-lg bg-black/[0.04] text-[16px] text-ink-700 hover:bg-black/[0.08]"
                 >
                   🎲
@@ -438,13 +440,13 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
 
           <div>
             <label className="mb-1.5 block text-[13px] font-medium text-ink-700">
-              Times per day
+              {t("form_times_per_day")}
             </label>
             <div className="flex flex-wrap items-center gap-3" aria-describedby={frequencyHelpId}>
               <button
                 type="button"
                 onClick={() => handleFrequencyChange(frequencyPerDay - 1)}
-                aria-label="Decrease frequency"
+                aria-label={t("form_decrease_frequency")}
                 className="tap-target-compact flex items-center justify-center rounded-lg bg-black/[0.04] text-ink-700 hover:bg-black/[0.08]"
               >
                 −
@@ -455,27 +457,27 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
               <button
                 type="button"
                 onClick={() => handleFrequencyChange(frequencyPerDay + 1)}
-                aria-label="Increase frequency"
+                aria-label={t("form_increase_frequency")}
                 className="tap-target-compact flex items-center justify-center rounded-lg bg-black/[0.04] text-ink-700 hover:bg-black/[0.08]"
               >
                 +
               </button>
               <span className="text-[13px] text-ink-700">
-                {frequencyPerDay === 1 ? "Once a day" : `${frequencyPerDay} times a day`}
+                {frequencyPerDay === 1 ? t("form_once_a_day") : t("form_times_a_day", { count: String(frequencyPerDay) })}
               </span>
             </div>
             <p id={frequencyHelpId} className="mt-1.5 text-[12px] leading-5 text-ink-600">
-              Multi-slot habits unlock separate check-ins for each part of the day.
+              {t("form_frequency_help")}
             </p>
           </div>
 
           {frequencyPerDay > 1 && (
             <div>
               <label className="mb-1.5 block text-[13px] font-medium text-ink-700">
-                Time slot names
+                {t("form_time_slot_names")}
               </label>
               <p id={slotHelpId} className="mb-2.5 text-[12px] leading-5 text-ink-600">
-                Customize each check-in label. Leave any blank and ImproTrack will fill it with a helpful default like Morning or Evening.
+                {t("form_slot_help")}
               </p>
               <div className="space-y-2" aria-describedby={slotHelpId}>
                 {timeSlots.map((slot, index) => (
@@ -504,7 +506,7 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
             disabled={isSubmitting}
             className="pill-btn tap-target-compact rounded-lg px-4 py-2 text-[14px] font-medium text-ink-700 hover:bg-black/[0.04] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Cancel
+            {t("cancel")}
           </button>
           <button
             type="submit"
@@ -513,11 +515,11 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
           >
             {isSubmitting
               ? initial
-                ? "Saving..."
-                : "Creating..."
+                ? t("saving")
+                : t("creating")
               : initial
-                ? "Save changes"
-                : "Create habit"}
+                ? t("save_changes")
+                : t("create_habit")}
           </button>
         </div>
       </form>
@@ -540,6 +542,7 @@ export function ConfirmDialog({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation();
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -569,14 +572,14 @@ export function ConfirmDialog({
             onClick={onCancel}
             className="rounded-lg border border-black/[0.12] bg-white px-5 py-2.5 text-[14px] font-medium text-ink-700 transition-colors hover:bg-black/[0.04]"
           >
-            Cancel
+            {t("cancel")}
           </button>
           <button
             type="button"
             onClick={onConfirm}
             className="rounded-lg bg-red-600 px-5 py-2.5 text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-red-700"
           >
-            {confirmLabel ?? "Delete"}
+            {confirmLabel ?? t("delete")}
           </button>
         </div>
       </div>
@@ -595,6 +598,7 @@ export function HabitMenu({
   onArchive: () => void;
   onDelete: () => void;
 }) {
+  const { t } = useTranslation();
   void tone;
 
   const [open, setOpen] = useState(false);
@@ -730,7 +734,7 @@ export function HabitMenu({
             }
           }
         }}
-        aria-label="Open habit actions"
+        aria-label={t("habit_actions_open")}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
@@ -745,26 +749,26 @@ export function HabitMenu({
             ref={menuRef}
             id={menuId}
             role="menu"
-            aria-label="Habit actions"
+            aria-label={t("habit_actions")}
             onKeyDown={handleMenuKeyDown}
             className="fixed z-[250] w-44 rounded-xl border border-black/[0.08] bg-white py-1.5 shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_12px_28px_rgba(10,22,40,0.16)]"
             style={{ top: menuPos.top, left: menuPos.left }}
           >
             {[
               {
-                label: "Edit",
+                label: t("edit"),
                 action: onEdit,
                 className:
                   "flex min-h-10 w-full items-center gap-2 px-3 py-2 text-[14px] text-ink-700 hover:bg-black/[0.05]",
               },
               {
-                label: "Archive",
+                label: t("nav_archive"),
                 action: onArchive,
                 className:
                   "flex min-h-10 w-full items-center gap-2 px-3 py-2 text-[14px] text-ink-700 hover:bg-black/[0.05]",
               },
               {
-                label: "Delete",
+                label: t("delete"),
                 action: onDelete,
                 className:
                   "flex min-h-10 w-full items-center gap-2 px-3 py-2 text-[14px] text-red-700 hover:bg-red-50/80",

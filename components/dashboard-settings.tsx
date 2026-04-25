@@ -14,13 +14,18 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { useFirebaseAuth } from "@/components/firebase-auth-provider";
 import { useHabits } from "@/lib/storage";
 import { signOutFromFirebase } from "@/lib/firebase/auth";
+import { useTranslation } from "@/components/i18n-provider";
+import type { Translations } from "@/lib/i18n";
+
+type TFn = (key: keyof Translations, params?: Record<string, string>) => string;
 
 export function DashboardSettings() {
   const { user } = useFirebaseAuth();
   const { syncState } = useHabits();
+  const { t } = useTranslation();
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const syncSummary = getSyncSummary(syncState);
+  const syncSummary = getSyncSummary(syncState, t);
 
   const handleSignOut = async () => {
     setError(null);
@@ -30,7 +35,7 @@ export function DashboardSettings() {
       await signOutFromFirebase();
     } catch (nextError) {
       setError(
-        nextError instanceof Error ? nextError.message : "Sign-out failed.",
+        nextError instanceof Error ? nextError.message : t("auth_sign_out"),
       );
     } finally {
       setIsPending(false);
@@ -43,31 +48,28 @@ export function DashboardSettings() {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <span className="inline-flex rounded-full bg-ink-950/[0.05] px-3 py-1 text-[12px] font-semibold uppercase tracking-[0.2em] text-ink-700">
-              Settings
+              {t("settings_tag")}
             </span>
             <h1 className="mt-3 font-display text-[24px] font-semibold tracking-tight text-ink-950 sm:mt-4 sm:text-[40px]">
-              Keep your account and phone navigation tidy.
+              {t("settings_heading")}
             </h1>
             <p className="mt-2 text-[13px] leading-5 text-ink-700 sm:hidden">
-              Profile, shortcuts, and account actions in one calm phone-first
-              view.
+              {t("settings_heading_desc_mobile")}
             </p>
             <p className="mt-3 hidden max-w-2xl text-[15px] leading-7 text-ink-700 sm:block">
-              Update your profile, keep important routes one tap away, and
-              manage the account behind your synced habits without digging
-              through the drawer.
+              {t("settings_heading_desc")}
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:items-center">
             <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-semibold text-ink-950 shadow-[var(--shadow-card)] sm:text-[13px]">
-              {user?.email ?? "ImproTrack account"}
+              {user?.email ?? t("settings_account_email_fallback")}
             </span>
             <Link
               href="/dashboard"
               className="pill-btn tap-target-compact inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)] sm:text-[14px]"
             >
-              Back to dashboard
+              {t("settings_back")}
             </Link>
           </div>
         </div>
@@ -75,7 +77,7 @@ export function DashboardSettings() {
         <div className="mt-3 grid gap-2 sm:hidden">
           <div className="rounded-[22px] border border-black/[0.06] bg-white px-4 py-3 shadow-[var(--shadow-card)]">
             <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
-              Account snapshot
+              {t("settings_account_snapshot")}
             </p>
             <p className="mt-2 text-[14px] font-semibold text-ink-950">
               {syncSummary.statusLabel}
@@ -89,8 +91,8 @@ export function DashboardSettings() {
 
       <div className="grid gap-3.5 lg:grid-cols-[1.08fr_0.92fr] lg:gap-4">
         <ProfileSettingsCard
-          title="Profile"
-          description="Change the name and avatar shown in your drawer, settings, and future shared surfaces."
+          title={t("auth_profile")}
+          description={t("settings_profile_desc")}
         />
 
         <div className="flex flex-col gap-3.5 sm:gap-4">
@@ -98,10 +100,10 @@ export function DashboardSettings() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-[14px] font-semibold text-ink-950">
-                  Appearance
+                  {t("settings_appearance")}
                 </h2>
                 <p className="mt-1 text-[13px] leading-5 text-ink-700 sm:leading-6">
-                  Choose light or dark mode for your dashboard surfaces.
+                  {t("settings_appearance_desc")}
                 </p>
               </div>
               <ThemeToggle />
@@ -111,31 +113,30 @@ export function DashboardSettings() {
           <section className="animate-fade-in-up surface-panel rounded-[28px] p-4 sm:p-6">
             <div>
               <h2 className="text-[14px] font-semibold text-ink-950">
-                Quick routes
+                {t("settings_quick_routes")}
               </h2>
               <p className="mt-1 text-[13px] leading-5 text-ink-700 sm:leading-6">
-                Phones now keep the main sections in the bottom tab bar. These
-                shortcuts stay here for larger screens and fallback navigation.
+                {t("settings_quick_routes_desc")}
               </p>
             </div>
 
             <div className="mt-3 grid gap-2.5 sm:mt-4 sm:grid-cols-2 sm:gap-3">
               <SettingsLinkCard
                 href="/dashboard"
-                title="Dashboard"
-                detail="Return to the live habit board."
+                title={t("nav_dashboard")}
+                detail={t("settings_dashboard_detail")}
                 icon={<LayoutGrid className="h-4 w-4" strokeWidth={1.8} />}
               />
               <SettingsLinkCard
                 href="/dashboard/stats"
-                title="Statistics"
-                detail="Open the trend and leaderboard view."
+                title={t("nav_stats")}
+                detail={t("settings_stats_detail")}
                 icon={<BarChart2 className="h-4 w-4" strokeWidth={1.8} />}
               />
               <SettingsLinkCard
                 href="/dashboard/archive"
-                title="Archive"
-                detail="Review paused habits and restore them."
+                title={t("nav_archive")}
+                detail={t("settings_archive_detail")}
                 icon={<Archive className="h-4 w-4" strokeWidth={1.8} />}
               />
             </div>
@@ -145,10 +146,10 @@ export function DashboardSettings() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-[14px] font-semibold text-ink-950">
-                  Sync health
+                  {t("settings_sync_health")}
                 </h2>
                 <p className="mt-1 text-[13px] leading-5 text-ink-700 sm:leading-6">
-                  See whether recent habit edits and check-ins are fully synced.
+                  {t("settings_sync_desc")}
                 </p>
               </div>
               <span
@@ -168,25 +169,25 @@ export function DashboardSettings() {
 
               <div className="mt-4 grid gap-2 text-[12px] leading-5 text-ink-700">
                 <p>
-                  Pending record confirmations:{" "}
+                  {t("settings_pending_records")}:{" "}
                   <span className="font-semibold text-ink-950">
                     {syncState.pendingRecordCount}
                   </span>
                 </p>
                 <p>
-                  Active save requests:{" "}
+                  {t("settings_active_saves")}:{" "}
                   <span className="font-semibold text-ink-950">
                     {syncState.pendingMutationCount}
                   </span>
                 </p>
                 {syncState.latestMutationError ? (
                   <p className="text-red-700">
-                    Last save error: {syncState.latestMutationError.message}
+                    {t("settings_last_save_error")}: {syncState.latestMutationError.message}
                   </p>
                 ) : null}
                 {syncState.latestIssue?.kind === "listener" ? (
                   <p className="text-red-700">
-                    Live {syncState.latestIssue.source} sync warning:{" "}
+                    {t("settings_live_sync_warning", { source: syncState.latestIssue.source })}:{" "}
                     {syncState.latestIssue.message}
                   </p>
                 ) : null}
@@ -198,12 +199,12 @@ export function DashboardSettings() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-[14px] font-semibold text-ink-950">
-                  Account access
+                  {t("settings_account_access")}
                 </h2>
                 <p className="mt-1 text-[13px] leading-5 text-ink-700 sm:leading-6">
                   {user?.email
-                    ? `Signed in as ${user.email}.`
-                    : "Your dashboard syncs through your Google account."}
+                    ? t("auth_signed_in_as", { name: user.email })
+                    : t("settings_account_fallback")}
                 </p>
               </div>
               <span
@@ -215,8 +216,7 @@ export function DashboardSettings() {
 
             <div className="mt-4 rounded-[24px] border border-black/[0.06] bg-white px-4 py-4 shadow-[var(--shadow-card)]">
               <p className="text-[13px] leading-6 text-ink-700">
-                Signing out only disconnects this device until you continue with
-                Google again.
+                {t("auth_sign_out_info")}
               </p>
               {error ? (
                 <p className="mt-3 text-[12px] leading-5 text-red-700">
@@ -230,7 +230,7 @@ export function DashboardSettings() {
                 className="pill-btn mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-4 py-3 text-[14px] font-semibold text-white shadow-[0_8px_28px_rgba(109,40,217,0.38)] transition-opacity disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
               >
                 <LogOut className="h-4 w-4" strokeWidth={1.8} />
-                {isPending ? "Signing out..." : "Sign out"}
+                {isPending ? t("auth_signing_out") : t("auth_sign_out")}
               </button>
             </div>
           </section>
@@ -273,42 +273,43 @@ function SettingsLinkCard({
   );
 }
 
-function getSyncSummary(syncState: ReturnType<typeof useHabits>["syncState"]) {
+function getSyncSummary(
+  syncState: ReturnType<typeof useHabits>["syncState"],
+  t: TFn,
+) {
   if (syncState.latestIssue) {
     return {
-      statusLabel: "Needs attention",
+      statusLabel: t("sync_needs_attention"),
       badgeClass: "bg-red-100 text-red-700",
       title:
         syncState.latestIssue.kind === "listener"
-          ? "Live sync ran into a hiccup."
-          : "Your last change did not reach Firestore.",
+          ? t("sync_title_attention_listener")
+          : t("sync_title_attention_mutation"),
       detail: syncState.latestIssue.message,
-      shortDetail:
-        "Recent edits may need another try before every device sees them.",
+      shortDetail: t("sync_detail_attention"),
     };
   }
 
   if (syncState.isSyncing) {
     return {
-      statusLabel: "Saving",
+      statusLabel: t("sync_saving"),
       badgeClass: "bg-sky-100 text-sky-700",
-      title: "Recent updates are still syncing.",
+      title: t("sync_title_saving"),
       detail:
         syncState.pendingRecordCount > 0
-          ? "Keep the tab open until record confirmations finish so current and past check-ins settle cleanly."
-          : "Firestore is still processing your latest habit changes.",
-      shortDetail:
-        "This account is connected, and your newest changes are still saving.",
+          ? t("sync_detail_saving_records")
+          : t("sync_detail_saving_habits"),
+      shortDetail: t("sync_short_saving"),
     };
   }
 
   return {
-    statusLabel: "Synced",
+    statusLabel: t("sync_synced"),
     badgeClass: "bg-emerald-100 text-emerald-700",
-    title: "Everything is up to date.",
-    detail:
-      "Habit edits, reorder changes, and completed check-ins are synced to your Google account.",
-    shortDetail:
-      "Profile edits, habit data, and settings stay attached to this Google account.",
+    title: t("sync_title_synced"),
+    detail: t("sync_detail_synced"),
+    shortDetail: t("sync_short_synced"),
   };
 }
+
+

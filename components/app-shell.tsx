@@ -8,6 +8,7 @@ import { Footer } from "@/components/footer";
 import { HabitForm } from "@/components/habit-form";
 import { MobileTabBar } from "@/components/mobile-tab-bar";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useTranslation } from "@/components/i18n-provider";
 import {
   HabitStorageProvider,
   type HabitStorageSyncState,
@@ -33,6 +34,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
     bootstrapError,
     syncState,
   } = useHabits();
+  const { t } = useTranslation();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
@@ -74,7 +76,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
               <span className="loading-dot" />
               <span className="loading-dot" />
             </div>
-            <p className="text-[15px] text-ink-600">Loading your dashboard&hellip;</p>
+            <p className="text-[15px] text-ink-600">{t("app_loading")}</p>
           </div>
         </main>
 
@@ -99,10 +101,10 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
           <div className="surface-panel flex max-w-2xl flex-col items-center gap-4 rounded-[28px] px-8 py-10 text-center">
             <span className="text-[34px]">🔐</span>
             <h1 className="font-display text-[30px] font-semibold tracking-tight text-ink-950">
-              Sign in to open your dashboard
+              {t("app_sign_in_title")}
             </h1>
             <p className="max-w-xl text-[15px] leading-7 text-ink-700">
-              ImproTrack now stores habits per account, so the dashboard unlocks after you sign in with Google.
+              {t("app_sign_in_description")}
             </p>
             <AuthControls variant="panel" />
           </div>
@@ -129,7 +131,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
           <div className="surface-panel flex max-w-2xl flex-col items-center gap-4 rounded-[28px] px-8 py-10 text-center">
             <span className="text-[34px]">⚠️</span>
             <h1 className="font-display text-[30px] font-semibold tracking-tight text-ink-950">
-              Firestore is not ready yet
+              {t("app_firestore_not_ready")}
             </h1>
             <p className="max-w-xl text-[15px] leading-7 text-ink-700">
               {bootstrapError.message}
@@ -149,7 +151,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
         href="#dashboard-main"
         className="sr-only z-[120] rounded-xl bg-ink-950 px-4 py-2 text-[14px] font-semibold text-white shadow-lg focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
       >
-        Skip to dashboard content
+        {t("skip_to_dashboard")}
       </a>
 
       <Sidebar
@@ -203,12 +205,13 @@ function SyncStatusBanner({
 }: {
   syncState: HabitStorageSyncState;
 }) {
+  const { t } = useTranslation();
   const issueTitle =
     syncState.latestIssue?.kind === "listener"
       ? syncState.latestIssue.source === "records"
-        ? "Live record sync needs attention"
-        : "Live habit sync needs attention"
-      : "Last change did not sync";
+        ? t("banner_records_sync")
+        : t("banner_habits_sync")
+      : t("banner_last_change");
   return (
     <div className="grid gap-2">
       {syncState.latestIssue ? (
@@ -225,3 +228,5 @@ function SyncStatusBanner({
     </div>
   );
 }
+
+

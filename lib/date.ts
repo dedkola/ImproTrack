@@ -79,15 +79,28 @@ export function clampDateKey(value: string, min: string, max: string) {
   return value;
 }
 
-export function formatLongDate(value: string) {
-  return new Intl.DateTimeFormat("en", {
+/**
+ * Resolves the locale used for date formatting.
+ * Prefers an explicit locale, then the document language on the client
+ * when it is present, and falls back to English otherwise.
+ */
+function resolveDateLocale(locale?: string) {
+  if (locale) return locale;
+  if (typeof document !== "undefined") {
+    return document.documentElement.lang || "en";
+  }
+  return "en";
+}
+
+export function formatLongDate(value: string, locale?: string) {
+  return new Intl.DateTimeFormat(resolveDateLocale(locale), {
     month: "long",
     day: "numeric",
     year: "numeric",
   }).format(parseDateKey(value));
 }
 
-export function formatMonthLabel(range: DateRange) {
+export function formatMonthLabel(range: DateRange, locale?: string) {
   const start = parseDateKey(range.from);
   const end = parseDateKey(range.to);
   const sameMonth =
@@ -95,13 +108,13 @@ export function formatMonthLabel(range: DateRange) {
     start.getMonth() === end.getMonth();
 
   if (sameMonth) {
-    return new Intl.DateTimeFormat("en", {
+    return new Intl.DateTimeFormat(resolveDateLocale(locale), {
       month: "long",
       year: "numeric",
     }).format(start);
   }
 
-  const formatter = new Intl.DateTimeFormat("en", {
+  const formatter = new Intl.DateTimeFormat(resolveDateLocale(locale), {
     month: "short",
     day: "numeric",
   });

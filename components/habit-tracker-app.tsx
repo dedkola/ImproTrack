@@ -47,6 +47,8 @@ import { useHabits, useHabitRecords } from "@/lib/storage";
 import { HabitForm, HabitMenu, ConfirmDialog } from "@/components/habit-form";
 import { ArchiveFeedback } from "@/components/archive-feedback";
 import { HabitIcon } from "@/components/habit-icon";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { useTranslation } from "@/components/i18n-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const today = startOfDay(new Date());
@@ -311,6 +313,7 @@ function MobileMatrixDayCell({
 }
 
 export function HabitTrackerApp() {
+  const { t } = useTranslation();
   const { isDark } = useTheme();
   const {
     activeHabits,
@@ -569,25 +572,25 @@ export function HabitTrackerApp() {
         <div className="page-shell flex flex-col gap-2.5">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-5">
-              <h1 className="font-display text-[20px] font-semibold leading-none tracking-tight text-ink-950">
-                Dashboard
-              </h1>
+                <h1 className="font-display text-[20px] font-semibold leading-none tracking-tight text-ink-950">
+                  {t("nav_dashboard")}
+                </h1>
               <span className="hidden h-4 w-px bg-ink-950/10 sm:block" />
               <div className="hidden items-center gap-5 sm:flex">
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-[14px] text-ink-700">Habits</span>
+                  <span className="text-[14px] text-ink-700">{t("sidebar_habits")}</span>
                   <span className="font-display text-[14px] font-semibold tabular-nums text-ink-950">
                     {activeHabits.length}
                   </span>
                 </div>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-[14px] text-ink-700">Hit rate</span>
+                  <span className="text-[14px] text-ink-700">{t("tracker_hit_rate")}</span>
                   <span className="font-display text-[14px] font-semibold tabular-nums text-ink-950">
                     {averageRate}%
                   </span>
                 </div>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-[14px] text-ink-700">Total</span>
+                  <span className="text-[14px] text-ink-700">{t("tracker_total")}</span>
                   <span className="font-display text-[14px] font-semibold tabular-nums text-ink-950">
                     {totalCompleted}
                   </span>
@@ -595,8 +598,9 @@ export function HabitTrackerApp() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <ThemeToggle className="ml-auto" showLabel={false} />
+            <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+              <ThemeToggle showLabel={false} />
+              <LanguageSwitcher />
               <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-semibold text-ink-950 shadow-[var(--shadow-card)] md:hidden">
                 {mobileRangeLabel}
               </span>
@@ -607,11 +611,11 @@ export function HabitTrackerApp() {
                 href="/dashboard/stats"
                 className="pill-btn tap-target-compact hidden items-center gap-1.5 rounded-lg bg-white/80 px-3 py-2 text-[13px] font-semibold text-ink-950 shadow-[var(--shadow-card)] backdrop-blur-sm transition-all hover:bg-white hover:shadow-[var(--shadow-card-hover)] md:inline-flex"
               >
-                Statistics
-              </Link>
+                 {t("nav_stats")}
+               </Link>
               <button
                 type="button"
-                aria-label="Add habit"
+                 aria-label={t("tab_add_habit_aria")}
                 onClick={() => {
                   setEditingHabit(null);
                   setFormOpen(true);
@@ -619,9 +623,9 @@ export function HabitTrackerApp() {
                 className="pill-btn tap-target-compact flex items-center gap-1.5 rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)]"
               >
                 <Plus className="h-3.5 w-3.5" strokeWidth={2} />
-                <span className="hidden sm:inline">Add habit</span>
-                <span className="sm:hidden">Add</span>
-              </button>
+                 <span className="hidden sm:inline">{t("tab_add_habit")}</span>
+                 <span className="sm:hidden">{t("tab_add_habit")}</span>
+               </button>
             </div>
           </div>
         </div>
@@ -631,12 +635,12 @@ export function HabitTrackerApp() {
         {activeHabits.length === 0 ? (
           <div className="surface-panel flex flex-col items-center justify-center gap-3 rounded-2xl px-8 py-16 text-center">
             <span className="text-[32px]">🎯</span>
-            <h2 className="text-[18px] font-semibold text-ink-950">
-              No habits yet
-            </h2>
-            <p className="max-w-xs text-[14px] text-ink-700">
-              Create your first habit to start tracking your progress.
-            </p>
+             <h2 className="text-[18px] font-semibold text-ink-950">
+               {t("sidebar_no_habits_title")}
+             </h2>
+             <p className="max-w-xs text-[14px] text-ink-700">
+               {t("tracker_empty_desc")}
+             </p>
             <div className="mt-2 flex w-full max-w-sm flex-col gap-2 sm:flex-row sm:justify-center">
               <button
                 type="button"
@@ -646,15 +650,15 @@ export function HabitTrackerApp() {
                 }}
                 className="pill-btn tap-target rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-4 py-2 text-[14px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)]"
               >
-                Create first habit
-              </button>
+                 {t("sidebar_create_habit")}
+               </button>
               {archivedHabits.length > 0 ? (
                 <Link
                   href="/dashboard/archive"
                   className="pill-btn tap-target inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]"
                 >
-                  Open archive
-                </Link>
+                   {t("nav_archive")}
+                 </Link>
               ) : null}
             </div>
           </div>
@@ -663,17 +667,17 @@ export function HabitTrackerApp() {
             {/* Mobile matrix */}
             <section className="animate-scale-in surface-panel rounded-[28px] p-3.5 md:hidden">
               <div className="flex items-center justify-between gap-3">
-                <h2 className="text-[15px] font-semibold text-ink-950">
-                  Habit matrix
-                </h2>
+                 <h2 className="text-[15px] font-semibold text-ink-950">
+                   {t("tracker_matrix")}
+                 </h2>
                 {isLatestMobileWeek ? null : (
                   <button
                     type="button"
                     onClick={() => setMobileWeekOffset(0)}
                     className="pill-btn tap-target-compact inline-flex items-center rounded-lg bg-white px-3 py-2 text-[12px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]"
                   >
-                    Latest
-                  </button>
+                     {t("tracker_latest")}
+                   </button>
                 )}
               </div>
 
@@ -681,7 +685,7 @@ export function HabitTrackerApp() {
                 <button
                   type="button"
                   onClick={() => setMobileWeekOffset((current) => current + 1)}
-                  aria-label="Show previous 7-day window"
+                  aria-label={t("tracker_previous_week")}
                   className="tap-target-compact flex items-center justify-center rounded-xl border border-black/[0.06] bg-white text-ink-700 transition-colors hover:bg-black/[0.03] hover:text-ink-950"
                 >
                   <ChevronLeft className="h-4 w-4" strokeWidth={1.9} />
@@ -702,7 +706,7 @@ export function HabitTrackerApp() {
                     setMobileWeekOffset((current) => Math.max(0, current - 1))
                   }
                   disabled={isLatestMobileWeek}
-                  aria-label="Show next 7-day window"
+                  aria-label={t("tracker_next_week")}
                   className="tap-target-compact flex items-center justify-center rounded-xl border border-black/[0.06] bg-white text-ink-700 transition-colors hover:bg-black/[0.03] hover:text-ink-950 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <ChevronRight className="h-4 w-4" strokeWidth={1.9} />
@@ -771,7 +775,7 @@ export function HabitTrackerApp() {
                       <div className="flex items-start gap-3">
                         <Link
                           href={`/dashboard/habits/${habit.slug}`}
-                          aria-label={`Open ${habit.name} statistics`}
+                          aria-label={t("tracker_open_stats", { name: habit.name })}
                           className="flex min-w-0 flex-1 items-start gap-3 rounded-[18px] transition-colors hover:bg-black/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6D28D9]/35"
                         >
                           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-ink-950/[0.05] text-ink-950 sm:h-10 sm:w-10">
@@ -791,8 +795,8 @@ export function HabitTrackerApp() {
                                 </h3>
                                 <p className="mt-0.5 text-[12px] leading-5 text-ink-600">
                                   {isMultiSlot
-                                    ? `${todayCompletedCount}/${habit.timeSlots.length} slots done today`
-                                    : `${recentCompleted}/${mobileDays.length} days completed`}
+                                    ? t("tracker_slots_done_today", { done: String(todayCompletedCount), total: String(habit.timeSlots.length) })
+                                    : t("tracker_days_completed", { done: String(recentCompleted), total: String(mobileDays.length) })}
                                 </p>
                               </div>
 
@@ -810,7 +814,7 @@ export function HabitTrackerApp() {
                             <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                               {isMultiSlot ? (
                                 <span className="text-[10px] text-ink-500 sm:text-[11px]">
-                                  {habit.timeSlots.length} slots
+                                  {t("tracker_slots", { count: String(habit.timeSlots.length) })}
                                 </span>
                               ) : null}
                             </div>
@@ -867,7 +871,7 @@ export function HabitTrackerApp() {
                                           checked={checked}
                                           isFuture={isFuture}
                                           matrixTone={matrixTone}
-                                          ariaLabel={`${habit.name} ${slotName} ${checked ? "completed" : "not completed"} on ${formatLongDate(dateKey)}`}
+                                          ariaLabel={t("tracker_cell_aria_slot", { name: habit.name, slot: slotName, status: checked ? t("tracker_completed") : t("tracker_not_completed"), date: formatLongDate(dateKey) })}
                                           onClick={() => {
                                             if (!isFuture) {
                                               toggleHabitDay(
@@ -901,7 +905,7 @@ export function HabitTrackerApp() {
                                   checked={checked}
                                   isFuture={isFuture}
                                   matrixTone={matrixTone}
-                                  ariaLabel={`${habit.name} ${checked ? "completed" : "not completed"} on ${formatLongDate(dateKey)}`}
+                                  ariaLabel={t("tracker_cell_aria", { name: habit.name, status: checked ? t("tracker_completed") : t("tracker_not_completed"), date: formatLongDate(dateKey) })}
                                   onClick={() => {
                                     if (!isFuture) {
                                       toggleHabitDay(
@@ -928,10 +932,10 @@ export function HabitTrackerApp() {
               <div className="flex items-center justify-between gap-4 border-b border-black/[0.04] px-5 py-3 sm:px-6">
                 <div>
                   <h2 className="text-[14px] font-semibold text-ink-950">
-                    Habit matrix
+                    {t("tracker_matrix")}
                   </h2>
                   <p className="mt-0.5 text-[13px] text-ink-700">
-                    Tap a cell to toggle completion
+                    {t("tracker_matrix_desc")}
                   </p>
                 </div>
 
@@ -942,7 +946,7 @@ export function HabitTrackerApp() {
                       onClick={() => setDesktopMonthOffset(0)}
                       className="pill-btn inline-flex h-8 items-center rounded-md bg-white px-2.5 text-[11px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]"
                     >
-                      Latest
+                      {t("tracker_latest")}
                     </button>
                   )}
 
@@ -952,7 +956,7 @@ export function HabitTrackerApp() {
                       onClick={() =>
                         setDesktopMonthOffset((current) => current + 1)
                       }
-                      aria-label="Show previous month"
+                      aria-label={t("tracker_previous_month")}
                       className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.06] bg-white text-ink-700 transition-colors hover:bg-black/[0.03] hover:text-ink-950"
                     >
                       <ChevronLeft className="h-3.5 w-3.5" strokeWidth={1.9} />
@@ -975,7 +979,7 @@ export function HabitTrackerApp() {
                         )
                       }
                       disabled={isLatestDesktopMonth}
-                      aria-label="Show next month"
+                      aria-label={t("tracker_next_month")}
                       className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/[0.06] bg-white text-ink-700 transition-colors hover:bg-black/[0.03] hover:text-ink-950 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       <ChevronRight className="h-3.5 w-3.5" strokeWidth={1.9} />
@@ -997,7 +1001,7 @@ export function HabitTrackerApp() {
                   >
                     {/* Column headers */}
                     <div className="rounded-tl-[11px] bg-white px-4 py-3 text-left text-[12px] font-semibold uppercase tracking-wider text-ink-700">
-                      Habit
+                      {t("tracker_habit")}
                     </div>
                     {desktopDays.map((dateKey, index) => {
                       const isFuture = dateKey > todayKey;
@@ -1126,9 +1130,9 @@ export function HabitTrackerApp() {
                                 <div className="flex items-center gap-1">
                                   <div
                                     role="img"
-                                    aria-label="Drag to reorder"
+                                    aria-label={t("tracker_drag_reorder")}
                                     className="shrink-0 cursor-grab touch-none text-ink-700/25 hover:text-ink-700/60 active:cursor-grabbing"
-                                    title="Drag to reorder"
+                                    title={t("tracker_drag_reorder")}
                                   >
                                     <GripVertical
                                       className="h-3.5 w-3.5"
@@ -1379,7 +1383,7 @@ export function HabitTrackerApp() {
                       )}
                       <div className="flex items-end justify-between pt-1">
                         <div>
-                          <p className="text-[12px] text-ink-700">Completed</p>
+                          <p className="text-[12px] text-ink-700">{t("stats_completed")}</p>
                           <p className="font-display text-[22px] font-semibold tabular-nums text-ink-950">
                             {completed}
                           </p>
@@ -1388,7 +1392,7 @@ export function HabitTrackerApp() {
                           className={`text-[13px] font-medium ${accentClass(habit.tone)} transition-transform duration-200 group-hover:translate-x-0.5`}
                           style={accentStyle(habit.tone)}
                         >
-                          View stats &rarr;
+                          {t("tracker_view_stats")}
                         </span>
                       </div>
                     </div>
@@ -1422,8 +1426,8 @@ export function HabitTrackerApp() {
 
       <ConfirmDialog
         open={deleteTarget !== null}
-        title="Delete habit"
-        message={`Are you sure you want to permanently delete "${deleteTarget?.name}"? This action cannot be undone.`}
+        title={t("archive_delete_permanently")}
+        message={deleteTarget ? t("habit_delete_confirm", { name: deleteTarget.name }) : ""}
         onConfirm={() => {
           if (deleteTarget) deleteHabit(deleteTarget.id);
           setDeleteTarget(null);

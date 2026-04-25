@@ -1,6 +1,11 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslation } from "@/components/i18n-provider";
 
 export function Footer() {
+  const { t } = useTranslation();
+
   return (
     <footer className="border-t border-black/[0.06] bg-white/80 backdrop-blur-2xl">
       <div className="page-shell flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between">
@@ -20,16 +25,16 @@ export function Footer() {
             href="/sitemap"
             className="transition-colors hover:text-ink-950"
           >
-            Sitemap
+            {t("footer_sitemap")}
           </Link>
           <Link
             href="/privacy"
             className="transition-colors hover:text-ink-950"
           >
-            Privacy Policy
+            {t("footer_privacy")}
           </Link>
           <Link href="/terms" className="transition-colors hover:text-ink-950">
-            Terms of Service
+            {t("footer_terms")}
           </Link>
         </div>
         <p className="text-[12px] text-ink-600 sm:text-right">

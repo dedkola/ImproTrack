@@ -1,29 +1,54 @@
+"use client";
+
 import Link from "next/link";
 import { PublicPageShell } from "@/components/public-page-shell";
 import { CRAWLER_BLOCKED_PATHS, PUBLIC_SITE_ROUTES } from "@/lib/public-routes";
+import { useTranslation } from "@/components/i18n-provider";
+import type { Translations } from "@/lib/i18n";
 
-const seoFiles = [
-  {
-    href: "/sitemap.xml",
-    label: "sitemap.xml",
-    description:
-      "XML sitemap for search engines with the public static routes only.",
+const routeTranslationKeys: Record<
+  string,
+  { title: keyof Translations; description: keyof Translations }
+> = {
+  "/": {
+    title: "sitemap_route_home_title",
+    description: "sitemap_route_home_desc",
   },
-  {
-    href: "/robots.txt",
-    label: "robots.txt",
-    description:
-      "Crawler rules that point to the sitemap and block signed-in dashboard paths.",
+  "/privacy": {
+    title: "sitemap_route_privacy_title",
+    description: "sitemap_route_privacy_desc",
   },
-];
+  "/terms": {
+    title: "sitemap_route_terms_title",
+    description: "sitemap_route_terms_desc",
+  },
+  "/sitemap": {
+    title: "sitemap_route_sitemap_title",
+    description: "sitemap_route_sitemap_desc",
+  },
+};
 
 export function SitemapPage() {
+  const { t } = useTranslation();
+  const seoFiles = [
+    {
+      href: "/sitemap.xml",
+      label: "sitemap.xml",
+      description: t("sitemap_file_xml_desc"),
+    },
+    {
+      href: "/robots.txt",
+      label: "robots.txt",
+      description: t("sitemap_file_robots_desc"),
+    },
+  ];
+
   return (
     <PublicPageShell
       navLinks={[
-        { href: "/", label: "Home" },
-        { href: "/privacy", label: "Privacy" },
-        { href: "/terms", label: "Terms" },
+        { href: "/", label: t("nav_home") },
+        { href: "/privacy", label: t("footer_privacy") },
+        { href: "/terms", label: t("footer_terms") },
       ]}
       width="standard"
     >
@@ -36,46 +61,48 @@ export function SitemapPage() {
 
           <div className="relative z-10 max-w-3xl">
             <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
-              Public Sitemap
+              {t("sitemap_title_label")}
             </p>
             <h1 className="mt-3 font-display text-[38px] font-semibold tracking-tight text-ink-950 sm:text-[48px]">
-              The public pages search engines are allowed to see.
+              {t("sitemap_heading")}
             </h1>
             <p className="mt-4 text-[16px] leading-8 text-ink-700 sm:text-[17px]">
-              This page lists the static public routes exposed by ImproTrack.
-              Signed-in dashboard paths stay out of search with both robots
-              rules and page-level noindex metadata.
+              {t("sitemap_intro")}
             </p>
           </div>
         </div>
 
         <section className="mt-6 grid gap-4 md:grid-cols-2">
-          {PUBLIC_SITE_ROUTES.map((route) => (
-            <Link
-              key={route.href}
-              href={route.href}
-              className="feature-panel group flex h-full flex-col rounded-[28px] px-6 py-6"
-            >
-              <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
-                {route.href}
-              </p>
-              <h2 className="mt-3 font-display text-[28px] font-semibold tracking-tight text-ink-950">
-                {route.title}
-              </h2>
-              <p className="mt-3 flex-1 text-[15px] leading-7 text-ink-700">
-                {route.description}
-              </p>
-              <span className="mt-5 inline-flex items-center text-[14px] font-semibold text-ink-950 transition-colors group-hover:text-sky-700">
-                Open page
-              </span>
-            </Link>
-          ))}
+          {PUBLIC_SITE_ROUTES.map((route) => {
+            const display = routeTranslationKeys[route.href];
+
+            return (
+              <Link
+                key={route.href}
+                href={route.href}
+                className="feature-panel group flex h-full flex-col rounded-[28px] px-6 py-6"
+              >
+                <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
+                  {route.href}
+                </p>
+                <h2 className="mt-3 font-display text-[28px] font-semibold tracking-tight text-ink-950">
+                  {display ? t(display.title) : route.href}
+                </h2>
+                <p className="mt-3 flex-1 text-[15px] leading-7 text-ink-700">
+                  {display ? t(display.description) : route.href}
+                </p>
+                <span className="mt-5 inline-flex items-center text-[14px] font-semibold text-ink-950 transition-colors group-hover:text-sky-700">
+                  {t("sitemap_open_page")}
+                </span>
+              </Link>
+            );
+          })}
         </section>
 
         <section className="mt-6 grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="feature-panel rounded-[28px] px-6 py-6">
             <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
-              SEO Files
+              {t("sitemap_seo_files")}
             </p>
             <div className="mt-4 space-y-4">
               {seoFiles.map((file) => (
@@ -93,7 +120,7 @@ export function SitemapPage() {
                     </p>
                   </div>
                   <span className="shrink-0 text-[14px] font-semibold text-ink-950">
-                    View
+                    {t("sitemap_view")}
                   </span>
                 </Link>
               ))}
@@ -102,15 +129,13 @@ export function SitemapPage() {
 
           <div className="feature-panel rounded-[28px] px-6 py-6">
             <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
-              Blocked From Crawlers
+              {t("sitemap_blocked_label")}
             </p>
             <h2 className="mt-3 font-display text-[28px] font-semibold tracking-tight text-ink-950">
-              Signed-in routes stay private.
+              {t("sitemap_blocked_heading")}
             </h2>
             <p className="mt-3 text-[15px] leading-7 text-ink-700">
-              Crawlers are explicitly blocked from the dashboard namespace and
-              the legacy public redirects that lead back into authenticated
-              screens.
+              {t("sitemap_blocked_desc")}
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               {CRAWLER_BLOCKED_PATHS.map((path) => (

@@ -4,13 +4,14 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { FirebaseAnalytics } from "@/components/firebase-analytics";
 import { FirebaseAuthProvider } from "@/components/firebase-auth-provider";
+import { I18nProvider } from "@/components/i18n-provider";
 import { PwaController } from "@/components/pwa-controller";
 import { ThemeProvider } from "@/components/theme-provider";
 import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 const sans = Inter({
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
   display: "swap",
   variable: "--font-sans-ui",
 });
@@ -111,11 +112,13 @@ export default function RootLayout({
       </head>
       <body className={`${sans.variable} ${display.variable} antialiased`}>
         <FirebaseAnalytics />
-        <ThemeProvider>
-          <FirebaseAuthProvider>
-            <PwaController>{children}</PwaController>
-          </FirebaseAuthProvider>
-        </ThemeProvider>
+        <I18nProvider>
+          <ThemeProvider>
+            <FirebaseAuthProvider>
+              <PwaController>{children}</PwaController>
+            </FirebaseAuthProvider>
+          </ThemeProvider>
+        </I18nProvider>
         <Analytics />
         <SpeedInsights />
       </body>
