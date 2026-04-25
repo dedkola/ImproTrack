@@ -27,7 +27,7 @@ const metadataBase = new URL(siteUrl);
 const title = "ImproTrack";
 const description =
   "ImproTrack is a focused habit tracker for daily routines, streaks, archive history, and progress insights across your dashboard, stats, and archive views.";
-const socialImage = `${siteUrl}/brand/dashboard-shot.png`;
+const socialImage = `${siteUrl}/brand/opengraph.png`;
 
 export const metadata: Metadata = {
   metadataBase,
@@ -74,9 +74,9 @@ export const metadata: Metadata = {
     images: [
       {
         url: socialImage,
-        width: 3198,
-        height: 2126,
-        alt: "ImproTrack dashboard preview with habits, streaks, and weekly progress",
+        width: 1200,
+        height: 630,
+        alt: "ImproTrack preview collage with the home page, dashboard matrix, and statistics view",
       },
     ],
   },
