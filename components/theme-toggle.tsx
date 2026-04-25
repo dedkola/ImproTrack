@@ -17,13 +17,16 @@ export function ThemeToggle({
   const ariaLabel = isDark
     ? t("theme_switch_to_light")
     : t("theme_switch_to_dark");
+  const buttonClassName = showLabel
+    ? "pill-btn theme-toggle-pill tap-target-compact inline-flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] font-semibold shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]"
+    : "pill-btn tap-target-compact inline-flex items-center justify-center rounded-lg text-ink-950 transition-all hover:text-ink-700";
 
   return (
     <button
       type="button"
       onClick={toggleTheme}
       aria-label={ariaLabel}
-      className={`pill-btn theme-toggle-pill tap-target-compact inline-flex items-center gap-2 rounded-lg border border-black/[0.06] px-3 py-2 text-[13px] font-semibold shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)] ${className}`}
+      className={`${buttonClassName} ${className}`}
     >
       {isDark ? (
         <Moon className="h-4 w-4" strokeWidth={1.8} />
