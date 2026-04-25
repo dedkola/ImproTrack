@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1200, initial-scale=1" />
+    <title>ImproTrack OpenGraph Image</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+      }
+
+      body {
+        color: #0a1628;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+
+      .canvas {
+        isolation: isolate;
+        position: relative;
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        background:
+          linear-gradient(120deg, rgba(14, 165, 233, 0.08) 0%, rgba(255, 255, 255, 0) 32%),
+          linear-gradient(145deg, #f8fbff 0%, #ffffff 42%, #f7f2ff 100%);
+      }
+
+      .canvas::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -2;
+        background-image:
+          linear-gradient(rgba(10, 22, 40, 0.035) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(10, 22, 40, 0.035) 1px, transparent 1px);
+        background-size: 38px 38px;
+        mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.38), rgba(0, 0, 0, 0.04) 64%, transparent);
+      }
+
+      .canvas::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: -3;
+        width: 650px;
+        height: 630px;
+        clip-path: polygon(22% 0, 100% 0, 100% 100%, 0 100%);
+        background: linear-gradient(135deg, rgba(109, 40, 217, 0.14), rgba(14, 165, 233, 0.1) 46%, rgba(245, 158, 11, 0.09));
+      }
+
+      .brand {
+        position: absolute;
+        top: 48px;
+        left: 56px;
+        width: 370px;
+      }
+
+      .identity {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+
+      .logo-shell {
+        width: 78px;
+        height: 78px;
+        padding: 8px;
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow:
+          0 16px 42px rgba(109, 40, 217, 0.22),
+          0 2px 10px rgba(10, 22, 40, 0.08);
+      }
+
+      .logo-shell img,
+      .home-top img {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      .logo-shell img {
+        border-radius: 18px;
+      }
+
+      .wordmark {
+        font-size: 34px;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      .kicker {
+        margin-top: 48px;
+        color: #58677b;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.17em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 360px;
+        margin: 14px 0 0;
+        font-size: 48px;
+        font-weight: 850;
+        line-height: 0.98;
+        letter-spacing: 0;
+      }
+
+      .subcopy {
+        max-width: 340px;
+        margin-top: 18px;
+        color: #4b5b71;
+        font-size: 18px;
+        font-weight: 520;
+        line-height: 1.45;
+      }
+
+      .cta-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 20px;
+        padding: 14px 18px;
+        border-radius: 16px;
+        background: #0a1628;
+        color: #fff;
+        font-size: 15px;
+        font-weight: 850;
+        letter-spacing: 0;
+        box-shadow:
+          0 18px 34px rgba(10, 22, 40, 0.18),
+          0 2px 8px rgba(10, 22, 40, 0.1);
+      }
+
+      .metrics {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        max-width: 350px;
+        margin-top: 16px;
+      }
+
+      .metric {
+        min-width: 94px;
+        padding: 10px 12px;
+        border: 1px solid rgba(10, 22, 40, 0.08);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.78);
+        box-shadow: 0 12px 28px rgba(10, 22, 40, 0.08);
+      }
+
+      .metric strong {
+        display: block;
+        color: #111827;
+        font-size: 23px;
+        line-height: 1;
+      }
+
+      .metric span {
+        display: block;
+        margin-top: 6px;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 750;
+      }
+
+      .visuals {
+        position: absolute;
+        top: 48px;
+        left: 420px;
+        width: 728px;
+        height: 532px;
+      }
+
+      .shot-card {
+        position: absolute;
+        overflow: hidden;
+        border: 1px solid rgba(10, 22, 40, 0.08);
+        background: #fff;
+        box-shadow:
+          0 28px 72px rgba(10, 22, 40, 0.18),
+          0 2px 8px rgba(10, 22, 40, 0.05);
+      }
+
+      .shot-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0) 62%, rgba(255, 255, 255, 0.16));
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.52);
+      }
+
+      .dashboard-shot {
+        top: 12px;
+        left: 18px;
+        width: 694px;
+        height: 386px;
+        border-radius: 32px;
+        transform: rotate(-1.15deg);
+      }
+
+      .dashboard-shot img {
+        position: absolute;
+        top: -34px;
+        left: -132px;
+        width: auto;
+        height: 522px;
+      }
+
+      .home-card {
+        bottom: 24px;
+        left: 0;
+        width: 302px;
+        height: 178px;
+        padding: 24px;
+        border-radius: 28px;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 251, 255, 0.96)),
+          #fff;
+        transform: rotate(-2deg);
+      }
+
+      .home-top {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .home-top img {
+        width: 42px;
+        height: 42px;
+        border-radius: 13px;
+      }
+
+      .home-top strong {
+        font-size: 20px;
+        line-height: 1;
+      }
+
+      .home-title {
+        margin-top: 20px;
+        font-size: 25px;
+        font-weight: 820;
+        line-height: 1.1;
+        letter-spacing: 0;
+      }
+
+      .home-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 18px;
+      }
+
+      .chip {
+        padding: 8px 10px;
+        border-radius: 999px;
+        background: #f1f5f9;
+        color: #506179;
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .chip.sky {
+        background: #e0f2fe;
+        color: #075985;
+      }
+
+      .chip.gold {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      .label {
+        position: absolute;
+        top: 386px;
+        right: 46px;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.74;
+      }
+
+      .accent-line {
+        position: absolute;
+        top: 422px;
+        right: 44px;
+        width: 256px;
+        height: 6px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #0ea5e9, #8b5cf6, #f59e0b);
+        opacity: 0.72;
+      }
+
+      .stats-shot {
+        right: 18px;
+        bottom: 0;
+        width: 456px;
+        height: 224px;
+        border-radius: 28px;
+        transform: rotate(1.9deg);
+      }
+
+      .stats-shot img {
+        position: absolute;
+        top: -306px;
+        left: -152px;
+        width: 866px;
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="canvas" aria-label="ImproTrack social preview collage">
+      <section class="brand">
+        <div class="identity">
+          <div class="logo-shell">
+            <img src="../public/logo.svg" alt="" />
+          </div>
+          <div class="wordmark">ImproTrack</div>
+        </div>
+
+        <div class="kicker">Habit dashboard</div>
+        <h1>Build routines you can actually see.</h1>
+        <p class="subcopy">
+          Track daily habits, streaks, archive history, and progress insights in one focused workspace.
+        </p>
+        <div class="cta-pill">Start tracking today</div>
+
+        <div class="metrics">
+          <div class="metric">
+            <strong>82%</strong>
+            <span>hit rate</span>
+          </div>
+          <div class="metric">
+            <strong>36</strong>
+            <span>completed</span>
+          </div>
+          <div class="metric">
+            <strong>4</strong>
+            <span>habits</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="visuals" aria-hidden="true">
+        <div class="shot-card dashboard-shot">
+          <img src="../public/brand/dashboard-shot.png" alt="" />
+        </div>
+
+        <div class="shot-card home-card">
+          <div class="home-top">
+            <img src="../public/logo.svg" alt="" />
+            <strong>Main page</strong>
+          </div>
+          <div class="home-title">Quiet overview before the work starts.</div>
+          <div class="home-row">
+            <span class="chip sky">Routines</span>
+            <span class="chip">Streaks</span>
+            <span class="chip gold">Archive</span>
+          </div>
+        </div>
+
+        <div class="label">Statistics</div>
+        <div class="accent-line"></div>
+
+        <div class="shot-card stats-shot">
+          <img src="../public/brand/stats-shot.png" alt="" />
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
