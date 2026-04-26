@@ -310,9 +310,64 @@ html[data-theme="dark"] .brand-shot-frame {
   background: #ffffff;
 }
 
+.brand-shot-frame-phone {
+  display: grid;
+  place-items: center;
+  overflow: visible;
+  padding: clamp(1.5rem, 5vw, 3rem);
+  background:
+    radial-gradient(circle at 28% 18%, rgba(109, 40, 217, 0.16), transparent 32%),
+    radial-gradient(circle at 76% 82%, rgba(34, 197, 94, 0.18), transparent 34%),
+    linear-gradient(145deg, #fffaf2 0%, #eef6ff 100%);
+}
+
+html[data-theme="dark"] .brand-shot-frame-phone {
+  background:
+    radial-gradient(circle at 28% 18%, rgba(167, 139, 250, 0.22), transparent 32%),
+    radial-gradient(circle at 76% 82%, rgba(74, 222, 128, 0.16), transparent 34%),
+    linear-gradient(145deg, #0f172a 0%, #14213b 100%);
+}
+
+.iphone-shot-shell {
+  position: relative;
+  width: min(72vw, 20rem);
+  border: 0.62rem solid #0a1628;
+  border-radius: 3rem;
+  background: #0a1628;
+  box-shadow:
+    0 28px 70px rgba(10, 22, 40, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.iphone-shot-notch {
+  position: absolute;
+  top: 0.65rem;
+  left: 50%;
+  z-index: 1;
+  width: 5.4rem;
+  height: 1.15rem;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #0a1628;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.iphone-shot-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 2.25rem;
+  background: #ffffff;
+}
+
 @media (min-width: 640px) {
   .brand-shot-frame {
     padding: 0.85rem;
+  }
+
+  .brand-shot-frame-phone {
+    padding: clamp(1.5rem, 5vw, 3rem);
   }
 }
 

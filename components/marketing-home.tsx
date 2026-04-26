@@ -18,8 +18,11 @@ export function MarketingHome() {
       eyebrow: t("home_section_workspace_eyebrow"),
       title: t("home_section_workspace_title"),
       body: t("home_section_workspace_body"),
-      image: "/brand/dashboard-shot.png",
+      image: "/brand/ios.jpeg",
       imageAlt: t("home_section_workspace_alt"),
+      imageFrame: "phone",
+      imageWidth: 1242,
+      imageHeight: 2688,
       imagePriority: true,
     },
     {
@@ -131,6 +134,9 @@ export function MarketingHome() {
 
       {sectionNotes.map((section, index) => {
         const isEven = index % 2 === 0;
+        const isPhoneFrame = section.imageFrame === "phone";
+        const imageWidth = section.imageWidth ?? 1600;
+        const imageHeight = section.imageHeight ?? 1080;
 
         return (
           <section
@@ -158,18 +164,36 @@ export function MarketingHome() {
               </div>
 
               <figure
-                className={`brand-shot-frame ${isEven ? "lg:order-2" : "lg:order-1"}`}
+                className={`brand-shot-frame ${
+                  isPhoneFrame ? "brand-shot-frame-phone" : ""
+                } ${isEven ? "lg:order-2" : "lg:order-1"}`}
               >
-                <Image
-                  src={section.image}
-                  alt={section.imageAlt}
-                  width={1600}
-                  height={1080}
-                  priority={section.imagePriority}
-                  loading={section.imagePriority ? "eager" : undefined}
-                  className="brand-shot-image"
-                  sizes="(min-width: 1024px) 55vw, 100vw"
-                />
+                {isPhoneFrame ? (
+                  <div className="iphone-shot-shell">
+                    <span className="iphone-shot-notch" aria-hidden="true" />
+                    <Image
+                      src={section.image}
+                      alt={section.imageAlt}
+                      width={imageWidth}
+                      height={imageHeight}
+                      priority={section.imagePriority}
+                      loading={section.imagePriority ? "eager" : undefined}
+                      className="iphone-shot-image"
+                      sizes="(min-width: 1024px) 320px, (min-width: 640px) 42vw, 72vw"
+                    />
+                  </div>
+                ) : (
+                  <Image
+                    src={section.image}
+                    alt={section.imageAlt}
+                    width={imageWidth}
+                    height={imageHeight}
+                    priority={section.imagePriority}
+                    loading={section.imagePriority ? "eager" : undefined}
+                    className="brand-shot-image"
+                    sizes="(min-width: 1024px) 55vw, 100vw"
+                  />
+                )}
               </figure>
             </div>
           </section>
