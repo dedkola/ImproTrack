@@ -53,7 +53,6 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [goalLabel, setGoalLabel] = useState("");
   const [icon, setIcon] = useState("Target");
   const [frequencyPerDay, setFrequencyPerDay] = useState(1);
   const [timeSlots, setTimeSlots] = useState<string[]>(["default"]);
@@ -65,13 +64,11 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
 
   const nameId = `${formId}-habit-name`;
   const descriptionId = `${formId}-habit-description`;
-  const goalLabelId = `${formId}-habit-goal-label`;
   const titleId = `${formId}-habit-title`;
   const introId = `${formId}-habit-intro`;
   const nameHelpId = `${nameId}-help`;
   const nameErrorId = `${nameId}-error`;
   const descriptionHelpId = `${descriptionId}-help`;
-  const goalLabelHelpId = `${goalLabelId}-help`;
   const frequencyHelpId = `${formId}-frequency-help`;
   const slotHelpId = `${formId}-slot-help`;
   const iconHelpId = `${formId}-icon-help`;
@@ -112,7 +109,6 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
       );
       setName(initial.name);
       setDescription(initial.description ?? "");
-      setGoalLabel(initial.goalLabel ?? "");
       setIcon(initial.icon);
       setFrequencyPerDay(normalizedFrequency);
       setTimeSlots(normalizeTimeSlots(normalizedFrequency, initial.timeSlots));
@@ -136,7 +132,6 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
   function resetForm() {
     setName("");
     setDescription("");
-    setGoalLabel("");
     setIcon("Target");
     setFrequencyPerDay(1);
     setTimeSlots(["default"]);
@@ -176,7 +171,6 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
         description: description.trim(),
         icon,
         unitLabel: "days",
-        goalLabel: goalLabel.trim() || trimmedName,
         frequencyPerDay,
         timeSlots: normalizeTimeSlots(frequencyPerDay, timeSlots),
         tone:
@@ -299,27 +293,6 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
               />
               <p id={descriptionHelpId} className="mt-1.5 text-[12px] leading-5 text-ink-600">
                 {t("form_description_help")}
-              </p>
-            </div>
-
-            <div className="sm:col-span-2">
-              <label
-                htmlFor={goalLabelId}
-                className="mb-1.5 block text-[13px] font-medium text-ink-700"
-              >
-                {t("form_goal_label")} <span className="text-ink-500">{t("form_optional")}</span>
-              </label>
-              <input
-                id={goalLabelId}
-                type="text"
-                value={goalLabel}
-                onChange={(e) => setGoalLabel(e.target.value)}
-                aria-describedby={goalLabelHelpId}
-                placeholder={t("form_goal_placeholder")}
-                className="w-full rounded-lg border border-black/[0.16] bg-white px-3 py-2.5 text-[14px] text-ink-950 placeholder:text-ink-500 focus:border-ink-950/30"
-              />
-              <p id={goalLabelHelpId} className="mt-1.5 text-[12px] leading-5 text-ink-600">
-                {t("form_goal_help")}
               </p>
             </div>
           </div>

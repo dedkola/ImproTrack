@@ -46,7 +46,7 @@ export type HabitDefinition = {
   description: string;
   icon: string;
   unitLabel: string;
-  goalLabel: string;
+  goalLabel?: string;
   frequencyPerDay: number;
   timeSlots: string[];
   archived: boolean;
@@ -193,7 +193,6 @@ export const DEFAULT_HABITS: HabitDefinition[] = [
     description: "Daily movement target with an easy visual pulse.",
     icon: "Footprints",
     unitLabel: "days hit",
-    goalLabel: "10,000 steps",
     frequencyPerDay: 1,
     timeSlots: ["default"],
     archived: false,
@@ -207,7 +206,6 @@ export const DEFAULT_HABITS: HabitDefinition[] = [
     description: "A short workout, walk, or stretching session.",
     icon: "Dumbbell",
     unitLabel: "sessions",
-    goalLabel: "Active body",
     frequencyPerDay: 1,
     timeSlots: ["default"],
     archived: false,
@@ -222,7 +220,6 @@ export const DEFAULT_HABITS: HabitDefinition[] = [
       "Focused language practice with lessons, reading, or speaking.",
     icon: "BookOpen",
     unitLabel: "study days",
-    goalLabel: "Language practice",
     frequencyPerDay: 1,
     timeSlots: ["default"],
     archived: false,
@@ -236,7 +233,6 @@ export const DEFAULT_HABITS: HabitDefinition[] = [
     description: "Quiet reading time for focus and recovery.",
     icon: "BookMarked",
     unitLabel: "reading days",
-    goalLabel: "Reading habit",
     frequencyPerDay: 1,
     timeSlots: ["default"],
     archived: false,

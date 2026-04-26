@@ -227,9 +227,6 @@ export function HabitDetail({ slug }: { slug: string }) {
                  {t("habit_times_per_day_badge", { count: String(habit.frequencyPerDay) })}
               </span>
             )}
-            <span className="shrink-0 rounded-full bg-white px-3 py-2 text-[12px] font-medium text-ink-700 shadow-[var(--shadow-card)]">
-              {habit.goalLabel}
-            </span>
           </div>
         </div>
       </header>
