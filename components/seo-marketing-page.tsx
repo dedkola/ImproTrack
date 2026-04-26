@@ -73,7 +73,7 @@ export function SeoMarketingPage({ page }: { page: SeoPage }) {
               <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
                 {page.eyebrow}
               </p>
-              <h1 className="mt-4 max-w-4xl font-display text-[42px] font-semibold leading-[0.98] tracking-tight text-ink-950 sm:text-[60px] lg:text-[74px]">
+              <h1 className="marketing-title mt-4 max-w-4xl">
                 {page.heroTitle}
               </h1>
               <p className="mt-5 max-w-2xl text-[16px] leading-8 text-ink-700 sm:text-[18px]">
@@ -165,7 +165,7 @@ export function SeoMarketingPage({ page }: { page: SeoPage }) {
             <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
               Product Details
             </p>
-            <h2 className="mt-3 font-display text-[34px] font-semibold tracking-tight text-ink-950 sm:text-[44px]">
+            <h2 className="marketing-title mt-3">
               Built for the everyday loop of tracking, reviewing, and adjusting.
             </h2>
           </div>
@@ -242,7 +242,7 @@ export function SeoMarketingPage({ page }: { page: SeoPage }) {
               <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
                 Questions
               </p>
-              <h2 className="mt-3 font-display text-[34px] font-semibold tracking-tight text-ink-950 sm:text-[44px]">
+              <h2 className="marketing-title mt-3">
                 Quick answers for habit tracker searches.
               </h2>
             </div>
@@ -270,7 +270,7 @@ export function SeoMarketingPage({ page }: { page: SeoPage }) {
               <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
                 Keep Exploring
               </p>
-              <h2 className="mt-3 font-display text-[34px] font-semibold tracking-tight text-ink-950 sm:text-[44px]">
+              <h2 className="marketing-title mt-3">
                 Related ImproTrack pages
               </h2>
             </div>

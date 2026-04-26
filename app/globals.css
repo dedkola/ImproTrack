@@ -505,6 +505,15 @@ html[data-theme="dark"] .seo-hero-section::after {
   line-height: 1.25;
 }
 
+.marketing-title {
+  color: var(--color-ink-950);
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 1.08;
+}
+
 .seo-hero-collage {
   right: -27rem;
   bottom: -11rem;
@@ -581,60 +590,6 @@ html[data-theme="dark"] .seo-hero-section::after {
   .seo-hero-collage {
     width: 138vw;
     margin: -0.5rem -34vw -4rem auto;
-  }
-}
-
-/* --- Locale-aware hero heading scale-down -------------------------------- */
-/* Polish and verbose Cyrillic locales produce titles that are substantially */
-/* longer than English, causing the hero to overflow near desktop widths.    */
-
-html[lang="pl"] .marketing-hero-copy h1,
-html[lang="pl"] .seo-hero-copy h1,
-html[lang="ru"] .marketing-hero-copy h1,
-html[lang="ru"] .seo-hero-copy h1,
-html[lang="uk"] .marketing-hero-copy h1,
-html[lang="uk"] .seo-hero-copy h1 {
-  font-size: 2.5rem; /* 40px */
-}
-
-@media (min-width: 640px) {
-  html[lang="pl"] .marketing-hero-copy h1,
-  html[lang="pl"] .seo-hero-copy h1,
-  html[lang="ru"] .marketing-hero-copy h1,
-  html[lang="ru"] .seo-hero-copy h1,
-  html[lang="uk"] .marketing-hero-copy h1,
-  html[lang="uk"] .seo-hero-copy h1 {
-    font-size: 2.875rem; /* 46px */
-  }
-}
-
-@media (min-width: 1024px) {
-  html[lang="pl"] .marketing-hero-copy h1,
-  html[lang="pl"] .seo-hero-copy h1,
-  html[lang="ru"] .marketing-hero-copy h1,
-  html[lang="ru"] .seo-hero-copy h1,
-  html[lang="uk"] .marketing-hero-copy h1,
-  html[lang="uk"] .seo-hero-copy h1 {
-    font-size: 3.5rem; /* 56px */
-  }
-}
-
-html[lang="ru"] .marketing-hero-copy h1,
-html[lang="ru"] .seo-hero-copy h1 {
-  font-size: 2.375rem; /* 38px */
-}
-
-@media (min-width: 640px) {
-  html[lang="ru"] .marketing-hero-copy h1,
-  html[lang="ru"] .seo-hero-copy h1 {
-    font-size: 2.75rem; /* 44px */
-  }
-}
-
-@media (min-width: 1024px) {
-  html[lang="ru"] .marketing-hero-copy h1,
-  html[lang="ru"] .seo-hero-copy h1 {
-    font-size: 3.25rem; /* 52px */
   }
 }
 

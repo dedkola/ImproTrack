@@ -61,7 +61,7 @@ export function MarketingHome() {
             <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
               ImproTrack
             </p>
-            <h1 className="mt-4 max-w-[31rem] font-display text-[42px] font-semibold leading-[0.96] tracking-tight text-ink-950 sm:text-[58px] lg:text-[60px] xl:text-[64px]">
+            <h1 className="marketing-title mt-4 max-w-[31rem]">
               {t("home_hero_title")}
             </h1>
             <p className="mt-5 max-w-[29rem] text-[16px] leading-7 text-ink-700 sm:text-[18px] sm:leading-8">
@@ -108,7 +108,7 @@ export function MarketingHome() {
           <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
             {t("home_video_eyebrow")}
           </p>
-          <h2 className="mt-3 font-display text-[34px] font-semibold tracking-tight text-ink-950 sm:text-[46px]">
+          <h2 className="marketing-title mt-3">
             {t("home_video_title")}
           </h2>
           <p className="mt-4 text-[15px] leading-8 text-ink-700 sm:text-[16px]">
@@ -153,7 +153,7 @@ export function MarketingHome() {
                 <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
                   {section.eyebrow}
                 </p>
-                <h2 className="mt-3 max-w-xl font-display text-[34px] font-semibold tracking-tight text-ink-950 sm:text-[46px]">
+                <h2 className="marketing-title mt-3 max-w-xl">
                   {section.title}
                 </h2>
                 <p className="mt-4 max-w-xl text-[15px] leading-8 text-ink-700 sm:text-[16px]">
@@ -203,7 +203,7 @@ export function MarketingHome() {
           <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
              {t("home_ready_label")}
           </p>
-          <h2 className="mt-3 font-display text-[30px] font-semibold tracking-tight text-ink-950 sm:text-[42px]">
+          <h2 className="marketing-title mt-3">
              {t("home_ready_title")}
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-[15px] leading-7 text-ink-700 sm:text-[16px] sm:leading-8">
