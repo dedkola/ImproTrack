@@ -120,7 +120,7 @@ export function MarketingHome() {
           <div className="video-embed-frame lg:order-2">
             <div className="video-embed-ratio">
               <iframe
-                src="https://www.youtube-nocookie.com/embed/9FVKZDoBj-c?rel=0&modestbranding=1"
+                src="https://www.youtube-nocookie.com/embed/hquPsAtyrPM?rel=0&modestbranding=1"
                 title={t("home_video_title")}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
