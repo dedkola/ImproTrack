@@ -20,7 +20,7 @@ export function ProductCollage({
         height={1200}
         priority={priority}
         className="product-collage-image"
-        sizes="(min-width: 1280px) 980px, (min-width: 768px) 84vw, 112vw"
+        sizes="(min-width: 1280px) 760px, (min-width: 1024px) 54vw, (min-width: 768px) 84vw, 112vw"
       />
     </figure>
   );

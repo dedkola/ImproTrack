@@ -61,10 +61,10 @@ export function MarketingHome() {
             <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
               ImproTrack
             </p>
-            <h1 className="mt-4 max-w-4xl font-display text-[44px] font-semibold leading-[0.94] tracking-tight text-ink-950 sm:text-[66px] lg:text-[86px]">
+            <h1 className="mt-4 max-w-[31rem] font-display text-[42px] font-semibold leading-[0.96] tracking-tight text-ink-950 sm:text-[58px] lg:text-[60px] xl:text-[64px]">
               {t("home_hero_title")}
             </h1>
-            <p className="mt-5 max-w-2xl text-[16px] leading-7 text-ink-700 sm:text-[19px] sm:leading-8">
+            <p className="mt-5 max-w-[29rem] text-[16px] leading-7 text-ink-700 sm:text-[18px] sm:leading-8">
               {t("home_hero_desc")}
             </p>
 
@@ -83,7 +83,7 @@ export function MarketingHome() {
               </Link>
             </div>
 
-            <div className="mt-10 flex flex-wrap gap-3 text-[13px] font-medium text-ink-700 sm:mt-12">
+            <div className="home-hero-points mt-8 flex flex-wrap gap-3 text-[13px] font-medium text-ink-700 sm:mt-10">
               {quietPoints.map((point) => (
                 <span
                   key={point}
@@ -96,7 +96,7 @@ export function MarketingHome() {
           </div>
 
           <ProductCollage
-            alt="ImproTrack product collage with dashboard, statistics, archive, and progress badges"
+            alt="ImproTrack product collage with dashboard, mobile habit tracking, statistics, and progress badges"
             className="marketing-hero-collage"
             priority
           />

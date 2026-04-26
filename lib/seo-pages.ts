@@ -294,9 +294,9 @@ export const SEO_PAGES: SeoPage[] = [
     heroTitle: "Compare ImproTrack with other habit tracker app styles.",
     heroDescription:
       "Some trackers are task lists, some are spreadsheets, some lean on streak pressure, and some bundle habits into a broad productivity suite. ImproTrack is focused on check-ins, routine clarity, and readable progress.",
-    heroImage: "/brand/archive-shot.png",
+    heroImage: "/brand/global-statistic.png",
     heroImageAlt:
-      "ImproTrack archive page showing paused habits and supporting product navigation",
+      "ImproTrack global statistics page showing completion summaries and progress signals",
     primaryCta: { href: "/dashboard", label: "Open ImproTrack" },
     secondaryCta: { href: "/features", label: "View features" },
     proofPoints: [

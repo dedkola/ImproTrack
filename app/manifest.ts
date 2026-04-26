@@ -82,21 +82,21 @@ export default function manifest(): MetadataRoute.Manifest {
     screenshots: [
       {
         src: "/brand/dashboard-shot.png",
-        sizes: "3198x2126",
+        sizes: "2630x1582",
         type: "image/png",
         label: "Dashboard view with habits and weekly progress",
       },
       {
         src: "/brand/stats-shot.png",
-        sizes: "3198x3604",
+        sizes: "2632x1526",
         type: "image/png",
         label: "Statistics view with streaks and trend charts",
       },
       {
-        src: "/brand/archive-shot.png",
-        sizes: "3198x2126",
+        src: "/brand/global-statistic.png",
+        sizes: "3336x1814",
         type: "image/png",
-        label: "Archive view for paused or retired habits",
+        label: "Global statistics view with completion summaries and progress signals",
       },
     ],
     prefer_related_applications: false,

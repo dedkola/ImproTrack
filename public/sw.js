@@ -21,8 +21,9 @@ const CORE_ASSETS = [
   "/logo.svg",
   "/brand/home-collage.png",
   "/brand/dashboard-shot.png",
+  "/brand/global-statistic.png",
+  "/brand/ios.jpeg",
   "/brand/stats-shot.png",
-  "/brand/archive-shot.png",
 ];
 
 self.addEventListener("install", (event) => {
