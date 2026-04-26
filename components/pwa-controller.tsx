@@ -236,16 +236,19 @@ export function PwaController({ children }: PwaControllerProps) {
 
       {hasMounted && isOnline && isInstallCardVisible ? (
         <div className="pointer-events-none fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-sm sm:left-auto sm:right-6">
-          <aside className="pointer-events-auto rounded-[24px] border border-black/[0.08] bg-white/95 px-4 py-4 shadow-[var(--shadow-panel)] backdrop-blur-xl">
-            <div className="flex items-start justify-between gap-4">
+          <aside
+            aria-label={t("pwa_install_heading")}
+            className="pointer-events-auto rounded-2xl border border-black/[0.08] bg-white/95 px-3 py-3 shadow-[var(--shadow-panel)] backdrop-blur-xl sm:rounded-[24px] sm:px-4 sm:py-4"
+          >
+            <div className="flex items-center justify-between gap-3 sm:items-start sm:gap-4">
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-600">
+                <p className="truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-600 sm:text-[11px]">
                   {t("pwa_install_title")}
                 </p>
-                <h2 className="mt-2 font-display text-[22px] font-semibold tracking-tight text-ink-950">
-                   {t("pwa_install_heading")}
+                <h2 className="mt-2 hidden font-display text-[22px] font-semibold tracking-tight text-ink-950 sm:block">
+                  {t("pwa_install_heading")}
                 </h2>
-                <p className="mt-2 text-[14px] leading-6 text-ink-700">
+                <p className="mt-2 hidden text-[14px] leading-6 text-ink-700 sm:block">
                   {installMode === "browser"
                     ? t("pwa_install_browser_desc")
                     : t("pwa_install_ios_desc")}
@@ -262,21 +265,21 @@ export function PwaController({ children }: PwaControllerProps) {
               </button>
             </div>
 
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+            <div className="mt-3 flex gap-2 sm:mt-4 sm:flex-row">
               {installMode === "browser" ? (
                 <>
                   <button
                     type="button"
                     onClick={() => void requestInstall()}
                     disabled={isInstalling}
-                    className="pill-btn min-h-11 rounded-xl bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-4 py-3 text-[14px] font-semibold text-white shadow-[0_10px_24px_rgba(109,40,217,0.28)] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="pill-btn min-h-10 flex-1 rounded-xl bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-4 py-2.5 text-[14px] font-semibold text-white shadow-[0_10px_24px_rgba(109,40,217,0.28)] disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-11 sm:py-3"
                   >
                     {isInstalling ? t("pwa_opening_prompt") : t("install_app")}
                   </button>
                   <button
                     type="button"
                     onClick={dismissInstallCard}
-                    className="pill-btn min-h-11 rounded-xl border border-black/[0.06] bg-white px-4 py-3 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)]"
+                    className="pill-btn min-h-10 flex-1 rounded-xl border border-black/[0.06] bg-white px-4 py-2.5 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)] sm:min-h-11 sm:py-3"
                   >
                     {t("pwa_not_now")}
                   </button>
@@ -285,7 +288,7 @@ export function PwaController({ children }: PwaControllerProps) {
                 <button
                   type="button"
                   onClick={dismissInstallCard}
-                  className="pill-btn min-h-11 rounded-xl border border-black/[0.06] bg-white px-4 py-3 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)]"
+                  className="pill-btn min-h-10 flex-1 rounded-xl border border-black/[0.06] bg-white px-4 py-2.5 text-[14px] font-semibold text-ink-950 shadow-[var(--shadow-card)] sm:min-h-11 sm:py-3"
                 >
                   {t("pwa_hide_tip")}
                 </button>

@@ -103,31 +103,29 @@ export function MarketingHome() {
         </div>
       </section>
 
-      <section className="page-shell mx-auto max-w-6xl py-6 sm:py-8 lg:py-10">
-        <div className="grid items-center gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
-          <div className="lg:order-1">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
-              {t("home_video_eyebrow")}
-            </p>
-            <h2 className="mt-3 max-w-xl font-display text-[34px] font-semibold tracking-tight text-ink-950 sm:text-[46px]">
-              {t("home_video_title")}
-            </h2>
-            <p className="mt-4 max-w-xl text-[15px] leading-8 text-ink-700 sm:text-[16px]">
-              {t("home_video_desc")}
-            </p>
-          </div>
+      <section className="page-shell mx-auto max-w-6xl py-8 sm:py-10 lg:py-14">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-600">
+            {t("home_video_eyebrow")}
+          </p>
+          <h2 className="mt-3 font-display text-[34px] font-semibold tracking-tight text-ink-950 sm:text-[46px]">
+            {t("home_video_title")}
+          </h2>
+          <p className="mt-4 text-[15px] leading-8 text-ink-700 sm:text-[16px]">
+            {t("home_video_desc")}
+          </p>
+        </div>
 
-          <div className="video-embed-frame lg:order-2">
-            <div className="video-embed-ratio">
-              <iframe
-                src="https://www.youtube-nocookie.com/embed/hquPsAtyrPM?rel=0&modestbranding=1"
-                title={t("home_video_title")}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="strict-origin-when-cross-origin"
-              />
-            </div>
+        <div className="video-embed-frame mt-8 sm:mt-10">
+          <div className="video-embed-ratio">
+            <iframe
+              src="https://www.youtube-nocookie.com/embed/hquPsAtyrPM?rel=0&modestbranding=1"
+              title={t("home_video_title")}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
           </div>
         </div>
       </section>
