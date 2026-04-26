@@ -166,6 +166,7 @@ export function MarketingHome() {
                   width={1600}
                   height={1080}
                   priority={section.imagePriority}
+                  loading={section.imagePriority ? "eager" : undefined}
                   className="brand-shot-image"
                   sizes="(min-width: 1024px) 55vw, 100vw"
                 />
