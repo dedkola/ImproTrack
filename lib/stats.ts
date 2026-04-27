@@ -1,9 +1,6 @@
 import { addDays, DateRange, eachDay, parseDateKey, toDateKey } from "@/lib/date";
+import { normalizeSlotKey } from "@/lib/habits";
 import { HabitRecords } from "@/lib/storage";
-
-function normalizeSlotKey(slotName: string) {
-  return slotName.trim().toLowerCase();
-}
 
 export function isSlotCompleted(
   daySlots: Record<string, boolean> | undefined,

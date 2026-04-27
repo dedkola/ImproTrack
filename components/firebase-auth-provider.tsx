@@ -75,20 +75,6 @@ export function FirebaseAuthProvider({
   );
 }
 
-export function FirebaseAuthOverrideProvider({
-  children,
-  value,
-}: Readonly<{
-  children: React.ReactNode;
-  value: FirebaseAuthContextValue;
-}>) {
-  return (
-    <FirebaseAuthContext.Provider value={value}>
-      {children}
-    </FirebaseAuthContext.Provider>
-  );
-}
-
 export function useFirebaseAuth() {
   const context = useContext(FirebaseAuthContext);
 

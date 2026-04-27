@@ -241,6 +241,10 @@ export const DEFAULT_HABITS: HabitDefinition[] = [
   },
 ];
 
+export function normalizeSlotKey(slotName: string): string {
+  return slotName.trim().toLowerCase();
+}
+
 export function slugify(name: string): string {
   return name
     .toLowerCase()

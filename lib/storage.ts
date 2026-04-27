@@ -25,6 +25,7 @@ import {
   getNormalizedFrequency,
   HabitDefinition,
   HabitTone,
+  normalizeSlotKey,
   normalizeTimeSlots,
   TONE_PRESETS,
   slugify,
@@ -41,10 +42,6 @@ export type SlotRecords = Record<string, boolean>;
 export type DayRecords = Record<string, SlotRecords>;
 export type HabitRecords = Record<string, DayRecords>;
 type PendingRecordPatches = Record<string, SlotRecords>;
-
-function normalizeSlotKey(slotName: string) {
-  return slotName.trim().toLowerCase();
-}
 
 function resolveSlotValue(
   daySlots: SlotRecords | undefined,
