@@ -29,6 +29,8 @@
   },
   "pnpm": {
     "overrides": {
+      "next@16.2.6>postcss": "8.5.15",
+      "postcss": "8.5.15",
       "protobufjs": "7.5.5"
     }
   },
