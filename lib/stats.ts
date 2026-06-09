@@ -129,6 +129,15 @@ export function getCurrentStreak(
   let streak = 0;
   let cursor = parseDateKey(todayKey);
 
+  if (!isDayFullyCompleted(records, habitId, toDateKey(cursor), timeSlots)) {
+    const yesterday = new Date(cursor);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (!isDayFullyCompleted(records, habitId, toDateKey(yesterday), timeSlots)) {
+      return 0;
+    }
+    cursor = yesterday;
+  }
+
   while (isDayFullyCompleted(records, habitId, toDateKey(cursor), timeSlots)) {
     streak += 1;
     cursor.setDate(cursor.getDate() - 1);

@@ -461,6 +461,9 @@ type ExtraTranslations = {
   sitemap_route_terms_desc: string;
   sitemap_route_sitemap_title: string;
   sitemap_route_sitemap_desc: string;
+  form_rewardable?: string;
+  form_rewardable_help?: string;
+  tracker_streak_tooltip?: string;
 };
 
 export type Translations = BaseTranslations & ExtraTranslations;
@@ -2759,6 +2762,9 @@ const enExtra: ExtraTranslations = {
   sitemap_route_terms_desc: "The public terms that govern access to the marketing site, sign-in flow, and app usage.",
   sitemap_route_sitemap_title: "Sitemap",
   sitemap_route_sitemap_desc: "A human-readable index of the public pages and SEO files exposed by the site.",
+  form_rewardable: "Rewardable (Show streak)",
+  form_rewardable_help: "Display a streak badge in the matrix when you complete this habit consecutively.",
+  tracker_streak_tooltip: "{count} day streak",
 };
 
 const esExtra: ExtraTranslations = {
@@ -5342,6 +5348,9 @@ const ruExtra: ExtraTranslations = {
   sitemap_route_terms_desc: "The public terms that govern access to the marketing site, sign-in flow, and app usage.",
   sitemap_route_sitemap_title: "Sitemap",
   sitemap_route_sitemap_desc: "A human-readable index of the public pages and SEO files exposed by the site.",
+  form_rewardable: "С серией (Показывать серию)",
+  form_rewardable_help: "Показывать значок серии выполненных дней подряд в матрице.",
+  tracker_streak_tooltip: "{count} дн. подряд",
 };
 
 const trExtra: ExtraTranslations = {

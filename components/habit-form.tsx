@@ -61,6 +61,7 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
   const [hexInput, setHexInput] = useState("");
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRewardable, setIsRewardable] = useState(true);
 
   const nameId = `${formId}-habit-name`;
   const descriptionId = `${formId}-habit-description`;
@@ -124,6 +125,7 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
         setCustomHex(null);
         setHexInput("");
       }
+      setIsRewardable(initial.isRewardable !== false);
     } else {
       resetForm();
     }
@@ -139,6 +141,7 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
     setCustomHex(null);
     setHexInput("");
     setAttemptedSubmit(false);
+    setIsRewardable(true);
   }
 
   function handleFrequencyChange(value: number) {
@@ -177,6 +180,7 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
           customHex !== null
             ? buildToneFromHex(customHex)
             : TONE_PRESETS[selectedToneIndex].tone,
+        isRewardable,
       });
       resetForm();
       onClose();
@@ -470,6 +474,34 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
               </div>
             </div>
           )}
+
+          <div className="flex items-center justify-between rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-black/[0.01] dark:bg-white/[0.01] p-4">
+            <div className="flex-1 pr-4">
+              <label htmlFor="isRewardable" className="block text-[14px] font-semibold text-ink-950">
+                {t("form_rewardable")}
+              </label>
+              <p className="mt-1 text-[12px] leading-relaxed text-ink-600">
+                {t("form_rewardable_help")}
+              </p>
+            </div>
+            <button
+              id="isRewardable"
+              type="button"
+              role="checkbox"
+              aria-checked={isRewardable}
+              onClick={() => setIsRewardable(!isRewardable)}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#6D28D9] focus:ring-offset-2 ${
+                isRewardable ? "bg-[#6D28D9]" : "bg-black/[0.12] dark:bg-white/[0.12]"
+              }`}
+            >
+              <span
+                aria-hidden="true"
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                  isRewardable ? "translate-x-5" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center justify-end gap-2 border-t border-black/[0.06] bg-white px-5 py-3">

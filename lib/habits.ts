@@ -53,6 +53,7 @@ export type HabitDefinition = {
   createdAt: string;
   sortOrder?: number;
   tone: HabitTone;
+  isRewardable?: boolean;
 };
 
 const DEFAULT_TIME_SLOT_NAMES = [

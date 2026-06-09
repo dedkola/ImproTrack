@@ -41,6 +41,7 @@ import {
   completedSlotsInDay,
   completionRate,
   countCompleted,
+  getCurrentStreak,
   isSlotCompleted,
 } from "@/lib/stats";
 import { useHabits, useHabitRecords } from "@/lib/storage";
@@ -325,7 +326,8 @@ export function HabitTrackerApp() {
     restoreHabit,
     reorderHabits: persistHabitOrder,
   } = useHabits();
-  const { records, toggleHabitDay, loadMonth } = useHabitRecords(activeHabits);
+  const { records, toggleHabitDay, loadMonth, loadFullHistory } =
+    useHabitRecords(activeHabits);
   const [mobileWeekOffset, setMobileWeekOffset] = useState(0);
   const [desktopMonthOffset, setDesktopMonthOffset] = useState(0);
 
@@ -342,6 +344,17 @@ export function HabitTrackerApp() {
     addDays(today, -(mobileWeekOffset * MOBILE_DAY_WINDOW)),
   );
   const mobileDays = eachDay(mobileRange);
+  const mobileStatsRange = useMemo(
+    () =>
+      getCurrentMonthRange(
+        addDays(today, -(mobileWeekOffset * MOBILE_DAY_WINDOW)),
+      ),
+    [mobileWeekOffset],
+  );
+  const mobileStatsDays = useMemo(
+    () => eachDay(mobileStatsRange),
+    [mobileStatsRange],
+  );
 
   // Load records for the desktop month when navigating backward
   useEffect(() => {
@@ -354,14 +367,11 @@ export function HabitTrackerApp() {
     loadMonth(toYearMonth(targetDate));
   }, [desktopMonthOffset, loadMonth]);
 
-  // Load records for the mobile week's containing month(s)
+  // Load records for the month summarized by the mobile cards.
   useEffect(() => {
     if (mobileWeekOffset === 0) return;
-    const fromMonth = yearMonthFromDateKey(mobileRange.from);
-    const toMonth = yearMonthFromDateKey(mobileRange.to);
-    loadMonth(fromMonth);
-    if (toMonth !== fromMonth) loadMonth(toMonth);
-  }, [mobileWeekOffset, mobileRange.from, mobileRange.to, loadMonth]);
+    loadMonth(yearMonthFromDateKey(mobileStatsRange.from));
+  }, [mobileWeekOffset, mobileStatsRange.from, loadMonth]);
   const mobileRangeLabel = getMobileRangeLabel(mobileRange);
   const desktopRangeLabel = formatMonthLabel(desktopRange);
   const mobileWindowLabel =
@@ -408,6 +418,14 @@ export function HabitTrackerApp() {
   const [didMigrateLegacyOrder, setDidMigrateLegacyOrder] = useState(false);
 
   const orderedActiveHabits = activeHabits;
+
+  useEffect(() => {
+    if (!orderedActiveHabits.some((habit) => habit.isRewardable !== false)) {
+      return;
+    }
+
+    void loadFullHistory();
+  }, [loadFullHistory, orderedActiveHabits]);
 
   useEffect(() => {
     if (didMigrateLegacyOrder) {
@@ -749,14 +767,14 @@ export function HabitTrackerApp() {
                   const mobileRate = completionRate(
                     records,
                     habit.id,
-                    mobileRange,
+                    mobileStatsRange,
                     todayKey,
                     habit.timeSlots,
                   );
                   const recentCompleted = countCompleted(
                     records,
                     habit.id,
-                    mobileRange,
+                    mobileStatsRange,
                     todayKey,
                     habit.timeSlots,
                   );
@@ -768,6 +786,10 @@ export function HabitTrackerApp() {
                     todayKey,
                     habit.timeSlots,
                   );
+                  const mobileStreak =
+                    habit.isRewardable !== false
+                      ? getCurrentStreak(records, habit.id, todayKey, habit.timeSlots)
+                      : 0;
 
                   return (
                     <article
@@ -798,19 +820,29 @@ export function HabitTrackerApp() {
                                 <p className="mt-0.5 text-[12px] leading-5 text-ink-600">
                                   {isMultiSlot
                                     ? t("tracker_slots_done_today", { done: String(todayCompletedCount), total: String(habit.timeSlots.length) })
-                                    : t("tracker_days_completed", { done: String(recentCompleted), total: String(mobileDays.length) })}
+                                    : t("tracker_days_completed", { done: String(recentCompleted), total: String(mobileStatsDays.length) })}
                                 </p>
                               </div>
 
-                              <span
-                                className={`rounded-md px-1.5 py-1 text-[11px] font-semibold ${isDark ? softFillClassDark(habit.tone) : softFillClass(habit.tone)} ${badgeClass(habit.tone)}`}
-                                style={{
-                                  ...(isDark ? softFillStyleDark(habit.tone) : softFillStyle(habit.tone)),
-                                  ...badgeStyle(habit.tone),
-                                }}
-                              >
-                                {mobileRate}%
-                              </span>
+                              <div className="flex items-center gap-1.5">
+                                <span
+                                  className={`rounded-md px-1.5 py-1 text-[11px] font-semibold ${isDark ? softFillClassDark(habit.tone) : softFillClass(habit.tone)} ${badgeClass(habit.tone)}`}
+                                  style={{
+                                    ...(isDark ? softFillStyleDark(habit.tone) : softFillStyle(habit.tone)),
+                                    ...badgeStyle(habit.tone),
+                                  }}
+                                >
+                                  {mobileRate}%
+                                </span>
+                                {mobileStreak > 0 && (
+                                  <span
+                                    title={t("tracker_streak_tooltip", { count: String(mobileStreak) })}
+                                    className="inline-flex items-center gap-0.5 rounded-md bg-amber-50 px-1.5 py-1 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200"
+                                  >
+                                    🔥 {mobileStreak}
+                                  </span>
+                                )}
+                              </div>
                             </div>
 
                             <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
@@ -1127,63 +1159,77 @@ export function HabitTrackerApp() {
                                 : ""
                             }`}
                           >
-                            {isFirstSlot ? (
-                              <div className="flex min-w-0 flex-col gap-1">
-                                <div className="flex items-center gap-1">
-                                  <div
-                                    role="img"
-                                    aria-label={t("tracker_drag_reorder")}
-                                    className="shrink-0 cursor-grab touch-none text-ink-700/25 hover:text-ink-700/60 active:cursor-grabbing"
-                                    title={t("tracker_drag_reorder")}
-                                  >
-                                    <GripVertical
-                                      className="h-3.5 w-3.5"
-                                      strokeWidth={2}
+                            {isFirstSlot ? (() => {
+                              const desktopStreak =
+                                habit.isRewardable !== false
+                                  ? getCurrentStreak(records, habit.id, todayKey, habit.timeSlots)
+                                  : 0;
+                              return (
+                                <div className="flex min-w-0 flex-col gap-1">
+                                  <div className="flex items-center gap-1">
+                                    <div
+                                      role="img"
+                                      aria-label={t("tracker_drag_reorder")}
+                                      className="shrink-0 cursor-grab touch-none text-ink-700/25 hover:text-ink-700/60 active:cursor-grabbing"
+                                      title={t("tracker_drag_reorder")}
+                                    >
+                                      <GripVertical
+                                        className="h-3.5 w-3.5"
+                                        strokeWidth={2}
+                                      />
+                                    </div>
+                                    <HabitIcon
+                                      name={habit.icon}
+                                      size={14}
+                                      className={`shrink-0 ${accentClass(habit.tone)}`}
+                                      style={accentStyle(habit.tone)}
+                                    />
+                                    <div className="flex-1" />
+                                    {desktopStreak > 0 && (
+                                      <span
+                                        title={t("tracker_streak_tooltip", { count: String(desktopStreak) })}
+                                        className="inline-flex items-center gap-0.5 rounded-md bg-amber-50 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200"
+                                      >
+                                        🔥 {desktopStreak}
+                                      </span>
+                                    )}
+                                    <span
+                                      className={`rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${isDark ? softFillClassDark(habit.tone) : softFillClass(habit.tone)} ${badgeClass(habit.tone)}`}
+                                      style={{
+                                        ...(isDark ? softFillStyleDark(habit.tone) : softFillStyle(habit.tone)),
+                                        ...badgeStyle(habit.tone),
+                                      }}
+                                    >
+                                      {completionRate(
+                                        records,
+                                        habit.id,
+                                        desktopRange,
+                                        todayKey,
+                                        habit.timeSlots,
+                                      )}
+                                      %
+                                    </span>
+                                    <HabitMenu
+                                      tone={habit.tone}
+                                      onEdit={() => {
+                                        setEditingHabit(habit);
+                                        setFormOpen(true);
+                                      }}
+                                      onArchive={() => {
+                                        void handleArchiveHabit(habit);
+                                      }}
+                                      onDelete={() => setDeleteTarget(habit)}
                                     />
                                   </div>
-                                  <HabitIcon
-                                    name={habit.icon}
-                                    size={14}
-                                    className={`shrink-0 ${accentClass(habit.tone)}`}
-                                    style={accentStyle(habit.tone)}
-                                  />
-                                  <div className="flex-1" />
-                                  <span
-                                    className={`rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${isDark ? softFillClassDark(habit.tone) : softFillClass(habit.tone)} ${badgeClass(habit.tone)}`}
-                                    style={{
-                                      ...(isDark ? softFillStyleDark(habit.tone) : softFillStyle(habit.tone)),
-                                      ...badgeStyle(habit.tone),
-                                    }}
+                                  <Link
+                                    href={`/dashboard/habits/${habit.slug}`}
+                                    className="block truncate text-[13px] font-semibold leading-tight text-ink-950 transition-colors hover:text-[#6D28D9] focus-visible:outline-none focus-visible:text-[#6D28D9]"
                                   >
-                                    {completionRate(
-                                      records,
-                                      habit.id,
-                                      desktopRange,
-                                      todayKey,
-                                      habit.timeSlots,
-                                    )}
-                                    %
-                                  </span>
-                                  <HabitMenu
-                                    tone={habit.tone}
-                                    onEdit={() => {
-                                      setEditingHabit(habit);
-                                      setFormOpen(true);
-                                    }}
-                                    onArchive={() => {
-                                      void handleArchiveHabit(habit);
-                                    }}
-                                    onDelete={() => setDeleteTarget(habit)}
-                                  />
+                                    {habit.name}
+                                  </Link>
                                 </div>
-                                <Link
-                                  href={`/dashboard/habits/${habit.slug}`}
-                                  className="block truncate text-[13px] font-semibold leading-tight text-ink-950 transition-colors hover:text-[#6D28D9] focus-visible:outline-none focus-visible:text-[#6D28D9]"
-                                >
-                                  {habit.name}
-                                </Link>
-                              </div>
-                            ) : (
+                              );
+                            })() : (
                               <p className="pl-5 text-[12px] text-ink-700">
                                 {displaySlotName}
                               </p>
