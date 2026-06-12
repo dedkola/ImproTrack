@@ -368,7 +368,112 @@ async function buildOpenGraph() {
     .toFile(path.join(brandDir, "opengraph.png"));
 }
 
+async function buildGitHubSocialPreview() {
+  const width = 1280;
+  const height = 640;
+  const dashboard = await shotCard({
+    source: sources.dashboard,
+    width: 536,
+    height: 322,
+    radius: 38,
+    padding: 12,
+    rotate: -1.5,
+  });
+  const global = await shotCard({
+    source: sources.global,
+    width: 334,
+    height: 202,
+    radius: 30,
+    padding: 10,
+    rotate: 3.4,
+    tint: "#f7fbff",
+  });
+  const stats = await shotCard({
+    source: sources.stats,
+    width: 290,
+    height: 168,
+    radius: 30,
+    padding: 10,
+    rotate: -3.2,
+    tint: "#fffaf2",
+  });
+  const phone = await phoneCard({
+    source: sources.ios,
+    width: 132,
+    height: 286,
+    radius: 34,
+    rotate: 4.6,
+  });
+
+  const background = textSvg({
+    width,
+    height,
+    content: `
+      <defs>
+        <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0" stop-color="#f8fbff"/>
+          <stop offset="0.52" stop-color="#ffffff"/>
+          <stop offset="1" stop-color="#fff7ed"/>
+        </linearGradient>
+        <pattern id="grid" width="38" height="38" patternUnits="userSpaceOnUse">
+          <path d="M 38 0 L 0 0 0 38" fill="none" stroke="rgba(10,22,40,0.04)" stroke-width="1"/>
+        </pattern>
+      </defs>
+      <rect width="${width}" height="${height}" fill="url(#bg)"/>
+      <rect width="${width}" height="${height}" fill="url(#grid)" opacity="0.8"/>
+      <path d="M544 -28 L1322 -28 L1322 690 L700 690 C856 506 868 330 544 -28Z" fill="#ede9fe" opacity="0.62"/>
+      <path d="M684 90 C880 32 1084 62 1190 160" fill="none" stroke="#0ea5e9" stroke-width="10" stroke-linecap="round" opacity="0.24"/>
+      <text x="64" y="148" class="sans" font-size="14" font-weight="850" letter-spacing="3" fill="#64748b">HABIT DASHBOARD</text>
+      <text x="62" y="224" class="display" font-size="57" font-weight="850" fill="#0a1628">Build routines</text>
+      <text x="62" y="286" class="display" font-size="57" font-weight="850" fill="#0a1628">you can see.</text>
+      <text x="66" y="344" class="sans" font-size="20" font-weight="550" fill="#4b5b71">Daily habits, streaks, archive history,</text>
+      <text x="66" y="374" class="sans" font-size="20" font-weight="550" fill="#4b5b71">and progress insights in one workspace.</text>
+      <rect x="64" y="422" width="214" height="58" rx="18" fill="#0a1628"/>
+      <text x="92" y="458" class="sans" font-size="16" font-weight="850" fill="#fff">Start tracking today</text>
+      <rect x="64" y="518" width="126" height="58" rx="20" fill="rgba(255,255,255,0.86)" stroke="rgba(10,22,40,0.08)"/>
+      <text x="88" y="546" class="sans" font-size="24" font-weight="850" fill="#0a1628">82%</text>
+      <text x="88" y="566" class="sans" font-size="11" font-weight="800" fill="#64748b" letter-spacing="1">HIT RATE</text>
+      <rect x="206" y="518" width="126" height="58" rx="20" fill="rgba(255,255,255,0.86)" stroke="rgba(10,22,40,0.08)"/>
+      <text x="230" y="546" class="sans" font-size="24" font-weight="850" fill="#0a1628">14</text>
+      <text x="230" y="566" class="sans" font-size="11" font-weight="800" fill="#64748b" letter-spacing="1">DAY RUN</text>
+    `,
+  });
+
+  const logo = await sharp(sources.logo).resize(74, 74).png().toBuffer();
+  const logoShell = textSvg({
+    width: 388,
+    height: 94,
+    content: `
+      <rect x="0" y="0" width="94" height="94" rx="28" fill="rgba(255,255,255,0.92)" stroke="rgba(10,22,40,0.06)"/>
+      <text x="114" y="58" class="display" font-size="36" font-weight="850" fill="#0a1628">ImproTrack</text>
+    `,
+  });
+
+  await sharp({
+    create: {
+      width,
+      height,
+      channels: 4,
+      background: { r: 255, g: 255, b: 255, alpha: 1 },
+    },
+  })
+    .composite([
+      { input: background, left: 0, top: 0 },
+      { input: logoShell, left: 60, top: 38 },
+      { input: logo, left: 70, top: 48 },
+      { input: stats, left: 528, top: 396 },
+      { input: dashboard, left: 532, top: 108 },
+      { input: global, left: 806, top: 356 },
+      { input: phone, left: 1014, top: 86 },
+    ])
+    .png()
+    .toFile(path.join(brandDir, "github-social-preview.png"));
+}
+
 await buildTransparentCollage();
 await buildOpenGraph();
+await buildGitHubSocialPreview();
 
-console.log("Generated public/brand/home-collage.png and public/brand/opengraph.png");
+console.log(
+  "Generated public/brand/home-collage.png, public/brand/opengraph.png, and public/brand/github-social-preview.png",
+);
