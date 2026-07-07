@@ -15,10 +15,10 @@ importers:
     dependencies:
       '@vercel/analytics':
         specifier: ^2.0.1
-        version: 2.0.1(next@16.2.9(@babel/core@7.29.7)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)
+        version: 2.0.1(next@16.2.9(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.5))(react@19.2.5))(react@19.2.5)
       '@vercel/speed-insights':
         specifier: ^2.0.0
-        version: 2.0.0(next@16.2.9(@babel/core@7.29.7)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)
+        version: 2.0.0(next@16.2.9(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.5))(react@19.2.5))(react@19.2.5)
       firebase:
         specifier: ^12.15.0
         version: 12.15.0
@@ -27,13 +27,13 @@ importers:
         version: 1.16.0(react@19.2.5)
       next:
         specifier: 16.2.9
-        version: 16.2.9(@babel/core@7.29.7)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+        version: 16.2.9(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.5))(react@19.2.5)
       react:
         specifier: 19.2.5
         version: 19.2.5
       react-dom:
-        specifier: 19.2.5
-        version: 19.2.5(react@19.2.5)
+        specifier: 19.2.7
+        version: 19.2.7(react@19.2.5)
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.3.0
@@ -2237,10 +2237,10 @@ packages:
   re2js@0.4.3:
     resolution: {integrity: sha512-EuNmh7jurhHEE8Ge/lBo9JuMLb3qf866Xjjfyovw3wPc7+hlqDkZq4LwhrCQMEI+ARWfrKrHozEndzlpNT0WDg==}
 
-  react-dom@19.2.5:
-    resolution: {integrity: sha512-J5bAZz+DXMMwW/wV3xzKke59Af6CHY7G4uYLN1OvBcKEsWOs4pQExj86BBKamxl/Ik5bx9whOrvBlSDfWzgSag==}
+  react-dom@19.2.7:
+    resolution: {integrity: sha512-t0BRVXvbiE/o20Hfw669rLbMCDWtYZLvmJigy2f0MxsXF+71pxhR3xOkspmsO8h3ZlNzyibAmtCa3l4lYKk6gQ==}
     peerDependencies:
-      react: ^19.2.5
+      react: ^19.2.7
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -3618,14 +3618,14 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.12.2':
     optional: true
 
-  '@vercel/analytics@2.0.1(next@16.2.9(@babel/core@7.29.7)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)':
+  '@vercel/analytics@2.0.1(next@16.2.9(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.5))(react@19.2.5))(react@19.2.5)':
     optionalDependencies:
-      next: 16.2.9(@babel/core@7.29.7)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      next: 16.2.9(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.5))(react@19.2.5)
       react: 19.2.5
 
-  '@vercel/speed-insights@2.0.0(next@16.2.9(@babel/core@7.29.7)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)':
+  '@vercel/speed-insights@2.0.0(next@16.2.9(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.5))(react@19.2.5))(react@19.2.5)':
     optionalDependencies:
-      next: 16.2.9(@babel/core@7.29.7)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      next: 16.2.9(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.5))(react@19.2.5)
       react: 19.2.5
 
   acorn-jsx@5.3.2(acorn@8.17.0):
@@ -4706,7 +4706,7 @@ snapshots:
 
   natural-compare@1.4.0: {}
 
-  next@16.2.9(@babel/core@7.29.7)(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
+  next@16.2.9(@babel/core@7.29.7)(react-dom@19.2.7(react@19.2.5))(react@19.2.5):
     dependencies:
       '@next/env': 16.2.9
       '@swc/helpers': 0.5.15
@@ -4714,7 +4714,7 @@ snapshots:
       caniuse-lite: 1.0.30001799
       postcss: 8.5.15
       react: 19.2.5
-      react-dom: 19.2.5(react@19.2.5)
+      react-dom: 19.2.7(react@19.2.5)
       styled-jsx: 5.1.6(@babel/core@7.29.7)(react@19.2.5)
     optionalDependencies:
       '@next/swc-darwin-arm64': 16.2.9
@@ -4857,7 +4857,7 @@ snapshots:
 
   re2js@0.4.3: {}
 
-  react-dom@19.2.5(react@19.2.5):
+  react-dom@19.2.7(react@19.2.5):
     dependencies:
       react: 19.2.5
       scheduler: 0.27.0
