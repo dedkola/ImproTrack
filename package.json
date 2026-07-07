@@ -5,8 +5,10 @@
   "packageManager": "pnpm@11.1.0",
   "scripts": {
     "dev": "next dev",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "check": "pnpm typecheck && pnpm build",
+    "smoke": "tsx scripts/smoke-checks.ts",
+    "check": "pnpm lint && pnpm typecheck && pnpm smoke && pnpm build",
     "build": "next build",
     "start": "next start"
   },
@@ -24,7 +26,10 @@
     "@types/node": "^25.7.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "16.2.9",
     "tailwindcss": "^4.3.2",
+    "tsx": "^4.23.0",
     "typescript": "^6.0.3"
   },
   "overrides": {

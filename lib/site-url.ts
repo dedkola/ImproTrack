@@ -1,6 +1,6 @@
 const DEFAULT_SITE_URL = "http://localhost:3000";
 
-function normalizeSiteUrl(value: string) {
+export function normalizeSiteUrl(value: string) {
   const normalizedValue = value.trim();
 
   if (!normalizedValue) {

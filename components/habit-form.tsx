@@ -78,6 +78,19 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
   const trimmedName = name.trim();
   const showNameError = attemptedSubmit && !trimmedName;
 
+  function resetForm() {
+    setName("");
+    setDescription("");
+    setIcon("Target");
+    setFrequencyPerDay(1);
+    setTimeSlots(["default"]);
+    setSelectedToneIndex(0);
+    setCustomHex(null);
+    setHexInput("");
+    setAttemptedSubmit(false);
+    setIsRewardable(true);
+  }
+
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
@@ -130,19 +143,6 @@ export function HabitForm({ open, onClose, onSave, initial }: HabitFormProps) {
       resetForm();
     }
   }, [initial, open]);
-
-  function resetForm() {
-    setName("");
-    setDescription("");
-    setIcon("Target");
-    setFrequencyPerDay(1);
-    setTimeSlots(["default"]);
-    setSelectedToneIndex(0);
-    setCustomHex(null);
-    setHexInput("");
-    setAttemptedSubmit(false);
-    setIsRewardable(true);
-  }
 
   function handleFrequencyChange(value: number) {
     const freq = Math.max(1, Math.min(10, value));

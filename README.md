@@ -35,13 +35,13 @@ ImproTrack turns daily routines into a simple visual system: tap a cell, keep th
 
 | Layer | Technology |
 | --- | --- |
-| App framework | Next.js 16.2.4 App Router |
+| App framework | Next.js 16.2.9 App Router |
 | UI runtime | React 19 |
 | Language | TypeScript 6 strict mode |
 | Styling | Tailwind CSS v4 |
 | Auth and data | Firebase Auth, Firestore, Firebase Storage helpers |
 | Analytics | Vercel Analytics and Speed Insights |
-| Package manager | pnpm 10.18.3 |
+| Package manager | pnpm 11.1.0 |
 | Runtime | Node.js 22 |
 
 ## App routes
@@ -117,12 +117,14 @@ If you test from another device on your LAN, set `NEXT_ALLOWED_DEV_ORIGINS` to a
 | Command | Description |
 | --- | --- |
 | `pnpm dev` | Start the local development server |
+| `pnpm lint` | Run ESLint across the tracked source files |
 | `pnpm typecheck` | Run TypeScript with `tsc --noEmit` |
+| `pnpm smoke` | Run lightweight config and SEO smoke checks |
 | `pnpm build` | Create a production Next.js build |
 | `pnpm start` | Serve the production build |
-| `pnpm check` | Run typecheck and production build |
+| `pnpm check` | Run lint, typecheck, smoke checks, and production build |
 
-There is currently no lint script or automated test runner configured.
+The repo now has ESLint plus a lightweight smoke-check script. There is still no broader component or end-to-end test suite.
 
 ## Firebase setup notes
 
@@ -168,7 +170,6 @@ app/         Next.js route wrappers, metadata, sitemap, robots, manifest
 components/  Public pages, dashboard shell, habit UI, PWA controller
 lib/         Date, stats, storage, Firebase, site URL, and habit helpers
 public/      Static assets, brand images, icons, service worker
-workers/     Standalone reminder-cron worker (its own package with node_modules)
 scripts/     Brand asset generation utilities
 ```
 

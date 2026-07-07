@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, useCallback } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   eachDay,
   getRollingRange,
@@ -132,23 +132,20 @@ function LineChartViz({
 
   const labelEvery = n <= 7 ? 1 : n <= 14 ? 2 : 7;
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<SVGSVGElement>) => {
-      const svg = svgRef.current;
-      if (!svg) return;
-      const rect = svg.getBoundingClientRect();
-      const mouseX = ((e.clientX - rect.left) / rect.width) * VW;
-      const idx = Math.round((mouseX - P.l) / stepX);
-      if (idx >= 0 && idx < n) {
-        setHoverIndex(idx);
-      } else {
-        setHoverIndex(null);
-      }
-    },
-    [n, stepX],
-  );
+  const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const rect = svg.getBoundingClientRect();
+    const mouseX = ((e.clientX - rect.left) / rect.width) * VW;
+    const idx = Math.round((mouseX - P.l) / stepX);
+    if (idx >= 0 && idx < n) {
+      setHoverIndex(idx);
+    } else {
+      setHoverIndex(null);
+    }
+  };
 
-  const handleMouseLeave = useCallback(() => setHoverIndex(null), []);
+  const handleMouseLeave = () => setHoverIndex(null);
 
   const hp = hoverIndex !== null ? pathPts[hoverIndex] : null;
   const hRate = hoverIndex !== null ? rates[hoverIndex] : 0;
