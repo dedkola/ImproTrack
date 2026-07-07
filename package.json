@@ -27,13 +27,6 @@
     "tailwindcss": "^4.3.2",
     "typescript": "^6.0.3"
   },
-  "pnpm": {
-    "overrides": {
-      "next@16.2.6>postcss": "8.5.15",
-      "postcss": "8.5.15",
-      "protobufjs": "7.5.5"
-    }
-  },
   "overrides": {
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3"
