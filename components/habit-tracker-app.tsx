@@ -24,9 +24,8 @@ import {
 } from "@/lib/date";
 import { HabitDefinition } from "@/lib/habits";
 import {
-  getMatrixToneFromHex,
-  getCardGradientStyleFromHex,
-  getCardGradientStyleFromHexDark,
+  getHabitCardGradient,
+  getHabitMatrixTone,
   softFillClass,
   softFillStyle,
   softFillClassDark,
@@ -59,182 +58,6 @@ const MOBILE_DAY_WINDOW = 7;
 function getOverallRate(rates: number[]) {
   if (rates.length === 0) return 0;
   return Math.round(rates.reduce((sum, rate) => sum + rate, 0) / rates.length);
-}
-
-function getAppleCardGradient(fillClass: string) {
-  const gradients: Record<string, string> = {
-    "bg-sky-500": "from-sky-200/85 via-cyan-100/85 to-white",
-    "bg-sky-600": "from-sky-200/85 via-cyan-100/85 to-white",
-    "bg-emerald-500": "from-emerald-200/85 via-lime-100/85 to-white",
-    "bg-emerald-600": "from-emerald-200/85 via-lime-100/85 to-white",
-    "bg-violet-500": "from-violet-200/85 via-fuchsia-100/85 to-white",
-    "bg-violet-600": "from-violet-200/85 via-fuchsia-100/85 to-white",
-    "bg-amber-500": "from-amber-200/90 via-orange-100/85 to-white",
-    "bg-amber-600": "from-amber-200/90 via-orange-100/85 to-white",
-    "bg-rose-500": "from-rose-200/85 via-pink-100/85 to-white",
-    "bg-rose-600": "from-rose-200/85 via-pink-100/85 to-white",
-    "bg-teal-500": "from-teal-200/85 via-emerald-100/85 to-white",
-    "bg-teal-600": "from-teal-200/85 via-emerald-100/85 to-white",
-    "bg-indigo-500": "from-indigo-200/85 via-blue-100/85 to-white",
-    "bg-indigo-600": "from-indigo-200/85 via-blue-100/85 to-white",
-    "bg-slate-500": "from-slate-200/85 via-gray-100/85 to-white",
-    "bg-slate-600": "from-slate-200/85 via-gray-100/85 to-white",
-  };
-
-  return gradients[fillClass] ?? "from-sky-200/80 via-cyan-100/80 to-white";
-}
-
-function getAppleCardGradientDark(fillClass: string) {
-  const gradients: Record<string, string> = {
-    "bg-sky-500": "from-sky-900/60 via-sky-950/45 to-slate-950/90",
-    "bg-sky-600": "from-sky-900/60 via-sky-950/45 to-slate-950/90",
-    "bg-emerald-500": "from-emerald-900/60 via-emerald-950/45 to-slate-950/90",
-    "bg-emerald-600": "from-emerald-900/60 via-emerald-950/45 to-slate-950/90",
-    "bg-violet-500": "from-violet-900/60 via-violet-950/45 to-slate-950/90",
-    "bg-violet-600": "from-violet-900/60 via-violet-950/45 to-slate-950/90",
-    "bg-amber-500": "from-amber-900/60 via-amber-950/45 to-slate-950/90",
-    "bg-amber-600": "from-amber-900/60 via-amber-950/45 to-slate-950/90",
-    "bg-rose-500": "from-rose-900/60 via-rose-950/45 to-slate-950/90",
-    "bg-rose-600": "from-rose-900/60 via-rose-950/45 to-slate-950/90",
-    "bg-teal-500": "from-teal-900/60 via-teal-950/45 to-slate-950/90",
-    "bg-teal-600": "from-teal-900/60 via-teal-950/45 to-slate-950/90",
-    "bg-indigo-500": "from-indigo-900/60 via-indigo-950/45 to-slate-950/90",
-    "bg-indigo-600": "from-indigo-900/60 via-indigo-950/45 to-slate-950/90",
-    "bg-slate-500": "from-slate-800/70 via-slate-900/55 to-slate-950/90",
-    "bg-slate-600": "from-slate-800/70 via-slate-900/55 to-slate-950/90",
-  };
-  return gradients[fillClass] ?? "from-sky-900/60 via-sky-950/45 to-slate-950/90";
-}
-
-function getAppleCardGradientStyle(
-  tone: { fill: string; hex?: string },
-  isDark: boolean,
-): {
-  className?: string;
-  style?: React.CSSProperties;
-} {
-  if (tone.hex) {
-    return {
-      style: isDark
-        ? getCardGradientStyleFromHexDark(tone.hex)
-        : getCardGradientStyleFromHex(tone.hex),
-    };
-  }
-  const gradient = isDark
-    ? getAppleCardGradientDark(tone.fill)
-    : getAppleCardGradient(tone.fill);
-  return { className: `bg-linear-to-br ${gradient}` };
-}
-
-function getMatrixTone(fillClass: string) {
-  const tones: Record<
-    string,
-    { cellTint: string; fill: string; glow: string; partial: string }
-  > = {
-    "bg-sky-500": {
-      cellTint: "rgba(14, 165, 233, 0.12)",
-      fill: "#0284c7",
-      glow: "rgba(2, 132, 199, 0.28)",
-      partial: "rgba(2, 132, 199, 0.16)",
-    },
-    "bg-sky-600": {
-      cellTint: "rgba(14, 165, 233, 0.12)",
-      fill: "#0284c7",
-      glow: "rgba(2, 132, 199, 0.28)",
-      partial: "rgba(2, 132, 199, 0.16)",
-    },
-    "bg-emerald-500": {
-      cellTint: "rgba(16, 185, 129, 0.12)",
-      fill: "#059669",
-      glow: "rgba(5, 150, 105, 0.28)",
-      partial: "rgba(5, 150, 105, 0.16)",
-    },
-    "bg-emerald-600": {
-      cellTint: "rgba(16, 185, 129, 0.12)",
-      fill: "#059669",
-      glow: "rgba(5, 150, 105, 0.28)",
-      partial: "rgba(5, 150, 105, 0.16)",
-    },
-    "bg-violet-500": {
-      cellTint: "rgba(139, 92, 246, 0.12)",
-      fill: "#7c3aed",
-      glow: "rgba(124, 58, 237, 0.28)",
-      partial: "rgba(124, 58, 237, 0.16)",
-    },
-    "bg-violet-600": {
-      cellTint: "rgba(139, 92, 246, 0.12)",
-      fill: "#7c3aed",
-      glow: "rgba(124, 58, 237, 0.28)",
-      partial: "rgba(124, 58, 237, 0.16)",
-    },
-    "bg-amber-500": {
-      cellTint: "rgba(245, 158, 11, 0.14)",
-      fill: "#d97706",
-      glow: "rgba(217, 119, 6, 0.28)",
-      partial: "rgba(217, 119, 6, 0.16)",
-    },
-    "bg-amber-600": {
-      cellTint: "rgba(245, 158, 11, 0.14)",
-      fill: "#d97706",
-      glow: "rgba(217, 119, 6, 0.28)",
-      partial: "rgba(217, 119, 6, 0.16)",
-    },
-    "bg-rose-500": {
-      cellTint: "rgba(244, 63, 94, 0.12)",
-      fill: "#e11d48",
-      glow: "rgba(225, 29, 72, 0.28)",
-      partial: "rgba(225, 29, 72, 0.16)",
-    },
-    "bg-rose-600": {
-      cellTint: "rgba(244, 63, 94, 0.12)",
-      fill: "#e11d48",
-      glow: "rgba(225, 29, 72, 0.28)",
-      partial: "rgba(225, 29, 72, 0.16)",
-    },
-    "bg-teal-500": {
-      cellTint: "rgba(13, 148, 136, 0.12)",
-      fill: "#0f766e",
-      glow: "rgba(15, 118, 110, 0.28)",
-      partial: "rgba(15, 118, 110, 0.16)",
-    },
-    "bg-teal-600": {
-      cellTint: "rgba(13, 148, 136, 0.12)",
-      fill: "#0f766e",
-      glow: "rgba(15, 118, 110, 0.28)",
-      partial: "rgba(15, 118, 110, 0.16)",
-    },
-    "bg-indigo-500": {
-      cellTint: "rgba(99, 102, 241, 0.12)",
-      fill: "#4f46e5",
-      glow: "rgba(79, 70, 229, 0.28)",
-      partial: "rgba(79, 70, 229, 0.16)",
-    },
-    "bg-indigo-600": {
-      cellTint: "rgba(99, 102, 241, 0.12)",
-      fill: "#4f46e5",
-      glow: "rgba(79, 70, 229, 0.28)",
-      partial: "rgba(79, 70, 229, 0.16)",
-    },
-    "bg-slate-500": {
-      cellTint: "rgba(71, 85, 105, 0.12)",
-      fill: "#475569",
-      glow: "rgba(71, 85, 105, 0.28)",
-      partial: "rgba(71, 85, 105, 0.16)",
-    },
-    "bg-slate-600": {
-      cellTint: "rgba(71, 85, 105, 0.12)",
-      fill: "#475569",
-      glow: "rgba(71, 85, 105, 0.28)",
-      partial: "rgba(71, 85, 105, 0.16)",
-    },
-  };
-
-  return tones[fillClass] ?? tones["bg-sky-600"];
-}
-
-function resolveMatrixTone(tone: { fill: string; hex?: string }) {
-  if (tone.hex) return getMatrixToneFromHex(tone.hex);
-  return getMatrixTone(tone.fill);
 }
 
 function getMobileRangeLabel(range: { from: string; to: string }) {
@@ -763,7 +586,7 @@ export function HabitTrackerApp() {
 
               <div className="mt-3 space-y-2.5">
                 {orderedActiveHabits.map((habit, habitIndex) => {
-                  const matrixTone = resolveMatrixTone(habit.tone);
+                  const matrixTone = getHabitMatrixTone(habit.tone);
                   const mobileRate = completionRate(
                     records,
                     habit.id,
@@ -1088,7 +911,7 @@ export function HabitTrackerApp() {
                       const isLastRow = rowIndex === gridRows.length - 1;
                       const displaySlotName =
                         rowType === "slot" ? slotName : null;
-                      const matrixTone = resolveMatrixTone(habit.tone);
+                      const matrixTone = getHabitMatrixTone(habit.tone);
                       const isDraggedItem = dragHabitId === habit.id;
                       const isDragTarget =
                         dragOverHabitId === habit.id && isFirstSlot;
@@ -1382,7 +1205,7 @@ export function HabitTrackerApp() {
             {/* Habit cards */}
             <section className="stagger-children grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
               {habitSummaries.map(({ habit, completed, rate }) => {
-                const cardGradient = getAppleCardGradientStyle(habit.tone, isDark);
+                const cardGradient = getHabitCardGradient(habit.tone, isDark);
                 return (
                   <Link
                     key={habit.id}

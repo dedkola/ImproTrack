@@ -110,6 +110,150 @@ export function clampHex(hex: string): string {
 
 const WHITE_SURFACE = "from-white via-white to-white";
 
+const PRESET_CARD_GRADIENTS: Record<string, string> = {
+  "bg-sky-500": "from-sky-200/85 via-cyan-100/85 to-white",
+  "bg-sky-600": "from-sky-200/85 via-cyan-100/85 to-white",
+  "bg-emerald-500": "from-emerald-200/85 via-lime-100/85 to-white",
+  "bg-emerald-600": "from-emerald-200/85 via-lime-100/85 to-white",
+  "bg-violet-500": "from-violet-200/85 via-fuchsia-100/85 to-white",
+  "bg-violet-600": "from-violet-200/85 via-fuchsia-100/85 to-white",
+  "bg-amber-500": "from-amber-200/90 via-orange-100/85 to-white",
+  "bg-amber-600": "from-amber-200/90 via-orange-100/85 to-white",
+  "bg-rose-500": "from-rose-200/85 via-pink-100/85 to-white",
+  "bg-rose-600": "from-rose-200/85 via-pink-100/85 to-white",
+  "bg-teal-500": "from-teal-200/85 via-emerald-100/85 to-white",
+  "bg-teal-600": "from-teal-200/85 via-emerald-100/85 to-white",
+  "bg-indigo-500": "from-indigo-200/85 via-blue-100/85 to-white",
+  "bg-indigo-600": "from-indigo-200/85 via-blue-100/85 to-white",
+  "bg-slate-500": "from-slate-200/85 via-gray-100/85 to-white",
+  "bg-slate-600": "from-slate-200/85 via-gray-100/85 to-white",
+};
+
+const PRESET_CARD_GRADIENTS_DARK: Record<string, string> = {
+  "bg-sky-500": "from-sky-900/60 via-sky-950/45 to-slate-950/90",
+  "bg-sky-600": "from-sky-900/60 via-sky-950/45 to-slate-950/90",
+  "bg-emerald-500": "from-emerald-900/60 via-emerald-950/45 to-slate-950/90",
+  "bg-emerald-600": "from-emerald-900/60 via-emerald-950/45 to-slate-950/90",
+  "bg-violet-500": "from-violet-900/60 via-violet-950/45 to-slate-950/90",
+  "bg-violet-600": "from-violet-900/60 via-violet-950/45 to-slate-950/90",
+  "bg-amber-500": "from-amber-900/60 via-amber-950/45 to-slate-950/90",
+  "bg-amber-600": "from-amber-900/60 via-amber-950/45 to-slate-950/90",
+  "bg-rose-500": "from-rose-900/60 via-rose-950/45 to-slate-950/90",
+  "bg-rose-600": "from-rose-900/60 via-rose-950/45 to-slate-950/90",
+  "bg-teal-500": "from-teal-900/60 via-teal-950/45 to-slate-950/90",
+  "bg-teal-600": "from-teal-900/60 via-teal-950/45 to-slate-950/90",
+  "bg-indigo-500": "from-indigo-900/60 via-indigo-950/45 to-slate-950/90",
+  "bg-indigo-600": "from-indigo-900/60 via-indigo-950/45 to-slate-950/90",
+  "bg-slate-500": "from-slate-800/70 via-slate-900/55 to-slate-950/90",
+  "bg-slate-600": "from-slate-800/70 via-slate-900/55 to-slate-950/90",
+};
+
+export type MatrixTone = {
+  cellTint: string;
+  fill: string;
+  glow: string;
+  partial: string;
+};
+
+const PRESET_MATRIX_TONES: Record<string, MatrixTone> = {
+  "bg-sky-500": {
+    cellTint: "rgba(14, 165, 233, 0.12)",
+    fill: "#0284c7",
+    glow: "rgba(2, 132, 199, 0.28)",
+    partial: "rgba(2, 132, 199, 0.16)",
+  },
+  "bg-sky-600": {
+    cellTint: "rgba(14, 165, 233, 0.12)",
+    fill: "#0284c7",
+    glow: "rgba(2, 132, 199, 0.28)",
+    partial: "rgba(2, 132, 199, 0.16)",
+  },
+  "bg-emerald-500": {
+    cellTint: "rgba(16, 185, 129, 0.12)",
+    fill: "#059669",
+    glow: "rgba(5, 150, 105, 0.28)",
+    partial: "rgba(5, 150, 105, 0.16)",
+  },
+  "bg-emerald-600": {
+    cellTint: "rgba(16, 185, 129, 0.12)",
+    fill: "#059669",
+    glow: "rgba(5, 150, 105, 0.28)",
+    partial: "rgba(5, 150, 105, 0.16)",
+  },
+  "bg-violet-500": {
+    cellTint: "rgba(139, 92, 246, 0.12)",
+    fill: "#7c3aed",
+    glow: "rgba(124, 58, 237, 0.28)",
+    partial: "rgba(124, 58, 237, 0.16)",
+  },
+  "bg-violet-600": {
+    cellTint: "rgba(139, 92, 246, 0.12)",
+    fill: "#7c3aed",
+    glow: "rgba(124, 58, 237, 0.28)",
+    partial: "rgba(124, 58, 237, 0.16)",
+  },
+  "bg-amber-500": {
+    cellTint: "rgba(245, 158, 11, 0.14)",
+    fill: "#d97706",
+    glow: "rgba(217, 119, 6, 0.28)",
+    partial: "rgba(217, 119, 6, 0.16)",
+  },
+  "bg-amber-600": {
+    cellTint: "rgba(245, 158, 11, 0.14)",
+    fill: "#d97706",
+    glow: "rgba(217, 119, 6, 0.28)",
+    partial: "rgba(217, 119, 6, 0.16)",
+  },
+  "bg-rose-500": {
+    cellTint: "rgba(244, 63, 94, 0.12)",
+    fill: "#e11d48",
+    glow: "rgba(225, 29, 72, 0.28)",
+    partial: "rgba(225, 29, 72, 0.16)",
+  },
+  "bg-rose-600": {
+    cellTint: "rgba(244, 63, 94, 0.12)",
+    fill: "#e11d48",
+    glow: "rgba(225, 29, 72, 0.28)",
+    partial: "rgba(225, 29, 72, 0.16)",
+  },
+  "bg-teal-500": {
+    cellTint: "rgba(13, 148, 136, 0.12)",
+    fill: "#0f766e",
+    glow: "rgba(15, 118, 110, 0.28)",
+    partial: "rgba(15, 118, 110, 0.16)",
+  },
+  "bg-teal-600": {
+    cellTint: "rgba(13, 148, 136, 0.12)",
+    fill: "#0f766e",
+    glow: "rgba(15, 118, 110, 0.28)",
+    partial: "rgba(15, 118, 110, 0.16)",
+  },
+  "bg-indigo-500": {
+    cellTint: "rgba(99, 102, 241, 0.12)",
+    fill: "#4f46e5",
+    glow: "rgba(79, 70, 229, 0.28)",
+    partial: "rgba(79, 70, 229, 0.16)",
+  },
+  "bg-indigo-600": {
+    cellTint: "rgba(99, 102, 241, 0.12)",
+    fill: "#4f46e5",
+    glow: "rgba(79, 70, 229, 0.28)",
+    partial: "rgba(79, 70, 229, 0.16)",
+  },
+  "bg-slate-500": {
+    cellTint: "rgba(71, 85, 105, 0.12)",
+    fill: "#475569",
+    glow: "rgba(71, 85, 105, 0.28)",
+    partial: "rgba(71, 85, 105, 0.16)",
+  },
+  "bg-slate-600": {
+    cellTint: "rgba(71, 85, 105, 0.12)",
+    fill: "#475569",
+    glow: "rgba(71, 85, 105, 0.28)",
+    partial: "rgba(71, 85, 105, 0.16)",
+  },
+};
+
 export function buildToneFromHex(hex: string): HabitTone {
   const normalized = hex.toLowerCase();
   return {
@@ -166,6 +310,38 @@ export function getChartColorsFromHex(hex: string): {
   stroke: string;
 } {
   return { fill: hex, stroke: hex };
+}
+
+export function getHabitCardGradient(
+  tone: HabitTone,
+  isDark: boolean,
+): { className?: string; style?: React.CSSProperties } {
+  if (tone.hex) {
+    return {
+      style: isDark
+        ? getCardGradientStyleFromHexDark(tone.hex)
+        : getCardGradientStyleFromHex(tone.hex),
+    };
+  }
+
+  const gradientMap = isDark
+    ? PRESET_CARD_GRADIENTS_DARK
+    : PRESET_CARD_GRADIENTS;
+  const fallback = isDark
+    ? "from-sky-900/60 via-sky-950/45 to-slate-950/90"
+    : "from-sky-200/80 via-cyan-100/80 to-white";
+
+  return {
+    className: `bg-linear-to-br ${gradientMap[tone.fill] ?? fallback}`,
+  };
+}
+
+export function getHabitMatrixTone(tone: HabitTone): MatrixTone {
+  if (tone.hex) {
+    return getMatrixToneFromHex(tone.hex);
+  }
+
+  return PRESET_MATRIX_TONES[tone.fill] ?? PRESET_MATRIX_TONES["bg-sky-600"];
 }
 
 // ---- Rendering prop helpers ------------------------------------------------

@@ -857,3 +857,15 @@ export const SEO_PAGES_BY_SLUG = SEO_PAGES.reduce(
   },
   {} as Record<SeoPageSlug, SeoPage>,
 );
+
+export const SEO_PAGES_BY_PATH_SEGMENT = SEO_PAGES.reduce(
+  (pages, page) => {
+    pages[page.path.slice(1)] = page;
+    return pages;
+  },
+  {} as Record<string, SeoPage>,
+);
+
+export function getSeoPageByPathSegment(pathSegment: string) {
+  return SEO_PAGES_BY_PATH_SEGMENT[pathSegment];
+}
