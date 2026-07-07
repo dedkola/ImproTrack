@@ -12,6 +12,15 @@ import {
 } from "react";
 import { useFirebaseAuth } from "@/components/firebase-auth-provider";
 import {
+  createBootstrapError,
+  createListenerIssue,
+  createMutationIssue,
+  getErroredFullHistoryState,
+  getIdleFullHistoryState,
+  getLoadingFullHistoryState,
+  getReadyFullHistoryState,
+} from "@/lib/storage-errors";
+import {
   deleteUserHabit,
   fetchAllRecords,
   fetchRecordsInRange,
@@ -24,12 +33,33 @@ import {
 import {
   getNormalizedFrequency,
   HabitDefinition,
-  HabitTone,
-  normalizeSlotKey,
   normalizeTimeSlots,
-  TONE_PRESETS,
   slugify,
 } from "@/lib/habits";
+import {
+  getNextSortOrder,
+  normalizeHabits,
+  normalizeTone,
+  sortHabits,
+} from "@/lib/storage-habit-normalization";
+import {
+  areSlotRecordsEqual,
+  getPendingPatchKey,
+  mergePendingRecordPatches,
+  mergeRecordLayers,
+  resolveSlotValue,
+  upsertDaySlots,
+  parsePendingPatchKey,
+} from "@/lib/storage-records";
+import type {
+  HabitMutationInput,
+  HabitRecords,
+  HabitStorageBootstrapError,
+  HabitStorageFullHistoryState,
+  HabitStorageSyncIssue,
+  HabitStorageSyncState,
+  PendingRecordPatches,
+} from "@/lib/storage-types";
 import {
   endOfMonth,
   startOfMonth,
@@ -38,173 +68,18 @@ import {
   yearMonthFromDateKey,
 } from "@/lib/date";
 
-export type SlotRecords = Record<string, boolean>;
-export type DayRecords = Record<string, SlotRecords>;
-export type HabitRecords = Record<string, DayRecords>;
-type PendingRecordPatches = Record<string, SlotRecords>;
-
-function resolveSlotValue(
-  daySlots: SlotRecords | undefined,
-  slotName: string,
-  options?: { fallbackToAny?: boolean },
-) {
-  if (!daySlots) return false;
-
-  if (typeof daySlots[slotName] === "boolean") {
-    return daySlots[slotName];
-  }
-
-  const normalizedTarget = normalizeSlotKey(slotName);
-  const normalizedEntry = Object.entries(daySlots).find(
-    ([key]) => normalizeSlotKey(key) === normalizedTarget,
-  );
-
-  if (normalizedEntry) {
-    return Boolean(normalizedEntry[1]);
-  }
-
-  if (options?.fallbackToAny) {
-    return Object.values(daySlots).some(Boolean);
-  }
-
-  return false;
-}
-
-function getPendingPatchKey(habitId: string, dateKey: string) {
-  return `${habitId}::${dateKey}`;
-}
-
-function parsePendingPatchKey(patchKey: string) {
-  const separatorIndex = patchKey.lastIndexOf("::");
-
-  return {
-    habitId: patchKey.slice(0, separatorIndex),
-    dateKey: patchKey.slice(separatorIndex + 2),
-  };
-}
-
-function areSlotRecordsEqual(
-  left: SlotRecords | undefined,
-  right: SlotRecords,
-) {
-  if (!left) {
-    return false;
-  }
-
-  const keys = new Set([...Object.keys(left), ...Object.keys(right)]);
-
-  return Array.from(keys).every(
-    (key) => Boolean(left[key]) === Boolean(right[key]),
-  );
-}
-
-function mergePendingRecordPatches(
-  records: HabitRecords,
-  patches: PendingRecordPatches,
-) {
-  return Object.entries(patches).reduce((nextRecords, [patchKey, slots]) => {
-    const { habitId, dateKey } = parsePendingPatchKey(patchKey);
-    return upsertDaySlots(nextRecords, habitId, dateKey, slots);
-  }, records);
-}
-
-function upsertDaySlots(
-  current: HabitRecords,
-  habitId: string,
-  dateKey: string,
-  slots: SlotRecords,
-): HabitRecords {
-  const nextHabitDays = {
-    ...(current[habitId] ?? {}),
-    [dateKey]: slots,
-  };
-
-  return {
-    ...current,
-    [habitId]: nextHabitDays,
-  };
-}
-
-function mergeRecordLayers(
-  base: HabitRecords,
-  ...layers: HabitRecords[]
-): HabitRecords {
-  const merged = { ...base };
-
-  for (const layer of layers) {
-    for (const [habitId, dayRecords] of Object.entries(layer)) {
-      merged[habitId] = { ...(merged[habitId] ?? {}), ...dayRecords };
-    }
-  }
-
-  return merged;
-}
-
-type HabitMutationInput = Omit<
-  HabitDefinition,
-  "id" | "slug" | "createdAt" | "archived"
->;
-
-type BootstrapErrorSource = "habits" | "records";
-
-export type HabitStorageBootstrapError = {
-  source: BootstrapErrorSource;
-  message: string;
-};
-
-export type HabitStorageMutationKind =
-  | "add-habit"
-  | "update-habit"
-  | "delete-habit"
-  | "archive-habit"
-  | "restore-habit"
-  | "reorder-habits"
-  | "toggle-record";
-
-export type HabitStorageMutationError = {
-  kind: "mutation";
-  mutation: HabitStorageMutationKind;
-  message: string;
-};
-
-export type HabitStorageSyncIssue =
-  | HabitStorageMutationError
-  | {
-      kind: "listener";
-      source: BootstrapErrorSource;
-      message: string;
-    };
-
-export type HabitStorageSyncState = {
-  isSyncing: boolean;
-  pendingMutationCount: number;
-  pendingRecordCount: number;
-  latestIssue: HabitStorageSyncIssue | null;
-  latestMutationError: HabitStorageMutationError | null;
-  isRecordPending: (habitId: string, dateKey: string) => boolean;
-};
-
-export type HabitStorageFullHistoryState =
-  | {
-      status: "idle";
-      hasFullHistory: false;
-      error: null;
-    }
-  | {
-      status: "loading";
-      hasFullHistory: false;
-      error: null;
-    }
-  | {
-      status: "ready";
-      hasFullHistory: true;
-      error: null;
-    }
-  | {
-      status: "error";
-      hasFullHistory: false;
-      error: string;
-    };
+export type {
+  DayRecords,
+  HabitMutationInput,
+  HabitRecords,
+  HabitStorageBootstrapError,
+  HabitStorageFullHistoryState,
+  HabitStorageMutationError,
+  HabitStorageMutationKind,
+  HabitStorageSyncIssue,
+  HabitStorageSyncState,
+  SlotRecords,
+} from "@/lib/storage-types";
 
 type HabitStorageContextValue = {
   habits: HabitDefinition[];
@@ -237,186 +112,6 @@ type HabitStorageContextValue = {
 const HabitStorageContext = createContext<HabitStorageContextValue | undefined>(
   undefined,
 );
-
-const LEGACY_FILL_TO_CURRENT: Record<string, string> = {
-  "bg-sky-500": "bg-sky-600",
-  "bg-emerald-500": "bg-emerald-600",
-  "bg-violet-500": "bg-violet-600",
-  "bg-amber-500": "bg-amber-600",
-  "bg-rose-500": "bg-rose-600",
-  "bg-teal-500": "bg-teal-600",
-  "bg-indigo-500": "bg-indigo-600",
-  "bg-slate-500": "bg-slate-600",
-};
-
-const TONE_BY_FILL = new Map<string, HabitTone>(
-  TONE_PRESETS.map((preset) => [preset.tone.fill, preset.tone]),
-);
-
-function normalizeTone(tone: HabitTone | undefined): HabitTone {
-  if (!tone) return TONE_PRESETS[0].tone;
-
-  // Custom hex tones bypass preset normalization
-  if (tone.hex) return tone;
-
-  const normalizedFill = LEGACY_FILL_TO_CURRENT[tone.fill] ?? tone.fill;
-  const mappedByFill = TONE_BY_FILL.get(normalizedFill);
-  if (mappedByFill) return mappedByFill;
-
-  const family = tone.accent.match(/text-([a-z]+)-\d+/)?.[1];
-  if (family) {
-    const mappedByFamily = TONE_PRESETS.find((preset) =>
-      preset.tone.accent.startsWith(`text-${family}-`),
-    )?.tone;
-    if (mappedByFamily) return mappedByFamily;
-  }
-
-  return TONE_PRESETS[0].tone;
-}
-
-function normalizeHabits(habits: HabitDefinition[]): HabitDefinition[] {
-  return habits.map((habit) => ({
-    ...habit,
-    frequencyPerDay: getNormalizedFrequency(
-      habit.frequencyPerDay,
-      habit.timeSlots,
-    ),
-    timeSlots: normalizeTimeSlots(
-      getNormalizedFrequency(habit.frequencyPerDay, habit.timeSlots),
-      habit.timeSlots,
-    ),
-    ...(Number.isFinite(habit.sortOrder) ? { sortOrder: habit.sortOrder } : {}),
-    tone: normalizeTone(habit.tone),
-  }));
-}
-
-function sortHabits(habits: HabitDefinition[]) {
-  return [...habits].sort((left, right) => {
-    const leftSortOrder =
-      typeof left.sortOrder === "number" && Number.isFinite(left.sortOrder)
-        ? left.sortOrder
-        : null;
-    const rightSortOrder =
-      typeof right.sortOrder === "number" && Number.isFinite(right.sortOrder)
-        ? right.sortOrder
-        : null;
-
-    if (leftSortOrder !== null && rightSortOrder !== null) {
-      if (leftSortOrder !== rightSortOrder) {
-        return leftSortOrder - rightSortOrder;
-      }
-    } else if (leftSortOrder !== null) {
-      return -1;
-    } else if (rightSortOrder !== null) {
-      return 1;
-    }
-
-    if (left.createdAt !== right.createdAt) {
-      return left.createdAt.localeCompare(right.createdAt);
-    }
-
-    return left.id.localeCompare(right.id);
-  });
-}
-
-function getNextSortOrder(habits: HabitDefinition[]) {
-  const maxSortOrder = habits.reduce<number>(
-    (maxValue, habit) =>
-      typeof habit.sortOrder === "number" && Number.isFinite(habit.sortOrder)
-        ? Math.max(maxValue, habit.sortOrder)
-        : maxValue,
-    -1,
-  );
-
-  return maxSortOrder + 1;
-}
-
-function toErrorMessage(error: unknown, fallback: string) {
-  if (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    error.code === "permission-denied"
-  ) {
-    return "Firestore rejected the request. Publish your Firestore rules, then sign out and sign back in once to refresh the session.";
-  }
-
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-
-  return fallback;
-}
-
-function createBootstrapError(
-  source: BootstrapErrorSource,
-  error: unknown,
-  fallback: string,
-): HabitStorageBootstrapError {
-  return {
-    source,
-    message: toErrorMessage(error, fallback),
-  };
-}
-
-function createListenerIssue(
-  source: BootstrapErrorSource,
-  error: unknown,
-  fallback: string,
-): HabitStorageSyncIssue {
-  return {
-    kind: "listener",
-    source,
-    message: toErrorMessage(error, fallback),
-  };
-}
-
-function createMutationIssue(
-  mutation: HabitStorageMutationKind,
-  error: unknown,
-  fallback: string,
-): HabitStorageMutationError {
-  return {
-    kind: "mutation",
-    mutation,
-    message: toErrorMessage(error, fallback),
-  };
-}
-
-function getIdleFullHistoryState(): HabitStorageFullHistoryState {
-  return {
-    status: "idle",
-    hasFullHistory: false,
-    error: null,
-  };
-}
-
-function getLoadingFullHistoryState(): HabitStorageFullHistoryState {
-  return {
-    status: "loading",
-    hasFullHistory: false,
-    error: null,
-  };
-}
-
-function getReadyFullHistoryState(): HabitStorageFullHistoryState {
-  return {
-    status: "ready",
-    hasFullHistory: true,
-    error: null,
-  };
-}
-
-function getErroredFullHistoryState(
-  error: unknown,
-  fallback: string,
-): HabitStorageFullHistoryState {
-  return {
-    status: "error",
-    hasFullHistory: false,
-    error: toErrorMessage(error, fallback),
-  };
-}
 
 function useHabitStorageContext() {
   const context = useContext(HabitStorageContext);
