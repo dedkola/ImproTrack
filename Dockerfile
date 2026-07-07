@@ -6,7 +6,7 @@ WORKDIR /app
 RUN npm install -g pnpm@11.1.0
 
 ENV NODE_ENV=development
-COPY pnpm-lock.yaml package.json ./
+COPY pnpm-lock.yaml package.json pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile --ignore-scripts
 COPY . .
 EXPOSE 3000
