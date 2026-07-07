@@ -1,5 +1,5 @@
 # Development Dockerfile for ImproTrack
-FROM node:22-alpine
+FROM node:26-alpine
 WORKDIR /app
 
 # Install pnpm via npm instead of corepack (more reliable in Alpine)
