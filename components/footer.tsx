@@ -50,7 +50,7 @@ export function Footer() {
         </div>
         <div className="flex items-center gap-2 sm:justify-end">
           <a
-            href="https://github.com/kolasokol/ImproTrack"
+            href="https://github.com/dedkola/ImproTrack"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="GitHub repository"
