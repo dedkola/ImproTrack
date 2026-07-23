@@ -347,8 +347,6 @@ export function HabitTrackerApp() {
         activeHabitCount={activeHabits.length}
         averageRate={averageRate}
         totalCompleted={totalCompleted}
-        mobileRangeLabel={mobileRangeLabel}
-        desktopRangeLabel={desktopRangeLabel}
         onAddHabit={openNewHabitForm}
       />
 

@@ -181,12 +181,12 @@ export function ProfileSettingsCard({
     .charAt(0)
     .toUpperCase();
   const actionButtonClassName =
-    "pill-btn inline-flex min-h-10 items-center justify-center rounded-xl border border-black/[0.06] bg-white px-3.5 py-2.5 text-[12px] font-semibold text-ink-950 shadow-[var(--shadow-card)] transition-all hover:shadow-[var(--shadow-card-hover)]";
+    "pill-btn inline-flex min-h-10 items-center justify-center rounded-xl border border-black/[0.08] bg-white px-3 py-2 text-[12px] font-semibold text-ink-950 transition-colors hover:bg-black/[0.025]";
 
   const containerClassName =
     variant === "modal"
       ? "relative w-full max-w-sm rounded-2xl border border-black/[0.06] bg-white p-6 shadow-[0_8px_40px_rgba(0,0,0,0.14)]"
-      : "surface-panel rounded-[28px] p-4 sm:p-6";
+      : "surface-panel min-w-0 overflow-hidden rounded-[20px] p-4 sm:p-5";
 
   return (
     <section className={containerClassName}>
@@ -195,9 +195,11 @@ export function ProfileSettingsCard({
           <h2 className="font-display text-[18px] font-semibold tracking-tight text-ink-950 sm:text-[20px]">
             {resolvedTitle}
           </h2>
-          <p className="mt-1 text-[13px] leading-6 text-ink-700">
-            {resolvedDescription}
-          </p>
+          {resolvedDescription ? (
+            <p className="mt-1 text-[13px] leading-6 text-ink-700">
+              {resolvedDescription}
+            </p>
+          ) : null}
         </div>
         {onClose ? (
           <button
@@ -211,18 +213,18 @@ export function ProfileSettingsCard({
         ) : null}
       </div>
 
-      <div className="mt-5 flex flex-col gap-5 sm:mt-6 sm:gap-6">
-        <div className="rounded-[26px] border border-black/[0.06] bg-white px-3.5 py-3.5 shadow-[var(--shadow-card)] sm:px-5 sm:py-5">
-          <div className="flex flex-col gap-3.5 sm:flex-row sm:items-center sm:gap-5">
-            <div className="relative mx-auto group sm:mx-0">
+      <div className="mt-4 flex flex-col gap-4 sm:mt-5">
+        <div>
+          <div className="flex items-center gap-4">
+            <div className="group relative shrink-0">
               {previewUrl ? (
                 <img
                   src={previewUrl}
                   alt={t("profile_avatar_alt")}
-                  className="h-20 w-20 rounded-[22px] border border-black/[0.08] object-cover sm:h-24 sm:w-24 sm:rounded-[24px]"
+                  className="h-16 w-16 rounded-[18px] border border-black/[0.08] object-cover sm:h-[4.5rem] sm:w-[4.5rem]"
                 />
               ) : (
-                <div className="flex h-20 w-20 select-none items-center justify-center rounded-[22px] bg-linear-to-br from-[#6D28D9] to-[#C026D3] text-[26px] font-semibold text-white sm:h-24 sm:w-24 sm:rounded-[24px] sm:text-[30px]">
+                <div className="primary-action flex h-16 w-16 select-none items-center justify-center rounded-[18px] text-[24px] font-semibold sm:h-[4.5rem] sm:w-[4.5rem] sm:text-[26px]">
                   {initial}
                 </div>
               )}
@@ -230,38 +232,27 @@ export function ProfileSettingsCard({
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 aria-label={t("profile_upload_avatar")}
-                className="absolute inset-0 flex items-center justify-center rounded-[22px] bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 sm:rounded-[24px]"
+                className="absolute inset-0 flex items-center justify-center rounded-[18px] bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
               >
                 <Upload className="h-5 w-5 text-white" strokeWidth={1.5} />
               </button>
             </div>
 
-            <div className="min-w-0 flex-1 text-center sm:text-left">
-              <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
-                <span className="rounded-full bg-ink-950/[0.05] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-700">
-                  {t("profile_google_account")}
-                </span>
-                <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-ink-950 shadow-[var(--shadow-card)]">
-                  {t("profile_synced_profile")}
-                </span>
-              </div>
-              <p className="mt-2.5 text-[15px] font-semibold text-ink-950 sm:mt-3 sm:text-[16px]">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[15px] font-semibold text-ink-950 sm:text-[16px]">
                 {displayName.trim() || user?.displayName || t("profile_your_profile")}
               </p>
-              <p className="mt-1 text-[13px] text-ink-600">
+              <p className="mt-1 truncate text-[13px] text-ink-600">
                 {user?.email ?? t("profile_signed_in_account")}
-              </p>
-              <p className="mt-2 text-[12px] leading-5 text-ink-600">
-                {t("profile_keep_same")}
               </p>
             </div>
           </div>
 
-          <div className="comparison-scroll -mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:mt-4 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
+          <div className="comparison-scroll -mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className={`${actionButtonClassName} shrink-0 text-[#6D28D9]`}
+              className={`${actionButtonClassName} shrink-0`}
             >
               {t("profile_upload_photo")}
             </button>
@@ -295,10 +286,10 @@ export function ProfileSettingsCard({
           />
         </div>
 
-        <div className="rounded-[24px] border border-black/[0.06] bg-white px-3.5 py-3.5 shadow-[var(--shadow-card)] sm:px-4 sm:py-4">
+        <div className="border-t border-black/[0.06] pt-4">
           <label
             htmlFor={`profile-display-name-${variant}`}
-            className="mb-1.5 block text-[12px] font-semibold uppercase tracking-[0.16em] text-ink-600"
+            className="mb-1.5 block text-[12px] font-semibold text-ink-700"
           >
             {t("profile_display_name")}
           </label>
@@ -312,11 +303,8 @@ export function ProfileSettingsCard({
             }}
             placeholder={t("profile_your_name")}
             maxLength={60}
-            className="w-full rounded-xl border border-black/[0.1] bg-white px-3 py-3 text-[14px] text-ink-950 outline-none transition-shadow placeholder:text-ink-400 focus:border-[#6D28D9] focus:ring-2 focus:ring-[#6D28D9]/20"
+            className="w-full rounded-xl border border-black/[0.1] bg-white px-3 py-2.5 text-[14px] text-ink-950 outline-none transition-shadow placeholder:text-ink-400 focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand-soft)]"
           />
-          <p className="mt-2 text-[12px] leading-5 text-ink-600">
-            {t("profile_save_help")}
-          </p>
         </div>
 
         {error ? (
@@ -326,7 +314,7 @@ export function ProfileSettingsCard({
           <p className="text-[12px] leading-5 text-emerald-700">{success}</p>
         ) : null}
 
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
           {onClose ? (
             <button
               type="button"
@@ -340,7 +328,7 @@ export function ProfileSettingsCard({
             type="button"
             onClick={() => void handleSave()}
             disabled={isSaving || !user}
-            className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-xl bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-4 py-3 text-[13px] font-semibold text-white shadow-[0_8px_24px_rgba(109,40,217,0.32)] transition-opacity disabled:cursor-not-allowed disabled:opacity-60"
+            className="primary-action flex min-h-11 items-center justify-center gap-1.5 rounded-xl px-5 py-2.5 text-[13px] font-semibold transition-opacity disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-32"
           >
             {isSaving ? (
               <>

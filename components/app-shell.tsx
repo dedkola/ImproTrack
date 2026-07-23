@@ -147,7 +147,7 @@ function AppShellContent({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen min-w-0">
+    <div className="dashboard-frame flex min-h-screen min-w-0">
       <a
         href="#dashboard-main"
         className="sr-only z-[120] rounded-xl bg-ink-950 px-4 py-2 text-[14px] font-semibold text-white shadow-lg focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
@@ -232,4 +232,3 @@ function SyncStatusBanner({
     </div>
   );
 }
-
