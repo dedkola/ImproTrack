@@ -126,7 +126,7 @@ export function Sidebar({
               href="/dashboard"
               label={t("nav_dashboard")}
               icon={<LayoutGrid className="h-4 w-4" strokeWidth={1.5} />}
-              active={pathname === "/dashboard" || pathname.startsWith("/dashboard/habits/")}
+              active={pathname === "/dashboard"}
               onClick={closeOnMobile}
             />
           </div>
