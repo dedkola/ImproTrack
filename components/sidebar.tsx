@@ -28,9 +28,6 @@ type SidebarProps = {
   onAddHabit: () => void;
 };
 
-const THEME_INVARIANT_ACTIVE_NAV_CLASS =
-  "bg-[rgba(10,22,40,0.06)] text-[#0A1628]";
-
 export function Sidebar({
   habits,
   isOpen,
@@ -62,18 +59,18 @@ export function Sidebar({
 
       <aside
         aria-label={t("sidebar_habits")}
-        className={`fixed left-0 top-0 z-50 flex h-full w-72 flex-col border-r border-black/[0.06] bg-white/80 backdrop-blur-2xl transition-transform duration-300 ease-out lg:sticky lg:z-30 lg:translate-x-0 ${
+        className={`dashboard-sidebar fixed left-0 top-0 z-50 flex h-full w-[17rem] flex-col border-r backdrop-blur-2xl transition-transform duration-300 ease-out lg:sticky lg:z-30 lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-14 items-center justify-between border-b border-black/[0.06] px-4">
+        <div className="flex h-16 items-center justify-between border-b border-black/[0.06] px-4">
           <Link
             href="/dashboard"
             onClick={closeOnMobile}
-            className="flex items-center gap-2.5"
+            className="flex items-center gap-2.5 rounded-lg"
           >
-            <img src="/logo.svg" alt="ImproTrack" className="h-11 w-11" />
-            <span className="font-display text-[24px] font-semibold text-ink-950">
+            <img src="/logo.svg" alt="ImproTrack" className="h-8 w-8" />
+            <span className="font-display text-[18px] font-semibold tracking-tight text-ink-950">
               ImproTrack
             </span>
           </Link>
@@ -108,7 +105,7 @@ export function Sidebar({
               <button
                 type="button"
                 onClick={handleAddHabit}
-                className="pill-btn inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)]"
+                className="primary-action pill-btn inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 py-2 text-[13px] font-semibold"
               >
                 <Plus className="h-3.5 w-3.5" strokeWidth={2} />
                 {t("sidebar_add_habit")}
@@ -187,7 +184,7 @@ export function Sidebar({
                 <button
                   type="button"
                   onClick={handleAddHabit}
-                  className="pill-btn tap-target-compact mt-3 inline-flex items-center gap-2 rounded-lg bg-linear-to-r from-[#6D28D9] to-[#C026D3] px-3 py-2 text-[13px] font-semibold text-white shadow-[0_1px_3px_rgba(109,40,217,0.4)]"
+                  className="primary-action pill-btn tap-target-compact mt-3 inline-flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] font-semibold"
                 >
                   <Plus className="h-3.5 w-3.5" strokeWidth={2} />
                   {t("sidebar_create_habit")}
@@ -250,7 +247,7 @@ function NavItem({
     <div
       className={`flex min-h-10 items-center gap-2.5 rounded-lg px-2.5 py-2 text-[14px] font-medium transition-colors ${
         active
-          ? THEME_INVARIANT_ACTIVE_NAV_CLASS
+          ? "nav-item-active"
           : disabled
             ? "cursor-not-allowed text-ink-500"
             : "text-ink-700 hover:bg-black/[0.04] hover:text-ink-950"
