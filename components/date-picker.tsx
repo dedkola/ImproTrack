@@ -2,16 +2,19 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
-import {
-  addDays,
-  endOfMonth,
-  parseDateKey,
-  startOfMonth,
-  toDateKey,
-} from "@/lib/date";
+import { endOfMonth, parseDateKey, toDateKey } from "@/lib/date";
 import { useTranslation } from "@/components/i18n-provider";
 
 const WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+const MONTH_FORMATTER = new Intl.DateTimeFormat("en", {
+  month: "long",
+  year: "numeric",
+});
+const DISPLAY_FORMATTER = new Intl.DateTimeFormat("en", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+});
 
 function getMonthGrid(year: number, month: number) {
   const first = new Date(year, month, 1);
@@ -73,16 +76,8 @@ export function DatePicker({
 
   const grid = getMonthGrid(viewYear, viewMonth);
 
-  const monthLabel = new Intl.DateTimeFormat("en", {
-    month: "long",
-    year: "numeric",
-  }).format(new Date(viewYear, viewMonth, 1));
-
-  const displayLabel = new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(selected);
+  const monthLabel = MONTH_FORMATTER.format(new Date(viewYear, viewMonth, 1));
+  const displayLabel = DISPLAY_FORMATTER.format(selected);
 
   const navigateMonth = useCallback(
     (delta: number) => {

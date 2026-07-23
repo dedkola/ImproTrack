@@ -20,7 +20,6 @@ import {
 } from "firebase/firestore";
 
 type SlotRecordsMap = Record<string, boolean>;
-type HabitRecordsMap = Record<string, SlotRecordsMap>;
 type RecordsDocument = {
   entries?: Record<string, unknown>;
 };

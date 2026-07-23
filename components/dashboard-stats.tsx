@@ -55,6 +55,7 @@ const todayKey = toDateKey(today);
 const RANGE_MIN = "2025-01-01";
 const RANGE_MAX = "2030-12-31";
 const MOBILE_TREND_WINDOW = 7;
+const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 function getPresetRange(preset: Exclude<StatsPreset, "custom">) {
   if (preset === "month") {
@@ -144,6 +145,12 @@ export function DashboardStats() {
       0,
     );
 
+    const weekdayTotals = WEEKDAY_LABELS.map((label) => ({
+      label,
+      completed: 0,
+      total: 0,
+    }));
+
     const trend: DailyAggregate[] = eachDay(range).map((dateKey) => {
       const completed = filteredHabits.reduce(
         (sum, habit) =>
@@ -151,6 +158,9 @@ export function DashboardStats() {
           completedSlotsInDay(records, habit.id, dateKey, habit.timeSlots),
         0,
       );
+      const weekday = weekdayTotals[parseDateKey(dateKey).getDay()];
+      weekday.completed += completed;
+      weekday.total += totalSlotsPerDay;
 
       return {
         dateKey,
@@ -163,37 +173,12 @@ export function DashboardStats() {
       };
     });
 
-    const weekdayBuckets = [
-      "Sun",
-      "Mon",
-      "Tue",
-      "Wed",
-      "Thu",
-      "Fri",
-      "Sat",
-    ].map((label, index) => {
-      let completed = 0;
-      let total = 0;
-
-      eachDay(range).forEach((dateKey) => {
-        if (parseDateKey(dateKey).getDay() !== index) return;
-
-        filteredHabits.forEach((habit) => {
-          total += habit.timeSlots.length;
-          completed += completedSlotsInDay(
-            records,
-            habit.id,
-            dateKey,
-            habit.timeSlots,
-          );
-        });
-      });
-
-      return {
+    const weekdayBuckets = weekdayTotals.map(
+      ({ label, completed, total }) => ({
         label,
         rate: total === 0 ? 0 : Math.round((completed / total) * 100),
-      };
-    });
+      }),
+    );
 
     const bestRate = trend.reduce((best, day) => Math.max(best, day.rate), 0);
     const trendAverage = getAverage(trend.map((day) => day.rate));
