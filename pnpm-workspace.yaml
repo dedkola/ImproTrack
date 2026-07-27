@@ -1,7 +1,8 @@
 overrides:
-  "next@16.2.9>postcss": "8.5.15"
-  postcss: "8.5.15"
-  protobufjs: "7.5.5"
+  "next@16.2.9>postcss": "8.5.18"
+  postcss: "8.5.18"
+  protobufjs: "7.6.5"
+  sharp: "0.35.0"
 
 allowBuilds:
   '@firebase/util': false
