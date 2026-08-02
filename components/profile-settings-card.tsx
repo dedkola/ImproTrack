@@ -38,6 +38,7 @@ export function ProfileSettingsCard({
     user?.photoURL ?? null,
   );
   const previewImageUrl = getSafeImageUrl(previewUrl);
+  const encodedPreviewImageUrl = previewImageUrl ? encodeURI(previewImageUrl) : null;
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -219,9 +220,9 @@ export function ProfileSettingsCard({
         <div>
           <div className="flex items-center gap-4">
             <div className="group relative shrink-0">
-              {previewImageUrl ? (
+              {encodedPreviewImageUrl ? (
                 <img
-                  src={previewImageUrl}
+                  src={encodedPreviewImageUrl}
                   alt={t("profile_avatar_alt")}
                   className="h-16 w-16 rounded-[18px] border border-black/[0.08] object-cover sm:h-[4.5rem] sm:w-[4.5rem]"
                 />

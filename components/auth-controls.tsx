@@ -39,6 +39,7 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
   const photoUrl = getSafeImageUrl(user?.photoURL);
+  const encodedPhotoUrl = photoUrl ? encodeURI(photoUrl) : null;
 
   const { initial, primary, secondary } = getUserSummary({
     displayName: user?.displayName ?? null,
@@ -85,9 +86,9 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
         ) : user ? (
           <>
             <div className="flex items-center gap-3">
-              {photoUrl ? (
+              {encodedPhotoUrl ? (
                 <img
-                  src={photoUrl}
+                  src={encodedPhotoUrl}
                   alt={t("auth_profile_photo")}
                   className="h-10 w-10 rounded-xl border border-black/[0.08] object-cover"
                 />
@@ -214,9 +215,9 @@ export function AuthControls({ variant = "landing" }: AuthControlsProps) {
         ) : user ? (
           <>
             <div className="hidden items-center gap-3 rounded-lg border border-black/[0.06] bg-white/75 px-3 py-2 shadow-[var(--shadow-card)] sm:flex">
-              {photoUrl ? (
+              {encodedPhotoUrl ? (
                 <img
-                  src={photoUrl}
+                  src={encodedPhotoUrl}
                   alt={t("auth_profile_photo")}
                   className="h-8 w-8 rounded-lg object-cover border border-black/[0.08]"
                 />
