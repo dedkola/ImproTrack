@@ -6,6 +6,7 @@ import { Loader2, Upload, X } from "lucide-react";
 import { useFirebaseAuth } from "@/components/firebase-auth-provider";
 import { useTranslation } from "@/components/i18n-provider";
 import { getFirebaseAuth } from "@/lib/firebase/auth";
+import { getSafeImageUrl } from "@/lib/safe-image-url";
 import { deleteUserAvatar, uploadUserAvatar } from "@/lib/firebase/storage";
 
 type ProfileSettingsCardProps = {
@@ -36,6 +37,7 @@ export function ProfileSettingsCard({
   const [previewUrl, setPreviewUrl] = useState<string | null>(
     user?.photoURL ?? null,
   );
+  const previewImageUrl = getSafeImageUrl(previewUrl);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -217,9 +219,9 @@ export function ProfileSettingsCard({
         <div>
           <div className="flex items-center gap-4">
             <div className="group relative shrink-0">
-              {previewUrl ? (
+              {previewImageUrl ? (
                 <img
-                  src={previewUrl}
+                  src={previewImageUrl}
                   alt={t("profile_avatar_alt")}
                   className="h-16 w-16 rounded-[18px] border border-black/[0.08] object-cover sm:h-[4.5rem] sm:w-[4.5rem]"
                 />
