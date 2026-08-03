@@ -38,7 +38,17 @@ export function ProfileSettingsCard({
     user?.photoURL ?? null,
   );
   const previewImageUrl = getSafeImageUrl(previewUrl);
-  const encodedPreviewImageUrl = previewImageUrl ? encodeURI(previewImageUrl) : null;
+  const encodedPreviewImageUrl = (() => {
+    if (!previewImageUrl) {
+      return null;
+    }
+
+    try {
+      return encodeURI(previewImageUrl);
+    } catch {
+      return null;
+    }
+  })();
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);

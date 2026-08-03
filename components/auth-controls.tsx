@@ -33,13 +33,25 @@ function getErrorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
+function encodeUriSafely(url: string | null) {
+  if (!url) {
+    return null;
+  }
+
+  try {
+    return encodeURI(url);
+  } catch {
+    return null;
+  }
+}
+
 export function AuthControls({ variant = "landing" }: AuthControlsProps) {
   const { user, isLoading } = useFirebaseAuth();
   const { t } = useTranslation();
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
   const photoUrl = getSafeImageUrl(user?.photoURL);
-  const encodedPhotoUrl = photoUrl ? encodeURI(photoUrl) : null;
+  const encodedPhotoUrl = encodeUriSafely(photoUrl);
 
   const { initial, primary, secondary } = getUserSummary({
     displayName: user?.displayName ?? null,

@@ -1,5 +1,3 @@
-"use client";
-
 export function getSafeImageUrl(url: string | null | undefined): string | null {
   if (!url) {
     return null;
