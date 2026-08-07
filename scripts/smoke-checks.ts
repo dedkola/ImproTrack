@@ -5,6 +5,7 @@ import {
   SEO_PAGE_LAST_MODIFIED,
   type SeoPage,
 } from "../lib/seo-pages";
+import { getSafeImageUrl } from "../lib/safe-image-url";
 import { normalizeSiteUrl } from "../lib/site-url";
 
 function assertUnique<T>(items: T[], label: string) {
@@ -55,6 +56,26 @@ function run() {
     normalizeSiteUrl(""),
     "http://localhost:3000",
     "Empty site URLs should fall back to localhost",
+  );
+  assert.equal(
+    getSafeImageUrl("https://example.com/avatar.png"),
+    "https://example.com/avatar.png",
+    "HTTPS avatar URLs should be allowed",
+  );
+  assert.equal(
+    getSafeImageUrl("blob:https://improtrack.app/example"),
+    "blob:https://improtrack.app/example",
+    "Blob preview URLs should be allowed",
+  );
+  assert.equal(
+    getSafeImageUrl("javascript:alert(1)"),
+    null,
+    "Unsafe avatar URL schemes should be rejected",
+  );
+  assert.equal(
+    getSafeImageUrl("http://example.com/avatar.png"),
+    null,
+    "Non-HTTPS remote avatar URLs should be rejected",
   );
 
   assert.ok(
