@@ -1,8 +1,26 @@
+minimumReleaseAge: 1440
+minimumReleaseAgeExcludePrune: true
+minimumReleaseAgeExclude:
+  # Allow the 16.3.6 security release without exempting future Next.js versions.
+  - next@16.3.6
+  - eslint-config-next@16.3.6
+  - "@next/env@16.3.6"
+  - "@next/eslint-plugin-next@16.3.6"
+  - "@next/swc-darwin-arm64@16.3.6"
+  - "@next/swc-darwin-x64@16.3.6"
+  - "@next/swc-linux-arm64-gnu@16.3.6"
+  - "@next/swc-linux-arm64-musl@16.3.6"
+  - "@next/swc-linux-x64-gnu@16.3.6"
+  - "@next/swc-linux-x64-musl@16.3.6"
+  - "@next/swc-win32-arm64-msvc@16.3.6"
+  - "@next/swc-win32-x64-msvc@16.3.6"
+
 overrides:
-  "next@16.2.9>postcss": "8.5.18"
-  postcss: "8.5.18"
+  "brace-expansion@1": "1.1.18"
+  "next@16.3.6>postcss": "8.5.23"
+  postcss: "8.5.23"
   protobufjs: "7.6.5"
-  sharp: "0.35.0"
+  sharp: "0.35.4"
 
 allowBuilds:
   '@firebase/util': false
