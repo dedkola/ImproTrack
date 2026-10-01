@@ -9,8 +9,8 @@
 </p>
 
 <p align="center">
-  <a href="#stack"><img alt="Next.js 16" src="https://img.shields.io/badge/Next.js-16.2.9-black?logo=nextdotjs" /></a>
-  <a href="#stack"><img alt="React 19" src="https://img.shields.io/badge/React-19.2.5-61dafb?logo=react&logoColor=111827" /></a>
+  <a href="#stack"><img alt="Next.js 16" src="https://img.shields.io/badge/Next.js-16.3.6-black?logo=nextdotjs" /></a>
+  <a href="#stack"><img alt="React 19" src="https://img.shields.io/badge/React-19.3.0-61dafb?logo=react&logoColor=111827" /></a>
   <a href="#stack"><img alt="TypeScript 6 strict mode" src="https://img.shields.io/badge/TypeScript-6_strict-3178c6?logo=typescript&logoColor=white" /></a>
   <a href="#stack"><img alt="Tailwind CSS 4" src="https://img.shields.io/badge/Tailwind_CSS-4.3-38bdf8?logo=tailwindcss&logoColor=white" /></a>
   <a href="#license"><img alt="License file pending" src="https://img.shields.io/badge/license-file_pending-lightgrey" /></a>
@@ -53,20 +53,20 @@ ImproTrack turns daily routines into a simple visual system: tap a cell, keep th
 
 | Layer | Technology |
 | --- | --- |
-| App framework | Next.js 16.2.9 App Router |
-| UI runtime | React 19 |
+| App framework | Next.js 16.3.6 App Router |
+| UI runtime | React 19.3.0 |
 | Language | TypeScript 6 strict mode |
 | Styling | Tailwind CSS v4 |
 | Auth and data | Firebase Auth, Firestore, Firebase Storage helpers |
 | Localization | 17 locales via the client-side i18n provider |
-| Analytics | Vercel Analytics and Speed Insights |
-| Package manager | pnpm 11.1.0 |
-| Runtime | Node.js 22 |
+| Analytics | Vercel Analytics and Speed Insights; optional Firebase Analytics |
+| Package manager | pnpm 11.25.0 |
+| Runtime | Node.js 24 |
 
 ## Requirements
 
-- Node.js 22 via `.nvmrc`
-- pnpm 11.1.0 via the pinned `packageManager` field
+- Node.js 24 via `.nvmrc`
+- pnpm 11.25.0 via the pinned `packageManager` field
 - A Firebase project with Google sign-in enabled if you want authenticated flows
 
 ## App routes
@@ -76,9 +76,10 @@ ImproTrack turns daily routines into a simple visual system: tap a cell, keep th
 | Route | Purpose |
 | --- | --- |
 | `/dashboard` | Habit matrix |
+| `/dashboard/habits/[slug]` | Individual habit details and history |
 | `/dashboard/archive` | Archived habits and history |
 | `/dashboard/stats` | Progress analytics |
-| `/dashboard/settings` | App preferences |
+| `/dashboard/settings` | App preferences and profile settings, including avatar uploads |
 
 **Public**
 
@@ -124,6 +125,8 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
 NEXT_PUBLIC_FIREBASE_APP_ID=your-firebase-app-id
 ```
 
+Optionally set `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID` to enable Firebase Analytics.
+
 Set the canonical public site URL when deploying:
 
 ```bash
@@ -131,6 +134,8 @@ NEXT_PUBLIC_SITE_URL=https://your-domain.example
 ```
 
 `NEXT_PUBLIC_SITE_URL` drives `metadataBase`, canonical/social URLs, `/sitemap.xml`, and `/robots.txt`. If it is missing, the app falls back to `SITE_URL`, Vercel URL variables, and then `http://localhost:3000`.
+
+Set all `NEXT_PUBLIC_*` values before running `pnpm build`: Next.js embeds them in the client bundle at build time. Changing the server environment after the build requires rebuilding to update those client values. See the [Next.js environment variable guide](https://nextjs.org/docs/app/guides/environment-variables).
 
 ### 3. Verify the project once
 
@@ -165,15 +170,27 @@ The repo now has ESLint plus a lightweight smoke-check script. There is still no
 ## Firebase setup notes
 
 - Firebase config is resolved lazily so CI can prerender public routes without shipping Firebase secrets.
-- Sign-in, Firestore, and Storage-backed flows still require `NEXT_PUBLIC_FIREBASE_*` values at runtime.
+- Sign-in, Firestore, and Storage-backed flows require the six Firebase web app values listed above, supplied before the production build.
 - Authentication is Google-only.
 - Add every local and deployed origin you use to **Firebase Console -> Authentication -> Settings -> Authorized domains**.
 - Installed PWAs use the same origin as the browser tab, so Google sign-in will fail if that origin is not authorized.
+
+Create a Firestore database and a Firebase Storage bucket for habit data and profile avatars. The repository includes `firebase.json`, `firestore.rules`, `firestore.indexes.json`, and `storage.rules` for their configuration.
+
+With the [Firebase CLI](https://firebase.google.com/docs/cli) installed, sign in and deploy the included rules and indexes to your project:
+
+```bash
+firebase login
+firebase deploy --project your-project-id --only firestore,storage
+```
+
+The Firestore rules restrict each user's data to that user. Storage rules allow authenticated users to read avatars and allow each user to upload their own image under 5 MiB.
 
 ## Deployment checklist
 
 - Set `NEXT_PUBLIC_SITE_URL` to the final production origin.
 - Add that same origin to Firebase authorized domains.
+- Supply Firebase web app environment values before building, and deploy the included Firebase rules and indexes.
 - Run `pnpm check` before shipping.
 - Validate PWA install and offline behavior with `pnpm build && pnpm start`.
 - Confirm `/robots.txt`, `/sitemap.xml`, and `/manifest.webmanifest` resolve correctly on the deployed host.
@@ -187,7 +204,7 @@ Important details:
 - `pnpm dev` does **not** register the service worker.
 - Use `pnpm build && pnpm start` to validate install and offline behavior locally.
 - Google sign-in and fresh Firestore sync require a live network connection.
-- Cached screens can load offline, but auth refreshes and new data writes wait for connectivity.
+- Cached screens can load offline. Firestore uses its default in-memory cache; persistent offline habit storage is not enabled. Pending writes can sync when connectivity returns while the session remains open, but habit data and pending writes are not guaranteed to survive a reload or app restart. See [Firestore offline behavior](https://firebase.google.com/docs/firestore/manage-data/enable-offline).
 - Chromium browsers can use the in-app install prompt.
 - On iOS Safari, install with **Share -> Add to Home Screen**.
 
@@ -214,8 +231,7 @@ app/         Next.js route wrappers, metadata, sitemap, robots, manifest
 components/  Public pages, dashboard shell, habit UI, PWA controller
 lib/         Date, stats, storage, Firebase, site URL, and habit helpers
 public/      Static assets, brand images, icons, service worker
-scripts/     Brand asset generation utilities
-workers/     Edge and worker-side experiments
+scripts/     Config and SEO smoke checks, brand asset generation utilities
 ```
 
 Key architecture rules:
@@ -234,7 +250,7 @@ Docker setup details live in [`DOCKER.md`](DOCKER.md).
 
 This project is open for experimentation and personal use. Before opening a pull request:
 
-1. Use Node.js 22 with the pinned pnpm version.
+1. Use Node.js 24 with the pinned pnpm version.
 2. Keep app routes thin and put UI logic in `components/`.
 3. Reuse storage, date, stats, and Firebase helpers instead of duplicating logic.
 4. Run `pnpm check` before submitting changes.
